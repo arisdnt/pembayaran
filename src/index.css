@@ -1,0 +1,326 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--color-background);
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background-color: var(--color-background);
+  overflow: overlay;
+}
+
+/* Hide scrollbar globally */
+* {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+*::-webkit-scrollbar {
+  display: none;
+}
+
+#root {
+  min-height: 100vh;
+  background-color: var(--color-background);
+}
+
+/* Prevent flash of unstyled content */
+.route-container {
+  opacity: 0;
+  animation: fadeIn 0.2s ease-in-out forwards;
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}
+
+/* Smooth page transitions */
+.page-enter {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.page-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 200ms ease-in-out, transform 200ms ease-in-out;
+}
+
+.page-exit {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.page-exit-active {
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 150ms ease-in-out, transform 150ms ease-in-out;
+}
+
+a {
+  color: inherit;
+}
+
+/* Hide scrollbar utility */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* Internet Explorer 10+ */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;  /* Safari and Chrome */
+}
+
+/* Ensure Radix portal poppers appear above other elements */
+[data-radix-popper-content-wrapper] {
+  z-index: 100000 !important;
+}
+
+/* Raise Radix Dialog/Popover/Tooltip/Dropdown z-index */
+.rt-SelectContent, .rt-PopoverContent, .rt-TooltipContent, .rt-DialogContent, .rt-DropdownMenuContent {
+  z-index: 100000 !important;
+}
+
+/* Modern Form Styles */
+.rt-TextFieldRoot {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+  border: 1px solid rgb(226, 232, 240);
+  transition: all 0.2s ease;
+  border-radius: 0.5rem;
+}
+
+.rt-TextFieldRoot:hover {
+  border-color: rgb(203, 213, 225);
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.05);
+}
+
+.rt-TextFieldRoot:focus-within {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+  border-color: rgb(59, 130, 246);
+}
+
+.rt-TextFieldInput {
+  font-size: 0.875rem;
+  padding: 0.625rem 0.875rem;
+}
+
+.rt-TextAreaRoot {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+  border: 1px solid rgb(226, 232, 240);
+  transition: all 0.2s ease;
+  border-radius: 0.5rem;
+}
+
+.rt-TextAreaRoot:hover {
+  border-color: rgb(203, 213, 225);
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.05);
+}
+
+.rt-TextAreaRoot:focus-within {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+  border-color: rgb(59, 130, 246);
+}
+
+.rt-TextArea {
+  font-size: 0.875rem;
+  padding: 0.625rem 0.875rem;
+}
+
+.rt-SelectTrigger {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+  border: 1px solid rgb(226, 232, 240);
+  transition: all 0.2s ease;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  padding: 0.625rem 0.875rem;
+}
+
+.rt-SelectTrigger:hover {
+  border-color: rgb(203, 213, 225);
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.05);
+}
+
+.rt-SelectTrigger:focus {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+  border-color: rgb(59, 130, 246);
+}
+
+.rt-SelectContent {
+  border: 1px solid rgb(226, 232, 240);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.rt-SelectItem {
+  font-size: 0.875rem;
+  padding: 0.625rem 0.875rem;
+  transition: all 0.15s ease;
+}
+
+.rt-SelectItem[data-highlighted] {
+  background: linear-gradient(to right, rgb(59, 130, 246), rgb(37, 99, 235));
+  color: white;
+}
+
+.rt-SelectItem[data-state="checked"] {
+  background-color: rgb(239, 246, 255);
+  color: rgb(37, 99, 235);
+  font-weight: 600;
+}
+
+.rt-SelectItem[data-state="checked"][data-highlighted] {
+  background: linear-gradient(to right, rgb(59, 130, 246), rgb(37, 99, 235));
+  color: white;
+}
+
+/* Hide checkmark icon on selected items */
+.rt-SelectItemIndicator {
+  display: none !important;
+}
+
+/* Hide checkmark icon for DropdownMenu */
+.rt-DropdownMenuItemIndicator {
+  display: none !important;
+}
+
+/* Hide checkmark icon for ContextMenu */
+.rt-ContextMenuItemIndicator {
+  display: none !important;
+}
+
+/* Modern Dropdown Menu Styles */
+.rt-DropdownMenuContent {
+  border: 1px solid rgb(226, 232, 240);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.rt-DropdownMenuItem {
+  font-size: 0.875rem;
+  padding: 0.625rem 0.875rem;
+  transition: all 0.15s ease;
+}
+
+.rt-DropdownMenuItem[data-highlighted] {
+  background: linear-gradient(to right, rgb(59, 130, 246), rgb(37, 99, 235));
+  color: white;
+}
+
+/* Modern Popover Styles */
+.rt-PopoverContent {
+  border: 1px solid rgb(226, 232, 240);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  border-radius: 0.75rem;
+}
+
+/* Modern Context Menu Styles */
+.rt-ContextMenuContent {
+  border: 1px solid rgb(226, 232, 240);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.rt-ContextMenuItem {
+  font-size: 0.875rem;
+  padding: 0.625rem 0.875rem;
+  transition: all 0.15s ease;
+}
+
+.rt-ContextMenuItem[data-highlighted] {
+  background: linear-gradient(to right, rgb(59, 130, 246), rgb(37, 99, 235));
+  color: white;
+}
+
+/* Modern Button Styles */
+.rt-Button {
+  font-weight: 600;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  border-radius: 0.5rem;
+  letter-spacing: -0.01em;
+}
+
+.rt-Button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.rt-Button:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.rt-Button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Modern Switch Styles */
+.rt-SwitchRoot {
+  transition: all 0.2s ease;
+  box-shadow: inset 0 1px 2px 0 rgba(0, 0, 0, 0.1);
+}
+
+.rt-SwitchRoot:hover {
+  box-shadow: inset 0 1px 2px 0 rgba(0, 0, 0, 0.15), 0 2px 4px 0 rgba(0, 0, 0, 0.05);
+}
+
+.rt-SwitchRoot[data-state="checked"] {
+  background: linear-gradient(to right, rgb(34, 197, 94), rgb(22, 163, 74));
+}
+
+.rt-SwitchThumb {
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+/* Modern Dialog Styles */
+.rt-DialogContent {
+  border: 1px solid rgb(226, 232, 240);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  border-radius: 0.75rem;
+  pointer-events: auto;
+}
+
+.rt-DialogTitle {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: rgb(15, 23, 42);
+}
+
+.rt-DialogDescription {
+  color: rgb(100, 116, 139);
+}
+
+/* Prevent dialog overlay from closing dialog on click */
+.rt-DialogOverlay {
+  pointer-events: none !important;
+  cursor: default !important;
+}
+
+/* Ensure dialog content stays interactive */
+.rt-DialogContent {
+  pointer-events: auto !important;
+}
+
+/* Disable escape key and outside click closing - handled via JS in main.jsx */
+
+/* (Optional) add print helpers later if needed */
+
+/* Removed legacy thermal invoice styles */

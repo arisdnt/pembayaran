@@ -1,0 +1,35 @@
+buat halaman baru untuk detail siswa, sehingga ketika user memilih detail dari halaman http://192.168.1.9:5175/siswa, maka di arahkan ke haalman individual untuk detail siswa, pada halaman detail siswa, menampilkan seluruh riwayat dan informasi siswa serta riwayat pembayaran siswa dengan format menyerupai ledger serta tertulis berdasarkan timeline, dengan panduan dengan urutan sebagai berikut
+
+Informasi siswa, mulai dari nama nisn, nama orang tua, wali dan lain-lain
+informasi riwayat tagihan dan informasi pembyaran siswa dengan layout dan format
+
+tahun ajaran / kelas 
+	Nama tagihan xxxxxxxxxxxxxxxxxx, nominal
+		pembayran untuk tagihan terkait   nominal
+		pembayran untuk tagihan terkait  nominal	
+		setatus pembayaran untuk tagihan terkait [ kurang xxxx / lunas ]
+
+	Nama tagihan xxxxxxxxxxxxxxxxxx, nominal
+		pembayran untuk tagihan terkait   nominal
+		pembayran untuk tagihan terkait  nominal	
+		setatus pembayaran untuk tagihan terkait [ kurang xxxx / lunas ]
+Status tagihan dan pembayaran pada tahun ajaran xxxx di kelas xxx [ kurang xxx / lunas ]
+
+tahun ajaran / kelas 
+	Nama tagihan xxxxxxxxxxxxxxxxxx, nominal
+		pembayran untuk tagihan terkait   nominal
+		pembayran untuk tagihan terkait  nominal	
+		setatus pembayaran untuk tagihan terkait [ kurang xxxx / lunas ]
+
+	Nama tagihan xxxxxxxxxxxxxxxxxx, nominal
+		pembayran untuk tagihan terkait   nominal
+		pembayran untuk tagihan terkait  nominal	
+		setatus pembayaran untuk tagihan terkait [ kurang xxxx / lunas ]
+Status tagihan dan pembayaran pada tahun ajaran xxxx di kelas xxx [ kurang xxx / lunas ]
+
+total seluruh tagihan dan pembayran [ kurang / lunas ]
+
+
+buat desain yang konsisten dengan seluruh sistem yang ada
+
+

@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(rustc --version)",
+      "Bash(curl:*)",
+      "Bash(sh:*)",
+      "Bash($env:PATH += \";$env:USERPROFILE\\.cargo\\bin\")",
+      "Bash(cargo --version)",
+      "Bash(export PATH=\"$HOME/.cargo/bin:$PATH\")",
+      "Bash(npm uninstall:*)",
+      "Bash(npx tauri:*)",
+      "Bash(mkdir:*)",
+      "Bash(npx @tauri-apps/cli icon:*)",
+      "Bash(npm run dev:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

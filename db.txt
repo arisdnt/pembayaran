@@ -1,0 +1,180 @@
+-- WARNING: This schema is for context only and is not meant to be run.
+-- Table order and constraints may not be valid for execution.
+
+CREATE TABLE public.jenis_pembayaran (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  kode character varying NOT NULL UNIQUE,
+  nama character varying NOT NULL,
+  deskripsi text,
+  jumlah_default numeric,
+  tipe_pembayaran character varying NOT NULL,
+  wajib boolean NOT NULL DEFAULT true,
+  status_aktif boolean NOT NULL DEFAULT true,
+  dibuat_pada timestamp with time zone NOT NULL DEFAULT now(),
+  diperbarui_pada timestamp with time zone NOT NULL DEFAULT now(),
+  id_tahun_ajaran uuid NOT NULL,
+  id_kelas uuid,
+  tingkat character varying NOT NULL,
+  CONSTRAINT jenis_pembayaran_pkey PRIMARY KEY (id),
+  CONSTRAINT jenis_pembayaran_id_tahun_ajaran_fkey FOREIGN KEY (id_tahun_ajaran) REFERENCES public.tahun_ajaran(id),
+  CONSTRAINT jenis_pembayaran_id_kelas_fkey FOREIGN KEY (id_kelas) REFERENCES public.kelas(id)
+);
+CREATE TABLE public.kelas (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  tingkat character varying NOT NULL,
+  nama_sub_kelas character varying NOT NULL,
+  kapasitas_maksimal integer,
+  dibuat_pada timestamp with time zone NOT NULL DEFAULT now(),
+  diperbarui_pada timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT kelas_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.pembayaran (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  id_tagihan uuid NOT NULL,
+  nomor_pembayaran character varying NOT NULL UNIQUE,
+  tanggal_dibuat timestamp with time zone NOT NULL DEFAULT now(),
+  catatan text,
+  dibuat_pada timestamp with time zone NOT NULL DEFAULT now(),
+  diperbarui_pada timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT pembayaran_pkey PRIMARY KEY (id),
+  CONSTRAINT pembayaran_id_tagihan_fkey FOREIGN KEY (id_tagihan) REFERENCES public.tagihan(id)
+);
+CREATE TABLE public.peminatan (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  kode character varying NOT NULL UNIQUE,
+  nama character varying NOT NULL,
+  keterangan text,
+  tingkat_min smallint CHECK (tingkat_min IS NULL OR tingkat_min >= 0),
+  tingkat_max smallint CHECK (tingkat_max IS NULL OR tingkat_max >= 0),
+  aktif boolean NOT NULL DEFAULT true,
+  CONSTRAINT peminatan_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.peminatan_siswa (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  id_siswa uuid NOT NULL,
+  id_tahun_ajaran uuid NOT NULL,
+  id_peminatan uuid NOT NULL,
+  tingkat character varying NOT NULL,
+  tanggal_mulai date NOT NULL DEFAULT CURRENT_DATE,
+  tanggal_selesai date,
+  catatan text,
+  CONSTRAINT peminatan_siswa_pkey PRIMARY KEY (id),
+  CONSTRAINT peminatan_siswa_id_siswa_fkey FOREIGN KEY (id_siswa) REFERENCES public.siswa(id),
+  CONSTRAINT peminatan_siswa_id_tahun_ajaran_fkey FOREIGN KEY (id_tahun_ajaran) REFERENCES public.tahun_ajaran(id),
+  CONSTRAINT peminatan_siswa_id_peminatan_fkey FOREIGN KEY (id_peminatan) REFERENCES public.peminatan(id)
+);
+CREATE TABLE public.rincian_pembayaran (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  id_pembayaran uuid NOT NULL,
+  nomor_transaksi character varying NOT NULL UNIQUE,
+  jumlah_dibayar numeric NOT NULL CHECK (jumlah_dibayar > 0::numeric),
+  tanggal_bayar timestamp with time zone NOT NULL DEFAULT now(),
+  metode_pembayaran character varying NOT NULL,
+  referensi_pembayaran character varying,
+  bukti_pembayaran_url text,
+  catatan text,
+  cicilan_ke integer,
+  dibuat_pada timestamp with time zone NOT NULL DEFAULT now(),
+  diperbarui_pada timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT rincian_pembayaran_pkey PRIMARY KEY (id),
+  CONSTRAINT rincian_pembayaran_id_pembayaran_fkey FOREIGN KEY (id_pembayaran) REFERENCES public.pembayaran(id)
+);
+CREATE TABLE public.rincian_tagihan (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  id_tagihan uuid NOT NULL,
+  id_jenis_pembayaran uuid NOT NULL,
+  deskripsi character varying NOT NULL,
+  jumlah numeric NOT NULL CHECK (jumlah >= 0::numeric),
+  urutan integer NOT NULL DEFAULT 1,
+  tanggal_dibuat timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT rincian_tagihan_pkey PRIMARY KEY (id),
+  CONSTRAINT rincian_tagihan_id_tagihan_fkey FOREIGN KEY (id_tagihan) REFERENCES public.tagihan(id),
+  CONSTRAINT rincian_tagihan_id_jenis_pembayaran_fkey FOREIGN KEY (id_jenis_pembayaran) REFERENCES public.jenis_pembayaran(id)
+);
+CREATE TABLE public.riwayat_kelas_siswa (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  id_siswa uuid NOT NULL,
+  id_kelas uuid NOT NULL,
+  id_tahun_ajaran uuid NOT NULL,
+  tanggal_masuk date NOT NULL,
+  tanggal_keluar date,
+  status character varying NOT NULL DEFAULT 'aktif'::character varying,
+  catatan text,
+  dibuat_pada timestamp with time zone NOT NULL DEFAULT now(),
+  diperbarui_pada timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT riwayat_kelas_siswa_pkey PRIMARY KEY (id),
+  CONSTRAINT riwayat_kelas_siswa_id_siswa_fkey FOREIGN KEY (id_siswa) REFERENCES public.siswa(id),
+  CONSTRAINT riwayat_kelas_siswa_id_kelas_fkey FOREIGN KEY (id_kelas) REFERENCES public.kelas(id),
+  CONSTRAINT riwayat_kelas_siswa_id_tahun_ajaran_fkey FOREIGN KEY (id_tahun_ajaran) REFERENCES public.tahun_ajaran(id)
+);
+CREATE TABLE public.riwayat_wali_kelas (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  id_wali_kelas uuid NOT NULL,
+  id_kelas uuid NOT NULL,
+  id_tahun_ajaran uuid NOT NULL,
+  tanggal_mulai date NOT NULL,
+  tanggal_selesai date,
+  status character varying NOT NULL DEFAULT 'aktif'::character varying,
+  catatan text,
+  dibuat_pada timestamp with time zone NOT NULL DEFAULT now(),
+  diperbarui_pada timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT riwayat_wali_kelas_pkey PRIMARY KEY (id),
+  CONSTRAINT riwayat_wali_kelas_id_wali_kelas_fkey FOREIGN KEY (id_wali_kelas) REFERENCES public.wali_kelas(id),
+  CONSTRAINT riwayat_wali_kelas_id_kelas_fkey FOREIGN KEY (id_kelas) REFERENCES public.kelas(id),
+  CONSTRAINT riwayat_wali_kelas_id_tahun_ajaran_fkey FOREIGN KEY (id_tahun_ajaran) REFERENCES public.tahun_ajaran(id)
+);
+CREATE TABLE public.siswa (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  nama_lengkap character varying NOT NULL,
+  nisn character varying UNIQUE,
+  tanggal_lahir date,
+  jenis_kelamin character varying,
+  alamat text,
+  nomor_whatsapp_wali character varying,
+  token_akses_unik character varying NOT NULL UNIQUE,
+  status_aktif boolean NOT NULL DEFAULT true,
+  dibuat_pada timestamp with time zone NOT NULL DEFAULT now(),
+  diperbarui_pada timestamp with time zone NOT NULL DEFAULT now(),
+  foto_profil_url text,
+  foto_profil_path text,
+  CONSTRAINT siswa_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.tagihan (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  id_riwayat_kelas_siswa uuid NOT NULL,
+  nomor_tagihan character varying NOT NULL UNIQUE,
+  judul character varying NOT NULL,
+  deskripsi text,
+  tanggal_tagihan date NOT NULL DEFAULT CURRENT_DATE,
+  tanggal_jatuh_tempo date NOT NULL,
+  tanggal_dibuat timestamp with time zone NOT NULL DEFAULT now(),
+  tanggal_diperbarui timestamp with time zone NOT NULL DEFAULT now(),
+  dokumen_url text,
+  dokumen_path text,
+  dokumen_nama text,
+  dokumen_tipe character varying,
+  dokumen_ukuran integer,
+  CONSTRAINT tagihan_pkey PRIMARY KEY (id),
+  CONSTRAINT tagihan_id_riwayat_kelas_siswa_fkey FOREIGN KEY (id_riwayat_kelas_siswa) REFERENCES public.riwayat_kelas_siswa(id)
+);
+CREATE TABLE public.tahun_ajaran (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  nama character varying NOT NULL UNIQUE,
+  tanggal_mulai date NOT NULL,
+  tanggal_selesai date NOT NULL,
+  status_aktif boolean NOT NULL DEFAULT false,
+  dibuat_pada timestamp with time zone NOT NULL DEFAULT now(),
+  diperbarui_pada timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT tahun_ajaran_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.wali_kelas (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  nama_lengkap character varying NOT NULL,
+  nip character varying UNIQUE,
+  nomor_telepon character varying,
+  email character varying,
+  status_aktif boolean NOT NULL DEFAULT true,
+  dibuat_pada timestamp with time zone NOT NULL DEFAULT now(),
+  diperbarui_pada timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT wali_kelas_pkey PRIMARY KEY (id)
+);
