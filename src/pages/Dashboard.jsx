@@ -18,14 +18,14 @@ function DashboardContent() {
     kelas: '',
     timeRange: 'all'
   })
-  
+
   const [masterData, setMasterData] = useState({
     tahunAjaranList: [],
     kelasList: [],
     tingkatList: []
   })
 
-  const { data, loading, error, refresh } = useDashboardData(filters)
+  const { data, loading, error, isRefreshing, refresh } = useDashboardData(filters)
 
   useEffect(() => {
     fetchMasterData()
