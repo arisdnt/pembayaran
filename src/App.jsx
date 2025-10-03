@@ -1,5 +1,6 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { Theme } from '@radix-ui/themes'
+import { RefreshProvider } from './contexts/RefreshContext'
 import { Login } from './pages/Login'
 import { Dashboard } from './pages/Dashboard'
 import { Siswa } from './pages/Siswa/index'
@@ -47,18 +48,20 @@ const routes = [
 function App() {
   return (
     <Theme accentColor="indigo" grayColor="slate">
-      <BrowserRouter>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route element={<ProtectedShell />}>
-            <Route index element={<Navigate to="/dashboard" replace />} />
-            {routes.map(({ path, element }) => (
-              <Route key={path} path={path} element={element} />
-            ))}
-            <Route path="*" element={<Navigate to="/dashboard" replace />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
+      <RefreshProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route element={<ProtectedShell />}>
+              <Route index element={<Navigate to="/dashboard" replace />} />
+              {routes.map(({ path, element }) => (
+                <Route key={path} path={path} element={element} />
+              ))}
+              <Route path="*" element={<Navigate to="/dashboard" replace />} />
+            </Route>
+          </Routes>
+        </BrowserRouter>
+      </RefreshProvider>
     </Theme>
   )
 }

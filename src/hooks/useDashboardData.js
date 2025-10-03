@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import { useAppRefresh } from './useAppRefresh'
+import { useRefreshContext } from '../contexts/RefreshContext'
 
 function getDateRange(timeRange) {
   const now = new Date()
@@ -34,6 +35,7 @@ function getDateRange(timeRange) {
 }
 
 export function useDashboardData(filters = {}) {
+  const { setIsRefreshing } = useRefreshContext()
   const [data, setData] = useState({
     stats: {
       totalSiswa: 0,
@@ -54,7 +56,6 @@ export function useDashboardData(filters = {}) {
     }
   })
   const [loading, setLoading] = useState(true)
-  const [isRefreshing, setIsRefreshing] = useState(false)
   const [error, setError] = useState(null)
 
   const fetchDashboardData = useCallback(async (isBackgroundRefresh = false) => {
@@ -294,7 +295,7 @@ export function useDashboardData(filters = {}) {
       setLoading(false)
       setIsRefreshing(false)
     }
-  }, [filters])
+  }, [filters, setIsRefreshing])
 
   const handleAppRefresh = useCallback(() => fetchDashboardData(true), [fetchDashboardData])
   useAppRefresh(handleAppRefresh)
@@ -303,7 +304,7 @@ export function useDashboardData(filters = {}) {
     fetchDashboardData(false)
   }, [fetchDashboardData])
 
-  return { data, loading, error, isRefreshing, refresh: () => fetchDashboardData(false) }
+  return { data, loading, error, refresh: () => fetchDashboardData(false) }
 }
 
 function processChartData(rincianPembayaran, tagihan) {

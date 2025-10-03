@@ -2,15 +2,18 @@ import { useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { useClock } from '../hooks/useClock'
 import { useSystemInfo } from '../hooks/useSystemInfo'
+import { useRefreshContext } from '../contexts/RefreshContext'
 import { SystemInfoSection } from './SystemInfoSection'
 import { AppStatusSection } from './AppStatusSection'
 import { DateTimeSection } from './DateTimeSection'
+import { RefreshIndicator } from './RefreshIndicator'
 import { Copy, Check } from 'lucide-react'
 
 export function StatusBar() {
   const currentTime = useClock()
   const systemInfo = useSystemInfo()
   const location = useLocation()
+  const { isRefreshing } = useRefreshContext()
   const [copied, setCopied] = useState(false)
 
   const handleCopyPath = async () => {
@@ -31,24 +34,30 @@ export function StatusBar() {
       }}
     >
       <div className="flex items-center justify-between h-full px-3">
-        <SystemInfoSection systemInfo={systemInfo} />
-        
-        {/* Path Display with Copy Button */}
-        <div className="flex items-center gap-1.5 px-2 py-0.5 bg-white border border-gray-300 shadow-sm">
-          <span className="font-mono text-[0.7rem] text-gray-700 select-all">
-            {location.pathname}
-          </span>
-          <button
-            onClick={handleCopyPath}
-            className="p-0.5 hover:bg-gray-100 transition-colors group"
-            title="Copy path"
-          >
-            {copied ? (
-              <Check className="h-3 w-3 text-green-600" />
-            ) : (
-              <Copy className="h-3 w-3 text-gray-500 group-hover:text-gray-700" />
-            )}
-          </button>
+        <div className="flex items-center gap-3">
+          <SystemInfoSection systemInfo={systemInfo} />
+          <RefreshIndicator isRefreshing={isRefreshing} />
+
+          {/* Path Display with Copy Button */}
+          <div className="flex items-center gap-1.5 px-2 py-0.5">
+            <span
+              className="font-mono text-[0.7rem] text-gray-700 max-w-[200px] truncate"
+              title={location.pathname}
+            >
+              {location.pathname}
+            </span>
+            <button
+              onClick={handleCopyPath}
+              className="p-0.5 hover:bg-gray-200 rounded transition-colors group shrink-0"
+              title="Copy path"
+            >
+              {copied ? (
+                <Check className="h-3 w-3 text-green-600" />
+              ) : (
+                <Copy className="h-3 w-3 text-gray-500 group-hover:text-gray-700" />
+              )}
+            </button>
+          </div>
         </div>
 
         <div className="flex items-center gap-3">

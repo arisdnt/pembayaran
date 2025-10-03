@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Text, TextField, Select, Badge } from '@radix-ui/themes'
+import { Text, TextField, Select, Badge, Button } from '@radix-ui/themes'
 import { MagnifyingGlassIcon, Pencil1Icon, TrashIcon } from '@radix-ui/react-icons'
 import { Receipt, Plus, X, Eye, Edit, Trash2 } from 'lucide-react'
 
@@ -170,14 +170,19 @@ export function TagihanTable({
 
           {/* Add Button */}
           <div className="ml-auto">
-            <button
+            <Button
               onClick={onAdd}
-              className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white border border-green-700 shadow-sm transition-colors font-medium"
-              type="button"
+              className="cursor-pointer text-white font-medium shadow-sm hover:shadow transition-all"
+              size="2"
+              style={{
+                borderRadius: 0,
+                backgroundColor: '#0066cc',
+                border: '1px solid #0052a3'
+              }}
             >
               <Plus className="h-4 w-4" />
               Tambah Tagihan
-            </button>
+            </Button>
           </div>
         </div>
       </div>

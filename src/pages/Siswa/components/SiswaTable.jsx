@@ -339,12 +339,6 @@ export function SiswaTable({
                 <span className="text-emerald-700">Aktif:</span>
                 <span className="font-bold text-emerald-900">{stats.active}</span>
               </div>
-              {isRefreshing && (
-                <div className="flex items-center gap-1 px-3 py-1.5 bg-sky-50 border border-sky-200 shadow-sm text-sky-700">
-                  <span className="inline-flex h-2 w-2 rounded-full bg-sky-500 animate-pulse" />
-                  <span>Menyegarkan…</span>
-                </div>
-              )}
               {hasActiveFilters && (
                 <div className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 border border-blue-300 shadow-sm">
                   <span className="text-blue-700">Tampil:</span>
@@ -377,38 +371,34 @@ export function SiswaTable({
           <div className="h-full overflow-auto excel-scrollbar">
             <table className="min-w-full table-fixed text-sm border-collapse">
               <colgroup>{[
-                <col key="col-1" style={{ width: '15%' }} />,
+                <col key="col-1" style={{ width: '17%' }} />,
                 <col key="col-2" style={{ width: '10%' }} />,
-                <col key="col-3" style={{ width: '8%' }} />,
+                <col key="col-3" style={{ width: '11%' }} />,
                 <col key="col-4" style={{ width: '10%' }} />,
-                <col key="col-5" style={{ width: '8%' }} />,
-                <col key="col-6" style={{ width: '8%' }} />,
-                <col key="col-7" style={{ width: '10%' }} />,
+                <col key="col-5" style={{ width: '9%' }} />,
+                <col key="col-6" style={{ width: '10%' }} />,
+                <col key="col-7" style={{ width: '9%' }} />,
                 <col key="col-8" style={{ width: '9%' }} />,
-                <col key="col-9" style={{ width: '9%' }} />,
-                <col key="col-10" style={{ width: '8%' }} />,
-                <col key="col-11" style={{ width: '8%' }} />,
-                <col key="col-12" style={{ width: '5%' }} />,
+                <col key="col-9" style={{ width: '8%' }} />,
+                <col key="col-10" style={{ width: '9%' }} />,
+                <col key="col-11" style={{ width: '6%' }} />,
               ]}</colgroup>
               <thead>
                 {/* Excel-style header with freeze pane effect */}
                 <tr className="bg-gradient-to-b from-slate-100 to-slate-50 sticky top-0 z-10 border-b border-slate-300 shadow-sm">
                   <th className="px-4 py-3 text-left text-[0.7rem] font-bold uppercase tracking-wider text-slate-700 border-r border-slate-300">
                     <div className="flex items-center gap-2">
-                      Nama Siswa
+                      Nama Siswa & Tgl Lahir
                     </div>
                   </th>
                   <th className="px-4 py-3 text-left text-[0.7rem] font-bold uppercase tracking-wider text-slate-700 border-r border-slate-300">
                     NISN
                   </th>
                   <th className="px-4 py-3 text-left text-[0.7rem] font-bold uppercase tracking-wider text-slate-700 border-r border-slate-300">
-                    Tgl Lahir
-                  </th>
-                  <th className="px-4 py-3 text-left text-[0.7rem] font-bold uppercase tracking-wider text-slate-700 border-r border-slate-300">
                     No. WhatsApp Wali
                   </th>
                   <th className="px-4 py-3 text-left text-[0.7rem] font-bold uppercase tracking-wider text-slate-700 border-r border-slate-300">
-                    Kelas
+                    Kelas & Peminatan
                   </th>
                   <th className="px-4 py-3 text-left text-[0.7rem] font-bold uppercase tracking-wider text-slate-700 border-r border-slate-300">
                     Tahun Ajaran
@@ -495,8 +485,8 @@ export function SiswaTable({
                         <Text size="2" weight="medium" className="text-slate-900 font-sans">
                           {item.nama_lengkap}
                         </Text>
-                        <Text size="1" className="text-slate-500 uppercase tracking-wide font-mono text-[0.65rem]">
-                          ID: {item.id?.slice(0, 8) ?? '—'}
+                        <Text size="1" className="text-slate-500 leading-tight">
+                          {formatDate(item.tanggal_lahir)}
                         </Text>
                       </div>
                     </td>
@@ -506,19 +496,25 @@ export function SiswaTable({
                       </Text>
                     </td>
                     <td className="px-4 py-3 border-r border-slate-200">
-                      <Text size="2" className="text-slate-700 font-sans">
-                        {formatDate(item.tanggal_lahir)}
-                      </Text>
-                    </td>
-                    <td className="px-4 py-3 border-r border-slate-200">
                       <Text size="2" className="text-slate-700 font-mono">
                         {item.nomor_whatsapp_wali || '—'}
                       </Text>
                     </td>
                     <td className="px-4 py-3 border-r border-slate-200">
-                      <Text size="2" className="text-slate-700 font-sans">
-                        {item.kelas_terbaru ? `${item.kelas_terbaru.tingkat} ${item.kelas_terbaru.nama_sub_kelas}` : '—'}
-                      </Text>
+                      <div className="flex flex-col gap-0.5">
+                        <Text size="2" className="text-slate-700 font-sans leading-tight">
+                          {item.kelas_terbaru ? `${item.kelas_terbaru.tingkat} ${item.kelas_terbaru.nama_sub_kelas}` : '—'}
+                        </Text>
+                        {item.peminatan_terbaru ? (
+                          <Text size="1" className="text-slate-500 italic leading-tight">
+                            {item.peminatan_terbaru.nama}
+                          </Text>
+                        ) : (
+                          <Text size="1" className="text-red-600 font-medium leading-tight">
+                            ---
+                          </Text>
+                        )}
+                      </div>
                     </td>
                     <td className="px-4 py-3 border-r border-slate-200">
                       <Text size="2" className="text-slate-700 font-sans">

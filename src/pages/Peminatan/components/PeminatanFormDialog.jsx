@@ -1,13 +1,14 @@
-import { useState } from 'react'
-import { Dialog, TextField, TextArea, Flex, Text, Button, Switch } from '@radix-ui/themes'
+import { useState, useEffect } from 'react'
+import { Dialog, TextField, TextArea, Flex, Text, Button, Switch, Select, VisuallyHidden } from '@radix-ui/themes'
 import { AlertCircle, BookOpen, Edit3, Hash, FileText, TrendingUp, TrendingDown, Power, X } from 'lucide-react'
+import { supabase } from '../../../lib/supabaseClient'
 
-export function PeminatanFormDialog({ 
-  open, 
-  onOpenChange, 
-  onSubmit, 
-  initialData, 
-  isEdit 
+export function PeminatanFormDialog({
+  open,
+  onOpenChange,
+  onSubmit,
+  initialData,
+  isEdit
 }) {
   const [formData, setFormData] = useState(
     initialData || {
@@ -22,6 +23,31 @@ export function PeminatanFormDialog({
   )
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
+  const [tingkatOptions, setTingkatOptions] = useState([])
+
+  // Fetch tingkat dari kelas yang tersedia
+  useEffect(() => {
+    const fetchTingkat = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('kelas')
+          .select('tingkat')
+          .order('tingkat')
+
+        if (error) throw error
+
+        // Get unique tingkat values
+        const uniqueTingkat = [...new Set(data.map(k => k.tingkat))].sort((a, b) => a - b)
+        setTingkatOptions(uniqueTingkat)
+      } catch (err) {
+        console.error('Error fetching tingkat:', err)
+      }
+    }
+
+    if (open) {
+      fetchTingkat()
+    }
+  }, [open])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -32,6 +58,15 @@ export function PeminatanFormDialog({
       setError('Kode dan Nama Peminatan wajib diisi')
       setSubmitting(false)
       return
+    }
+
+    // Validasi tingkat min dan max
+    if (formData.tingkat_min && formData.tingkat_max) {
+      if (parseInt(formData.tingkat_max) < parseInt(formData.tingkat_min)) {
+        setError('Tingkat Maximum harus sama dengan atau lebih besar dari Tingkat Minimum')
+        setSubmitting(false)
+        return
+      }
     }
 
     try {
@@ -56,8 +91,8 @@ export function PeminatanFormDialog({
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
-      <Dialog.Content 
-        style={{ 
+      <Dialog.Content
+        style={{
           maxWidth: '1100px',
           width: '95vw',
           maxHeight: '90vh',
@@ -67,6 +102,13 @@ export function PeminatanFormDialog({
         }}
         className="border-2 border-slate-300 shadow-2xl"
       >
+        <VisuallyHidden>
+          <Dialog.Title>{isEdit ? 'Edit Peminatan' : 'Tambah Peminatan'}</Dialog.Title>
+          <Dialog.Description>
+            {isEdit ? 'Perbarui informasi peminatan' : 'Tambahkan peminatan baru ke sistem'}
+          </Dialog.Description>
+        </VisuallyHidden>
+
         {/* Header */}
         <div className="flex items-center justify-between border-b-2 border-slate-300 bg-gradient-to-b from-slate-50 to-slate-100 px-5 py-4">
           <div className="flex items-center gap-2.5">
@@ -79,11 +121,11 @@ export function PeminatanFormDialog({
                 <BookOpen className="h-5 w-5 text-white" />
               )}
             </div>
-            <div>
-              <Text size="3" weight="bold" className="text-slate-800 uppercase tracking-wider">
+            <div className="flex flex-col -my-0.5">
+              <Text size="3" weight="bold" className="text-slate-800 uppercase tracking-wider leading-none">
                 {isEdit ? 'Edit Peminatan' : 'Tambah Peminatan'}
               </Text>
-              <Text size="1" className="text-slate-600">
+              <Text size="1" className="text-slate-600 leading-none mt-0.5">
                 {isEdit ? 'Perbarui informasi peminatan' : 'Tambahkan peminatan baru ke sistem'}
               </Text>
             </div>
@@ -172,14 +214,23 @@ export function PeminatanFormDialog({
                     Tingkat Minimum
                   </Text>
                 </div>
-                <TextField.Root
-                  type="number"
-                  placeholder="Contoh: 10"
-                  value={formData.tingkat_min}
-                  onChange={(e) => setFormData({ ...formData, tingkat_min: e.target.value })}
-                  style={{ borderRadius: 0 }}
-                  min="0"
-                />
+                <Select.Root
+                  value={formData.tingkat_min?.toString() || 'placeholder'}
+                  onValueChange={(value) => setFormData({ ...formData, tingkat_min: value === 'placeholder' ? '' : parseInt(value) })}
+                >
+                  <Select.Trigger
+                    placeholder="Pilih tingkat minimum"
+                    style={{ borderRadius: 0, width: '100%' }}
+                  />
+                  <Select.Content style={{ borderRadius: 0 }}>
+                    <Select.Item value="placeholder" disabled>-- Pilih Tingkat --</Select.Item>
+                    {tingkatOptions.map((tingkat) => (
+                      <Select.Item key={tingkat} value={tingkat.toString()}>
+                        Tingkat {tingkat}
+                      </Select.Item>
+                    ))}
+                  </Select.Content>
+                </Select.Root>
                 <Text size="1" className="text-slate-500 mt-1">
                   Tingkat terendah yang diperbolehkan
                 </Text>
@@ -192,14 +243,23 @@ export function PeminatanFormDialog({
                     Tingkat Maximum
                   </Text>
                 </div>
-                <TextField.Root
-                  type="number"
-                  placeholder="Contoh: 12"
-                  value={formData.tingkat_max}
-                  onChange={(e) => setFormData({ ...formData, tingkat_max: e.target.value })}
-                  style={{ borderRadius: 0 }}
-                  min="0"
-                />
+                <Select.Root
+                  value={formData.tingkat_max?.toString() || 'placeholder'}
+                  onValueChange={(value) => setFormData({ ...formData, tingkat_max: value === 'placeholder' ? '' : parseInt(value) })}
+                >
+                  <Select.Trigger
+                    placeholder="Pilih tingkat maksimum"
+                    style={{ borderRadius: 0, width: '100%' }}
+                  />
+                  <Select.Content style={{ borderRadius: 0 }}>
+                    <Select.Item value="placeholder" disabled>-- Pilih Tingkat --</Select.Item>
+                    {tingkatOptions.map((tingkat) => (
+                      <Select.Item key={tingkat} value={tingkat.toString()}>
+                        Tingkat {tingkat}
+                      </Select.Item>
+                    ))}
+                  </Select.Content>
+                </Select.Root>
                 <Text size="1" className="text-slate-500 mt-1">
                   Tingkat tertinggi yang diperbolehkan
                 </Text>

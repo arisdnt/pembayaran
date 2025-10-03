@@ -29,7 +29,7 @@ export function SchoolIdentity() {
           </div>
           <div>
             <Heading size="6" className="text-white font-bold uppercase tracking-wider drop-shadow-lg">
-              Sistem Kas Sekolah
+              ArtaPay
             </Heading>
             <Text size="2" className="text-white/90 font-medium tracking-wide">
               Manajemen Keuangan Digital
@@ -40,8 +40,8 @@ export function SchoolIdentity() {
         {/* Description */}
         <div className="mb-6">
           <Text size="2" className="text-white/90 leading-relaxed">
-            Sistem informasi keuangan yang memudahkan pengelolaan pembayaran,
-            tagihan, dan administrasi kas sekolah secara efisien dan transparan.
+            Platform manajemen keuangan sekolah yang memudahkan pengelolaan pembayaran,
+            tagihan, dan administrasi kas secara efisien dan transparan.
           </Text>
         </div>
 

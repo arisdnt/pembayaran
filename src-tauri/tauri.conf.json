@@ -1,7 +1,7 @@
 {
-  "productName": "kas-sekolah",
+  "productName": "ArtaPay",
   "version": "0.0.0",
-  "identifier": "com.kassekolah.app",
+  "identifier": "com.artapay.app",
   "build": {
     "beforeDevCommand": "npm run dev:vite",
     "beforeBuildCommand": "npm run build",
@@ -32,7 +32,7 @@
       {
         "fullscreen": false,
         "resizable": true,
-        "title": "kas-sekolah",
+        "title": "ArtaPay",
         "width": 1200,
         "height": 800,
         "decorations": false,

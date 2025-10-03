@@ -3,6 +3,7 @@ import { JenisPembayaranFilters } from './JenisPembayaranFilters'
 import { JenisPembayaranTableHeader } from './JenisPembayaranTableHeader'
 import { JenisPembayaranTableRow } from './JenisPembayaranTableRow'
 import { JenisPembayaranEmptyState } from './JenisPembayaranEmptyState'
+import { JenisPembayaranTableSkeleton } from './JenisPembayaranTableSkeleton'
 
 export function JenisPembayaranTable({ data, isLoading, isRefreshing, onEdit, onDelete, onAdd, onViewDetail, selectedItem, onSelectItem }) {
   const filters = useJenisPembayaranFilters(data)
@@ -52,22 +53,28 @@ export function JenisPembayaranTable({ data, isLoading, isRefreshing, onEdit, on
               ]}</colgroup>
               <JenisPembayaranTableHeader />
               <tbody className="divide-y divide-slate-100">
-                {filters.filteredData.map((item) => (
-                  <JenisPembayaranTableRow
-                    key={item.id}
-                    item={item}
-                    onEdit={onEdit}
-                    onDelete={onDelete}
-                    onViewDetail={onViewDetail}
-                    selectedItem={selectedItem}
-                    onSelectItem={onSelectItem}
-                  />
-                ))}
-                {isEmpty && (
-                  <JenisPembayaranEmptyState
-                    hasActiveFilters={filters.hasActiveFilters}
-                    onClearFilters={filters.handleClearFilters}
-                  />
+                {isLoading ? (
+                  <JenisPembayaranTableSkeleton />
+                ) : (
+                  <>
+                    {filters.filteredData.map((item) => (
+                      <JenisPembayaranTableRow
+                        key={item.id}
+                        item={item}
+                        onEdit={onEdit}
+                        onDelete={onDelete}
+                        onViewDetail={onViewDetail}
+                        selectedItem={selectedItem}
+                        onSelectItem={onSelectItem}
+                      />
+                    ))}
+                    {isEmpty && (
+                      <JenisPembayaranEmptyState
+                        hasActiveFilters={filters.hasActiveFilters}
+                        onClearFilters={filters.handleClearFilters}
+                      />
+                    )}
+                  </>
                 )}
               </tbody>
             </table>

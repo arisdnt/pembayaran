@@ -1,11 +1,11 @@
 [package]
-name = "kas-sekolah"
+name = "artapay"
 version = "0.0.0"
 description = "A Tauri App"
 authors = ["you"]
 license = ""
 repository = ""
-default-run = "kas-sekolah"
+default-run = "artapay"
 edition = "2021"
 rust-version = "1.60"
 

@@ -67,6 +67,18 @@ export function useSiswa() {
               rincian_pembayaran(jumlah_dibayar)
             )
           )
+        ),
+        peminatan_siswa(
+          id,
+          id_peminatan,
+          tingkat,
+          tanggal_mulai,
+          tanggal_selesai,
+          peminatan:id_peminatan(
+            id,
+            nama,
+            kode
+          )
         )
       `)
       .order('nama_lengkap', { ascending: true })
@@ -83,6 +95,17 @@ export function useSiswa() {
 
       const latestRiwayat = riwayatAktif?.[0]
 
+      // Get peminatan terakhir (yang terbaru berdasarkan tanggal_mulai)
+      const peminatanList = siswa.peminatan_siswa || []
+      const peminatanTerbaru = peminatanList
+        .filter(p => p.peminatan) // Pastikan ada data peminatan
+        .sort((a, b) => {
+          // Sort by tanggal_mulai descending (terbaru di atas)
+          const dateA = new Date(a.tanggal_mulai || 0)
+          const dateB = new Date(b.tanggal_mulai || 0)
+          return dateB - dateA
+        })[0]
+
       // Calculate total tagihan, pembayaran, dan tunggakan dari semua riwayat
       const allTagihan = siswa.riwayat_kelas_siswa?.flatMap(r => r.tagihan || []) || []
       const { totalTagihan, totalDibayar, totalTunggakan } = calculateTagihanSummary(allTagihan)
@@ -91,6 +114,7 @@ export function useSiswa() {
         ...siswa,
         kelas_terbaru: latestRiwayat?.kelas,
         tahun_ajaran_terbaru: latestRiwayat?.tahun_ajaran,
+        peminatan_terbaru: peminatanTerbaru?.peminatan || null,
         total_tagihan: totalTagihan,
         total_dibayar: totalDibayar,
         total_tunggakan: totalTunggakan
@@ -161,7 +185,20 @@ export function useSiswa() {
             table: 'siswa',
           },
           async (payload) => {
-            console.log('Realtime event received:', payload.eventType)
+            console.log('Realtime event received (siswa):', payload.eventType)
+            if (ignore) return
+            await refreshData({ withSpinner: false })
+          }
+        )
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'peminatan_siswa',
+          },
+          async (payload) => {
+            console.log('Realtime event received (peminatan_siswa):', payload.eventType)
             if (ignore) return
             await refreshData({ withSpinner: false })
           }

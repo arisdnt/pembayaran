@@ -257,19 +257,22 @@ export function Navbar({ realtimeStatus = 'disconnected' }) {
           <div className="flex items-center space-x-8 flex-1">
             {/* Logo/Brand */}
             <div className="flex items-center space-x-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/20 backdrop-blur">
-                <svg
-                  className="h-5 w-5 text-white"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3z"/>
-                </svg>
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/20 backdrop-blur p-1">
+                <img 
+                  src="/icon.ico" 
+                  alt="ArtaPay Logo" 
+                  className="h-full w-full object-contain"
+                />
               </div>
               <div className="hidden sm:block">
-                <Text size="4" weight="bold" className="text-white">
-                  Sekolah Digital
-                </Text>
+                <div className="flex flex-col -my-0.5">
+                  <Text size="4" weight="bold" className="text-white leading-none">
+                    ArtaPay
+                  </Text>
+                  <Text size="1" className="text-white/70 leading-none mt-0.5">
+                    Catat Bayar Cerdas
+                  </Text>
+                </div>
               </div>
             </div>
 

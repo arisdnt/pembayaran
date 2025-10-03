@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Text } from '@radix-ui/themes'
-import { Users, Receipt, Wallet, AlertCircle, RefreshCw } from 'lucide-react'
+import { Users, Receipt, Wallet, AlertCircle, RefreshCw, LayoutDashboard } from 'lucide-react'
 import { supabase } from '../lib/supabaseClient'
 import { useDashboardData } from '../hooks/useDashboardData'
 import { DashboardFilters } from '../components/dashboard/DashboardFilters'
@@ -25,7 +25,7 @@ function DashboardContent() {
     tingkatList: []
   })
 
-  const { data, loading, error, isRefreshing, refresh } = useDashboardData(filters)
+  const { data, loading, error, refresh } = useDashboardData(filters)
 
   useEffect(() => {
     fetchMasterData()
@@ -55,33 +55,49 @@ function DashboardContent() {
       <div className="flex flex-col h-full">
         {/* Header */}
         <div className="shrink-0 bg-white px-6 py-4">
-          <div className="flex items-center justify-end gap-4">
-            <DashboardFilters
-                tahunAjaranList={masterData.tahunAjaranList}
-                kelasList={masterData.kelasList}
-                tingkatList={masterData.tingkatList}
-                selectedTahunAjaran={filters.tahunAjaran}
-                onTahunAjaranChange={(val) => setFilters({ ...filters, tahunAjaran: val, tingkat: '', kelas: '' })}
-                selectedTingkat={filters.tingkat}
-                onTingkatChange={(val) => setFilters({ ...filters, tingkat: val, kelas: '' })}
-                selectedKelas={filters.kelas}
-                onKelasChange={(val) => setFilters({ ...filters, kelas: val })}
-                selectedTimeRange={filters.timeRange}
-                onTimeRangeChange={(val) => setFilters({ ...filters, timeRange: val })}
-            />
-            
-            <button
-                onClick={refresh}
-                disabled={loading}
-                className="flex items-center gap-2 px-3 border border-slate-300 bg-white hover:bg-slate-50 transition-colors disabled:opacity-50 shrink-0"
-                style={{ borderRadius: 0, height: '35px' }}
-                type="button"
-              >
-                <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-                <Text size="2" weight="medium" className="text-slate-700">
-                  Refresh
+          <div className="flex items-center justify-between gap-4">
+            {/* Page Title */}
+            <div className="flex items-center gap-2">
+              <LayoutDashboard className="h-5 w-5 text-blue-600" />
+              <div className="flex flex-col">
+                <Text size="4" weight="bold" className="text-slate-900 leading-none">
+                  Dashboard
                 </Text>
-            </button>
+                <Text size="1" className="text-slate-500 leading-none mt-0.5">
+                  Ringkasan data pembayaran dan tagihan
+                </Text>
+              </div>
+            </div>
+
+            {/* Filters and Actions */}
+            <div className="flex items-center gap-4">
+              <DashboardFilters
+                  tahunAjaranList={masterData.tahunAjaranList}
+                  kelasList={masterData.kelasList}
+                  tingkatList={masterData.tingkatList}
+                  selectedTahunAjaran={filters.tahunAjaran}
+                  onTahunAjaranChange={(val) => setFilters({ ...filters, tahunAjaran: val, tingkat: '', kelas: '' })}
+                  selectedTingkat={filters.tingkat}
+                  onTingkatChange={(val) => setFilters({ ...filters, tingkat: val, kelas: '' })}
+                  selectedKelas={filters.kelas}
+                  onKelasChange={(val) => setFilters({ ...filters, kelas: val })}
+                  selectedTimeRange={filters.timeRange}
+                  onTimeRangeChange={(val) => setFilters({ ...filters, timeRange: val })}
+              />
+
+              <button
+                  onClick={refresh}
+                  disabled={loading}
+                  className="flex items-center gap-2 px-3 border border-slate-300 bg-white hover:bg-slate-50 transition-colors disabled:opacity-50 shrink-0"
+                  style={{ borderRadius: 0, height: '35px' }}
+                  type="button"
+                >
+                  <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+                  <Text size="2" weight="medium" className="text-slate-700">
+                    Refresh
+                  </Text>
+              </button>
+            </div>
           </div>
         </div>
 

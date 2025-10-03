@@ -1,6 +1,7 @@
 import { memo } from 'react'
 import { Navbar } from '../layout/Navbar'
 import { StatusBar } from '../layout/StatusBar'
+import { NetworkStatusToast } from './NetworkStatusToast'
 
 const MemoizedNavbar = memo(Navbar)
 const MemoizedStatusBar = memo(StatusBar)
@@ -10,6 +11,9 @@ export const AppLayout = memo(function AppLayout({ children, realtimeStatus = 'd
     <div className="h-screen w-screen bg-white overflow-hidden">
       <MemoizedNavbar realtimeStatus={realtimeStatus} />
       <MemoizedStatusBar />
+
+      {/* Network Status Toast Notification */}
+      <NetworkStatusToast />
 
       <main
         className="overflow-hidden bg-white flex flex-col route-container"

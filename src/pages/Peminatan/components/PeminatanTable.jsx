@@ -163,9 +163,6 @@ export function PeminatanTable({
         {/* Table Container */}
         <div className="relative flex-1 min-h-0">
           <div className="h-full overflow-auto excel-scrollbar">
-            {isRefreshing && !isLoading ? (
-              <div className="pointer-events-none sticky top-0 z-20 h-0.5 bg-gradient-to-r from-transparent via-blue-400/60 to-transparent animate-pulse" />
-            ) : null}
             <table className="min-w-full table-fixed text-sm border-collapse">
               <colgroup>{[
                 <col key="col-1" style={{ width: '12%' }} />,

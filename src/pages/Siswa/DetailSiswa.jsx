@@ -7,6 +7,7 @@ import { InfoSiswaSection } from './components/detail/InfoSiswaSection'
 import { RiwayatKelasSection } from './components/detail/RiwayatKelasSection'
 import { PeminatanSection } from './components/detail/PeminatanSection'
 import { TagihanPembayaranSection } from './components/detail/TagihanPembayaranSection'
+import { DetailSiswaSkeleton } from './components/detail/DetailSiswaSkeleton'
 
 export function DetailSiswa() {
   const { id } = useParams()
@@ -16,14 +17,7 @@ export function DetailSiswa() {
   if (loading) {
     return (
       <PageLayout>
-        <div className="flex items-center justify-center h-full">
-          <div className="text-center">
-            <div className="animate-spin h-12 w-12 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4" />
-            <Text size="3" className="text-slate-600">
-              Memuat data siswa...
-            </Text>
-          </div>
-        </div>
+        <DetailSiswaSkeleton />
       </PageLayout>
     )
   }
