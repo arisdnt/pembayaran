@@ -3,12 +3,14 @@ import { Globe, Cpu, MemoryStick, HardDrive } from 'lucide-react'
 import { StatusBarItem } from './StatusBarItem'
 
 export function SystemInfoSection({ systemInfo }) {
+  const isConnected = systemInfo.network === 'Connected'
+
   return (
     <div className="flex items-center space-x-4">
       <StatusBarItem
         icon={Globe}
         label={systemInfo.network}
-        iconColor="text-green-600"
+        iconColor={isConnected ? "text-green-600" : "text-red-600"}
       />
       <Separator orientation="vertical" size="1" className="h-3 bg-gray-500" />
       <StatusBarItem

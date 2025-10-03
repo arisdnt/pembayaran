@@ -3,7 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { PageLayout } from '../../layout/PageLayout'
 import { Text } from '@radix-ui/themes'
 import { AlertCircle } from 'lucide-react'
-import { supabase } from '../../lib/supabaseClient'
+import { db } from '../../offline/db'
+import { updateTagihanWithRincian } from '../../offline/actions/tagihan'
 import { useTagihan } from './hooks/useTagihan'
 import { CreateTagihanHeader } from './components/CreateTagihanHeader'
 import { TargetSiswaSection } from './components/TargetSiswaSection'
@@ -43,34 +44,10 @@ function EditTagihanContent() {
       try {
         setLoading(true)
         
-        // Fetch tagihan header
-        const { data: tagihanData, error: tagihanError } = await supabase
-          .from('tagihan')
-          .select(`
-            *,
-            riwayat_kelas_siswa:id_riwayat_kelas_siswa(
-              id,
-              siswa:id_siswa(nama_lengkap, nisn),
-              kelas:id_kelas(id, tingkat, nama_sub_kelas),
-              tahun_ajaran:id_tahun_ajaran(id, nama)
-            )
-          `)
-          .eq('id', id)
-          .single()
+        const tagihanData = await db.tagihan.get(id)
 
-        if (tagihanError) throw tagihanError
-
-        // Fetch rincian items
-        const { data: rincianData, error: rincianError } = await supabase
-          .from('rincian_tagihan')
-          .select(`
-            *,
-            jenis_pembayaran:id_jenis_pembayaran(kode, nama)
-          `)
-          .eq('id_tagihan', id)
-          .order('urutan')
-
-        if (rincianError) throw rincianError
+        const rincianAll = await db.rincian_tagihan.where('id_tagihan').equals(id).toArray()
+        const rincianData = rincianAll.sort((a, b) => (a.urutan || 0) - (b.urutan || 0))
 
         // Set form data
         setFormData({
@@ -104,17 +81,10 @@ function EditTagihanContent() {
     }
   }, [id])
 
-  // Fetch jenis pembayaran dengan filter (sama seperti CreateTagihan)
+  // Fetch jenis pembayaran dengan filter (same approach as CreateTagihan, via IndexedDB)
   useEffect(() => {
     const fetchJenis = async () => {
-      let query = supabase
-        .from('jenis_pembayaran')
-        .select(`
-          id, kode, nama, jumlah_default, id_tahun_ajaran, tingkat,
-          tahun_ajaran:id_tahun_ajaran(nama)
-        `)
-        .eq('status_aktif', true)
-
+      const all = await db.jenis_pembayaran.orderBy('kode').toArray()
       let filterTahunAjaran = null
       let filterTingkat = null
 
@@ -126,19 +96,15 @@ function EditTagihanContent() {
         }
       }
 
-      if (filterTahunAjaran) {
-        query = query.eq('id_tahun_ajaran', filterTahunAjaran)
-      }
-
-      if (filterTingkat) {
-        query = query.eq('tingkat', filterTingkat)
-      }
-
-      const { data } = await query.order('kode')
-
-      setJenisPembayaranList(data || [])
+      const filtered = all.filter(j => {
+        if (j.status_aktif === false) return false
+        if (filterTahunAjaran && j.id_tahun_ajaran !== filterTahunAjaran) return false
+        if (filterTingkat && j.tingkat !== filterTingkat) return false
+        return true
+      })
+      setJenisPembayaranList(filtered)
     }
-    
+
     if (!loading && formData.id_riwayat_kelas_siswa) {
       fetchJenis()
     }
@@ -201,42 +167,13 @@ function EditTagihanContent() {
     }
 
     try {
-      // Update tagihan header
-      const { error: tagihanError } = await supabase
-        .from('tagihan')
-        .update({
-          nomor_tagihan: formData.nomor_tagihan,
-          judul: formData.judul,
-          deskripsi: formData.deskripsi || null,
-          tanggal_tagihan: formData.tanggal_tagihan,
-          tanggal_jatuh_tempo: formData.tanggal_jatuh_tempo,
-        })
-        .eq('id', id)
-
-      if (tagihanError) throw tagihanError
-
-      // Delete existing rincian
-      const { error: deleteError } = await supabase
-        .from('rincian_tagihan')
-        .delete()
-        .eq('id_tagihan', id)
-
-      if (deleteError) throw deleteError
-
-      // Insert new rincian
-      const rincianData = rincianItems.map(item => ({
-        id_tagihan: id,
-        id_jenis_pembayaran: item.id_jenis_pembayaran,
-        deskripsi: item.deskripsi,
-        jumlah: item.jumlah,
-        urutan: item.urutan,
-      }))
-
-      const { error: rincianError } = await supabase
-        .from('rincian_tagihan')
-        .insert(rincianData)
-
-      if (rincianError) throw rincianError
+      await updateTagihanWithRincian(id, {
+        nomor_tagihan: formData.nomor_tagihan,
+        judul: formData.judul,
+        deskripsi: formData.deskripsi || null,
+        tanggal_tagihan: formData.tanggal_tagihan,
+        tanggal_jatuh_tempo: formData.tanggal_jatuh_tempo,
+      }, rincianItems)
 
       navigate('/tagihan')
     } catch (err) {

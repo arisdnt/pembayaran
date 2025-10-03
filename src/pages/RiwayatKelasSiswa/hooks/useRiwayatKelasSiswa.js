@@ -1,208 +1,86 @@
 import { useEffect, useState, useCallback } from 'react'
-import { supabase } from '../../../lib/supabaseClient'
 import { useAppRefresh } from '../../../hooks/useAppRefresh'
+import { db } from '../../../offline/db'
+import { enqueueDelete, enqueueInsert, enqueueUpdate } from '../../../offline/outbox'
+import { useOffline } from '../../../contexts/OfflineContext'
 
 export function useRiwayatKelasSiswa() {
+  const { status } = useOffline()
   const [data, setData] = useState([])
   const [loading, setLoading] = useState(true)
-  const [realtimeStatus, setRealtimeStatus] = useState('connecting')
   const [error, setError] = useState('')
   const [siswaList, setSiswaList] = useState([])
   const [kelasList, setKelasList] = useState([])
   const [tahunAjaranList, setTahunAjaranList] = useState([])
 
-  const fetchData = useCallback(async () => {
-    const { data: result, error: queryError } = await supabase
-      .from('riwayat_kelas_siswa')
-      .select(`
-        *,
-        siswa:id_siswa(id, nama_lengkap, nisn),
-        kelas:id_kelas(
-          id, 
-          tingkat, 
-          nama_sub_kelas,
-          riwayat_wali_kelas!riwayat_wali_kelas_id_kelas_fkey(
-            id,
-            status,
-            id_tahun_ajaran,
-            wali_kelas:id_wali_kelas(
-              id,
-              nama_lengkap,
-              nip
-            )
-          )
-        ),
-        tahun_ajaran:id_tahun_ajaran(id, nama)
-      `)
-      .order('tanggal_masuk', { ascending: false })
-
-    if (queryError) {
-      setError('Gagal memuat data riwayat kelas siswa: ' + queryError.message)
-      return []
-    }
-    
-    return result ?? []
-  }, [])
-
-  const fetchLookupData = useCallback(async () => {
-    const [siswaRes, kelasRes, tahunAjaranRes] = await Promise.all([
-      supabase.from('siswa').select('id, nama_lengkap, nisn').eq('status_aktif', true).order('nama_lengkap'),
-      supabase.from('kelas').select('id, tingkat, nama_sub_kelas').order('tingkat'),
-      supabase.from('tahun_ajaran').select('id, nama').order('nama', { ascending: false })
-    ])
-
-    if (!siswaRes.error) setSiswaList(siswaRes.data ?? [])
-    if (!kelasRes.error) setKelasList(kelasRes.data ?? [])
-    if (!tahunAjaranRes.error) setTahunAjaranList(tahunAjaranRes.data ?? [])
-  }, [])
-
   const refreshData = useCallback(async () => {
-    const result = await fetchData()
-    setData(result)
-  }, [fetchData])
+    const [rows, siswa, kelas, tahun, rwl] = await Promise.all([
+      db.riwayat_kelas_siswa.orderBy('tanggal_masuk').reverse().toArray(),
+      db.siswa.toArray(),
+      db.kelas.toArray(),
+      db.tahun_ajaran.toArray(),
+      db.riwayat_wali_kelas.toArray(),
+    ])
+    const siswaMap = new Map(siswa.map(s => [s.id, s]))
+    const kelasMap = new Map(kelas.map(k => [k.id, k]))
+    const tahunMap = new Map(tahun.map(t => [t.id, t]))
+    const rwlByKelas = new Map()
+    rwl.forEach(x => {
+      const arr = rwlByKelas.get(x.id_kelas) || []
+      arr.push(x)
+      rwlByKelas.set(x.id_kelas, arr)
+    })
+    const list = rows.map(r => ({
+      ...r,
+      siswa: siswaMap.get(r.id_siswa) ? { id: r.id_siswa, nama_lengkap: siswaMap.get(r.id_siswa).nama_lengkap, nisn: siswaMap.get(r.id_siswa).nisn } : null,
+      kelas: (() => {
+        const k = kelasMap.get(r.id_kelas)
+        if (!k) return null
+        return {
+          id: k.id,
+          tingkat: k.tingkat,
+          nama_sub_kelas: k.nama_sub_kelas,
+          riwayat_wali_kelas: (rwlByKelas.get(k.id) || []).filter(x => x.id_tahun_ajaran === r.id_tahun_ajaran),
+        }
+      })(),
+      tahun_ajaran: tahunMap.get(r.id_tahun_ajaran) ? { id: r.id_tahun_ajaran, nama: tahunMap.get(r.id_tahun_ajaran).nama } : null,
+    }))
+    setData(list)
+    setSiswaList(siswa.filter(s => s.status_aktif))
+    setKelasList(kelas)
+    setTahunAjaranList(tahun)
+    setLoading(false)
+    return list
+  }, [])
 
   const handleAppRefresh = useCallback(() => refreshData(), [refreshData])
   useAppRefresh(handleAppRefresh)
-
-  useEffect(() => {
-    let ignore = false
-    let channel
-
-    async function initializeData() {
-      setLoading(true)
-      setError('')
-
-      await fetchLookupData()
-      const result = await fetchData()
-      
-      if (!ignore) {
-        setData(result)
-        setLoading(false)
-      }
-
-      channel = supabase
-        .channel('realtime-riwayat-kelas-siswa')
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'riwayat_kelas_siswa',
-          },
-          async (payload) => {
-            console.log('Realtime event received:', payload.eventType)
-            
-            const { data: refreshedData } = await supabase
-              .from('riwayat_kelas_siswa')
-              .select(`
-                *,
-                siswa:id_siswa(id, nama_lengkap, nisn),
-                kelas:id_kelas(
-                  id, 
-                  tingkat, 
-                  nama_sub_kelas,
-                  riwayat_wali_kelas!riwayat_wali_kelas_id_kelas_fkey(
-                    id,
-                    status,
-                    id_tahun_ajaran,
-                    wali_kelas:id_wali_kelas(
-                      id,
-                      nama_lengkap,
-                      nip
-                    )
-                  )
-                ),
-                tahun_ajaran:id_tahun_ajaran(id, nama)
-              `)
-              .order('tanggal_masuk', { ascending: false })
-
-            if (!ignore && refreshedData) {
-              setData(refreshedData)
-            }
-          }
-        )
-        .subscribe((status) => {
-          console.log('Realtime status:', status)
-          if (status === 'SUBSCRIBED') {
-            setRealtimeStatus('connected')
-          }
-          if (status === 'TIMED_OUT' || status === 'CHANNEL_ERROR') {
-            setRealtimeStatus('disconnected')
-          }
-        })
-    }
-
-    initializeData()
-
-    return () => {
-      ignore = true
-      if (channel) {
-        supabase.removeChannel(channel)
-      }
-    }
-  }, [fetchData, fetchLookupData])
+  useEffect(() => { refreshData() }, [refreshData])
 
   const deleteItem = async (id) => {
-    try {
-      const { error: deleteError } = await supabase
-        .from('riwayat_kelas_siswa')
-        .delete()
-        .eq('id', id)
-
-      if (deleteError) throw deleteError
-
-      await refreshData()
-    } catch (err) {
-      setError(err.message)
-      throw err
-    }
+    try { await enqueueDelete('riwayat_kelas_siswa', id) } catch (err) { setError(err.message); throw err }
   }
 
   const saveItem = async (formData, isEdit) => {
     try {
-      if (isEdit) {
-        const { error: updateError } = await supabase
-          .from('riwayat_kelas_siswa')
-          .update({
-            id_siswa: formData.id_siswa,
-            id_kelas: formData.id_kelas,
-            id_tahun_ajaran: formData.id_tahun_ajaran,
-            tanggal_masuk: formData.tanggal_masuk,
-            tanggal_keluar: formData.tanggal_keluar || null,
-            status: formData.status,
-            catatan: formData.catatan || null,
-            diperbarui_pada: new Date().toISOString(),
-          })
-          .eq('id', formData.id)
-
-        if (updateError) throw updateError
-      } else {
-        const { error: insertError } = await supabase
-          .from('riwayat_kelas_siswa')
-          .insert({
-            id_siswa: formData.id_siswa,
-            id_kelas: formData.id_kelas,
-            id_tahun_ajaran: formData.id_tahun_ajaran,
-            tanggal_masuk: formData.tanggal_masuk,
-            tanggal_keluar: formData.tanggal_keluar || null,
-            status: formData.status,
-            catatan: formData.catatan || null,
-          })
-
-        if (insertError) throw insertError
+      const payload = {
+        id_siswa: formData.id_siswa,
+        id_kelas: formData.id_kelas,
+        id_tahun_ajaran: formData.id_tahun_ajaran,
+        tanggal_masuk: formData.tanggal_masuk,
+        tanggal_keluar: formData.tanggal_keluar || null,
+        status: formData.status,
+        catatan: formData.catatan || null,
       }
-
-      await refreshData()
-    } catch (err) {
-      setError(err.message)
-      throw err
-    }
+      if (isEdit) await enqueueUpdate('riwayat_kelas_siswa', formData.id, payload)
+      else await enqueueInsert('riwayat_kelas_siswa', payload)
+    } catch (err) { setError(err.message); throw err }
   }
 
   return {
     data,
     loading,
-    realtimeStatus,
+    realtimeStatus: status.realtime,
     error,
     setError,
     deleteItem,

@@ -137,6 +137,7 @@ CREATE TABLE public.siswa (
   diperbarui_pada timestamp with time zone NOT NULL DEFAULT now(),
   foto_profil_url text,
   foto_profil_path text,
+  nama_wali_siswa character varying,
   CONSTRAINT siswa_pkey PRIMARY KEY (id)
 );
 CREATE TABLE public.tagihan (

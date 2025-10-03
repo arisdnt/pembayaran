@@ -1,244 +1,133 @@
-import { useEffect, useState, useCallback, useRef } from 'react'
-import { supabase } from '../../../lib/supabaseClient'
-import { useAppRefresh } from '../../../hooks/useAppRefresh'
-
-let cachedSiswa = null
-
-function calculateTagihanSummary(tagihanList = []) {
-  return tagihanList.reduce(
-    (acc, tagihan) => {
-      const totalTagihan = tagihan.rincian_tagihan?.reduce((sum, item) => sum + Number(item.jumlah || 0), 0) || 0
-
-      const totalDibayar = tagihan.pembayaran?.reduce((sumPembayaran, pembayaran) => {
-        const paid = pembayaran.rincian_pembayaran?.reduce(
-          (subTotal, rincian) => subTotal + Number(rincian.jumlah_dibayar || 0),
-          0,
-        ) || 0
-        return sumPembayaran + paid
-      }, 0) || 0
-
-      const kekurangan = Math.max(totalTagihan - totalDibayar, 0)
-
-      return {
-        totalTagihan: acc.totalTagihan + totalTagihan,
-        totalDibayar: acc.totalDibayar + totalDibayar,
-        totalTunggakan: acc.totalTunggakan + kekurangan,
-      }
-    },
-    { totalTagihan: 0, totalDibayar: 0, totalTunggakan: 0 },
-  )
-}
+import { useEffect, useMemo, useRef, useState, useCallback } from 'react'
+import { useLiveQuery } from 'dexie-react-hooks'
+import { db } from '../../../offline/db'
+import { enqueueDelete, enqueueInsert, enqueueUpdate } from '../../../offline/outbox'
+import { useOffline } from '../../../contexts/OfflineContext'
 
 export function useSiswa() {
-  const [data, setData] = useState(() => cachedSiswa ?? [])
-  const [loading, setLoading] = useState(() => !cachedSiswa)
-  const [isRefreshing, setIsRefreshing] = useState(false)
-  const [realtimeStatus, setRealtimeStatus] = useState('connecting')
+  const { status } = useOffline()
   const [error, setError] = useState('')
+  const [isRefreshing, setIsRefreshing] = useState(false)
   const isMountedRef = useRef(true)
 
-  const fetchData = useCallback(async () => {
-    const { data: result, error: queryError } = await supabase
-      .from('siswa')
-      .select(`
-        *,
-        riwayat_kelas_siswa(
-          id,
-          status,
-          id_tahun_ajaran,
-          id_kelas,
-          tanggal_masuk,
-          kelas:id_kelas(
-            id,
-            tingkat,
-            nama_sub_kelas
-          ),
-          tahun_ajaran:id_tahun_ajaran(
-            id,
-            nama
-          ),
-          tagihan(
-            id,
-            nomor_tagihan,
-            tanggal_tagihan,
-            rincian_tagihan(jumlah),
-            pembayaran(
-              id,
-              rincian_pembayaran(jumlah_dibayar)
-            )
-          )
-        ),
-        peminatan_siswa(
-          id,
-          id_peminatan,
-          tingkat,
-          tanggal_mulai,
-          tanggal_selesai,
-          peminatan:id_peminatan(
-            id,
-            nama,
-            kode
-          )
-        )
-      `)
-      .order('nama_lengkap', { ascending: true })
+  // Load base tables
+  const siswa = useLiveQuery(async () => db.siswa.orderBy('nama_lengkap').toArray(), [], undefined)
+  const rks = useLiveQuery(async () => db.riwayat_kelas_siswa.toArray(), [], undefined)
+  const kelas = useLiveQuery(async () => db.kelas.toArray(), [], undefined)
+  const tahun = useLiveQuery(async () => db.tahun_ajaran.toArray(), [], undefined)
+  const peminatan = useLiveQuery(async () => db.peminatan.toArray(), [], undefined)
+  const peminatanSiswa = useLiveQuery(async () => db.peminatan_siswa.toArray(), [], undefined)
+  const tagihan = useLiveQuery(async () => db.tagihan.toArray(), [], undefined)
+  const rincianTagihan = useLiveQuery(async () => db.rincian_tagihan.toArray(), [], undefined)
+  const pembayaran = useLiveQuery(async () => db.pembayaran.toArray(), [], undefined)
+  const rincianPembayaran = useLiveQuery(async () => db.rincian_pembayaran.toArray(), [], undefined)
 
-    if (queryError) {
-      setError('Gagal memuat data siswa: ' + queryError.message)
-      return []
-    }
+  const data = useMemo(() => {
+    const siswaList = siswa || []
+    const kelasMap = new Map((kelas || []).map(k => [k.id, k]))
+    const tahunMap = new Map((tahun || []).map(t => [t.id, t]))
+    const peminatanMap = new Map((peminatan || []).map(p => [p.id, p]))
 
-    const dataWithLatest = (result ?? []).map(siswa => {
-      const riwayatAktif = siswa.riwayat_kelas_siswa
-        ?.filter(r => r.status === 'aktif')
-        .sort((a, b) => new Date(b.tanggal_masuk) - new Date(a.tanggal_masuk))
-
-      const latestRiwayat = riwayatAktif?.[0]
-
-      // Get peminatan terakhir (yang terbaru berdasarkan tanggal_mulai)
-      const peminatanList = siswa.peminatan_siswa || []
-      const peminatanTerbaru = peminatanList
-        .filter(p => p.peminatan) // Pastikan ada data peminatan
-        .sort((a, b) => {
-          // Sort by tanggal_mulai descending (terbaru di atas)
-          const dateA = new Date(a.tanggal_mulai || 0)
-          const dateB = new Date(b.tanggal_mulai || 0)
-          return dateB - dateA
-        })[0]
-
-      // Calculate total tagihan, pembayaran, dan tunggakan dari semua riwayat
-      const allTagihan = siswa.riwayat_kelas_siswa?.flatMap(r => r.tagihan || []) || []
-      const { totalTagihan, totalDibayar, totalTunggakan } = calculateTagihanSummary(allTagihan)
-
-      return {
-        ...siswa,
-        kelas_terbaru: latestRiwayat?.kelas,
-        tahun_ajaran_terbaru: latestRiwayat?.tahun_ajaran,
-        peminatan_terbaru: peminatanTerbaru?.peminatan || null,
-        total_tagihan: totalTagihan,
-        total_dibayar: totalDibayar,
-        total_tunggakan: totalTunggakan
-      }
+    const rksBySiswa = new Map()
+    ;(rks || []).forEach(row => {
+      const arr = rksBySiswa.get(row.id_siswa) || []
+      arr.push(row)
+      rksBySiswa.set(row.id_siswa, arr)
     })
 
-    return dataWithLatest
-  }, [])
+    const tagihanByRks = new Map()
+    ;(tagihan || []).forEach(t => {
+      const arr = tagihanByRks.get(t.id_riwayat_kelas_siswa) || []
+      arr.push(t)
+      tagihanByRks.set(t.id_riwayat_kelas_siswa, arr)
+    })
 
-  const applyData = useCallback((result) => {
-    const next = Array.isArray(result) ? result : []
-    cachedSiswa = next
-    setData(next)
-  }, [])
+    const rincianByTagihan = new Map()
+    ;(rincianTagihan || []).forEach(r => {
+      const arr = rincianByTagihan.get(r.id_tagihan) || []
+      arr.push(r)
+      rincianByTagihan.set(r.id_tagihan, arr)
+    })
 
-  const refreshData = useCallback(
-    async ({ withSpinner = true } = {}) => {
-      const showInitialSpinner = !cachedSiswa
-      const showRefreshIndicator = cachedSiswa && withSpinner
+    const pembayaranByTagihan = new Map()
+    ;(pembayaran || []).forEach(p => {
+      const arr = pembayaranByTagihan.get(p.id_tagihan) || []
+      arr.push(p)
+      pembayaranByTagihan.set(p.id_tagihan, arr)
+    })
 
-      if (showInitialSpinner) {
-        setLoading(true)
-      }
-      if (showRefreshIndicator) {
-        setIsRefreshing(true)
-      }
+    const rincianPembayaranByPembayaran = new Map()
+    ;(rincianPembayaran || []).forEach(rp => {
+      const arr = rincianPembayaranByPembayaran.get(rp.id_pembayaran) || []
+      arr.push(rp)
+      rincianPembayaranByPembayaran.set(rp.id_pembayaran, arr)
+    })
 
-      setError('')
+    const peminatanBySiswa = new Map()
+    ;(peminatanSiswa || []).forEach(ps => {
+      const arr = peminatanBySiswa.get(ps.id_siswa) || []
+      arr.push(ps)
+      peminatanBySiswa.set(ps.id_siswa, arr)
+    })
 
-      try {
-        const result = await fetchData()
-        if (isMountedRef.current) {
-          applyData(result)
-        }
-        return result
-      } finally {
-        if (isMountedRef.current) {
-          if (showInitialSpinner) {
-            setLoading(false)
+    return siswaList.map(s => {
+      const rRows = (rksBySiswa.get(s.id) || [])
+        .filter(r => (r.status || '').toLowerCase() === 'aktif')
+        .sort((a, b) => new Date(b.tanggal_masuk || 0) - new Date(a.tanggal_masuk || 0))
+      const latest = rRows[0]
+      const kelasTerbaru = latest ? kelasMap.get(latest.id_kelas) || null : null
+      const tahunTerbaru = latest ? tahunMap.get(latest.id_tahun_ajaran) || null : null
+
+      // peminatan terbaru berdasarkan tanggal_mulai
+      const psList = (peminatanBySiswa.get(s.id) || []).sort((a, b) => new Date(b.tanggal_mulai || 0) - new Date(a.tanggal_mulai || 0))
+      const peminatanTerbaru = psList[0] ? (peminatanMap.get(psList[0].id_peminatan) || null) : null
+
+      // Aggregasi finansial dari seluruh tagihan terkait semua RKS siswa
+      const rksIds = (rksBySiswa.get(s.id) || []).map(r => r.id)
+      let totalTagihan = 0
+      let totalDibayar = 0
+      for (const rksId of rksIds) {
+        const tagihanRows = tagihanByRks.get(rksId) || []
+        for (const t of tagihanRows) {
+          const rincian = rincianByTagihan.get(t.id) || []
+          totalTagihan += rincian.reduce((sum, it) => sum + Number(it.jumlah || 0), 0)
+          const pembayaranRows = pembayaranByTagihan.get(t.id) || []
+          for (const p of pembayaranRows) {
+            const rp = rincianPembayaranByPembayaran.get(p.id) || []
+            totalDibayar += rp.reduce((sum, it) => sum + Number(it.jumlah_dibayar || 0), 0)
           }
-          if (showRefreshIndicator) {
-            setIsRefreshing(false)
-          }
         }
       }
-    },
-    [fetchData, applyData],
-  )
+      const totalTunggakan = Math.max(totalTagihan - totalDibayar, 0)
 
-  const handleAppRefresh = useCallback(() => refreshData(), [refreshData])
-  useAppRefresh(handleAppRefresh)
+      return {
+        ...s,
+        kelas_terbaru: kelasTerbaru,
+        tahun_ajaran_terbaru: tahunTerbaru,
+        peminatan_terbaru: peminatanTerbaru,
+        total_tagihan: totalTagihan,
+        total_dibayar: totalDibayar,
+        total_tunggakan: totalTunggakan,
+      }
+    })
+  }, [siswa, rks, kelas, tahun, peminatan, peminatanSiswa, tagihan, rincianTagihan, pembayaran, rincianPembayaran])
+
+  const loading = siswa === undefined
+
+  const refreshData = useCallback(async () => {
+    setIsRefreshing(true)
+    setTimeout(() => isMountedRef.current && setIsRefreshing(false), 300)
+    return data
+  }, [data])
 
   useEffect(() => {
     isMountedRef.current = true
-    let ignore = false
-    let channel
-
-    async function initializeData() {
-      await refreshData()
-
-      channel = supabase
-        .channel('realtime-siswa')
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'siswa',
-          },
-          async (payload) => {
-            console.log('Realtime event received (siswa):', payload.eventType)
-            if (ignore) return
-            await refreshData({ withSpinner: false })
-          }
-        )
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'peminatan_siswa',
-          },
-          async (payload) => {
-            console.log('Realtime event received (peminatan_siswa):', payload.eventType)
-            if (ignore) return
-            await refreshData({ withSpinner: false })
-          }
-        )
-        .subscribe((status) => {
-          console.log('Realtime status:', status)
-          if (!isMountedRef.current) return
-          if (status === 'SUBSCRIBED') {
-            setRealtimeStatus('connected')
-          }
-          if (status === 'TIMED_OUT' || status === 'CHANNEL_ERROR') {
-            setRealtimeStatus('disconnected')
-          }
-        })
-    }
-
-    initializeData()
-
-    return () => {
-      ignore = true
-      isMountedRef.current = false
-      if (channel) {
-        supabase.removeChannel(channel)
-      }
-    }
-  }, [refreshData])
+    return () => { isMountedRef.current = false }
+  }, [])
 
   const toggleStatus = async (item) => {
     try {
-      const { error: updateError } = await supabase
-        .from('siswa')
-        .update({
-          status_aktif: !item.status_aktif,
-          diperbarui_pada: new Date().toISOString(),
-        })
-        .eq('id', item.id)
-
-      if (updateError) throw updateError
-
-      await refreshData()
+      await enqueueUpdate('siswa', item.id, { status_aktif: !item.status_aktif })
     } catch (err) {
       setError(err.message)
     }
@@ -246,81 +135,38 @@ export function useSiswa() {
 
   const deleteItem = async (id) => {
     try {
-      const { error: deleteError } = await supabase
-        .from('siswa')
-        .delete()
-        .eq('id', id)
-
-      if (deleteError) throw deleteError
-
-      await refreshData()
+      await enqueueDelete('siswa', id)
     } catch (err) {
-      // Deteksi error foreign key constraint
-      const errorMessage = err.message || ''
-      
-      if (errorMessage.includes('violates foreign key constraint')) {
-        // Parse nama tabel dari error message
-        const tableMatch = errorMessage.match(/on table "([^"]+)"/)
-        const tableName = tableMatch ? tableMatch[1] : 'tabel terkait'
-        
-        // Mapping nama tabel ke nama yang lebih user-friendly
-        const tableNameMap = {
-          'riwayat_kelas_siswa': 'Riwayat Kelas Siswa',
-          'transaksi': 'Transaksi',
-          'pembayaran': 'Pembayaran',
-          'tagihan': 'Tagihan'
-        }
-        
-        const friendlyTableName = tableNameMap[tableName] || tableName
-        
-        setError(`Siswa tidak dapat dihapus karena masih memiliki data di tabel "${friendlyTableName}". Hapus data di tabel tersebut terlebih dahulu.`)
-      } else {
-        setError(err.message)
-      }
+      setError(err.message)
       throw err
     }
   }
 
   const saveItem = async (formData, isEdit) => {
     try {
-      // Generate token akses unik jika tidak ada (untuk siswa baru)
-      const tokenAksesUnik = formData.token_akses_unik || 
-        `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`
-
+      const token_akses_unik = formData.token_akses_unik || `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
       if (isEdit) {
-        const { error: updateError } = await supabase
-          .from('siswa')
-          .update({
-            nama_lengkap: formData.nama_lengkap,
-            nisn: formData.nisn || null,
-            tanggal_lahir: formData.tanggal_lahir || null,
-            jenis_kelamin: formData.jenis_kelamin || null,
-            alamat: formData.alamat || null,
-            nomor_whatsapp_wali: formData.nomor_whatsapp_wali || null,
-            status_aktif: formData.status_aktif,
-            diperbarui_pada: new Date().toISOString(),
-          })
-          .eq('id', formData.id)
-
-        if (updateError) throw updateError
+        await enqueueUpdate('siswa', formData.id, {
+          nama_lengkap: formData.nama_lengkap,
+          nisn: formData.nisn || null,
+          tanggal_lahir: formData.tanggal_lahir || null,
+          jenis_kelamin: formData.jenis_kelamin || null,
+          alamat: formData.alamat || null,
+          nomor_whatsapp_wali: formData.nomor_whatsapp_wali || null,
+          status_aktif: formData.status_aktif,
+        })
       } else {
-        const { error: insertError } = await supabase
-          .from('siswa')
-          .insert({
-            nama_lengkap: formData.nama_lengkap,
-            nisn: formData.nisn || null,
-            tanggal_lahir: formData.tanggal_lahir || null,
-            jenis_kelamin: formData.jenis_kelamin || null,
-            alamat: formData.alamat || null,
-            nomor_whatsapp_wali: formData.nomor_whatsapp_wali || null,
-            token_akses_unik: tokenAksesUnik,
-            status_aktif: formData.status_aktif,
-          })
-
-        if (insertError) throw insertError
+        await enqueueInsert('siswa', {
+          nama_lengkap: formData.nama_lengkap,
+          nisn: formData.nisn || null,
+          tanggal_lahir: formData.tanggal_lahir || null,
+          jenis_kelamin: formData.jenis_kelamin || null,
+          alamat: formData.alamat || null,
+          nomor_whatsapp_wali: formData.nomor_whatsapp_wali || null,
+          token_akses_unik,
+          status_aktif: formData.status_aktif,
+        })
       }
-
-      await refreshData()
     } catch (err) {
       setError(err.message)
       throw err
@@ -331,7 +177,7 @@ export function useSiswa() {
     data,
     loading,
     isRefreshing,
-    realtimeStatus,
+    realtimeStatus: status.realtime,
     error,
     setError,
     toggleStatus,
@@ -340,3 +186,4 @@ export function useSiswa() {
     refreshData,
   }
 }
+

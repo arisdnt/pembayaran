@@ -12,6 +12,7 @@ function formatCurrency(amount) {
 }
 
 function getMonthName(monthKey) {
+  if (!monthKey) return '-'
   const [year, month] = monthKey.split('-')
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des']
   return `${months[parseInt(month) - 1]} ${year}`
@@ -36,7 +37,7 @@ export const PembayaranChart = memo(function PembayaranChart({ data, loading }) 
           {(data || []).map((item, index) => {
             const height = maxValue > 0 ? (item.total / maxValue) * 100 : 0
             return (
-              <div key={item.month || index} className="flex-1 flex flex-col items-center gap-2 min-w-0">
+              <div key={item.bulan || index} className="flex-1 flex flex-col items-center gap-2 min-w-0">
                 <div className="w-full relative group">
                   <div
                     className="w-full bg-gradient-to-t from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 transition-all duration-300 cursor-pointer border-2 border-blue-700"
@@ -45,7 +46,7 @@ export const PembayaranChart = memo(function PembayaranChart({ data, loading }) 
                   />
                 </div>
                 <Text size="1" className="text-slate-600 text-center truncate w-full">
-                  {getMonthName(item.month)}
+                  {getMonthName(item.bulan)}
                 </Text>
               </div>
             )

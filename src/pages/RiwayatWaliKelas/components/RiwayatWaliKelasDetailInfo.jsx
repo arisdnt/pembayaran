@@ -3,7 +3,7 @@ import { Badge, Text } from '@radix-ui/themes'
 import { Calendar, Clock, FileText, Users } from 'lucide-react'
 import { format, differenceInDays } from 'date-fns'
 import { id } from 'date-fns/locale'
-import { supabase } from '../../../lib/supabaseClient'
+import { db } from '../../../offline/db'
 
 const FieldItem = ({ label, icon: Icon, children, className = '' }) => (
   <div className={`border-b border-slate-200 pb-3 ${className}`}>
@@ -80,32 +80,24 @@ export function RiwayatWaliKelasDetailInfo({ riwayat }) {
       setStudentsLoading(true)
       setStudentsError('')
 
-      const { data, error } = await supabase
-        .from('riwayat_kelas_siswa')
-        .select(`
-          id,
-          status,
-          tanggal_masuk,
-          tanggal_keluar,
-          siswa:id_siswa(id, nama_lengkap, nisn)
-        `)
-        .eq('id_kelas', riwayat.id_kelas)
-        .eq('id_tahun_ajaran', riwayat.id_tahun_ajaran)
-
+      const list = await db.riwayat_kelas_siswa
+        .where('id_kelas')
+        .equals(riwayat.id_kelas)
+        .toArray()
+      const filtered = list.filter(r => r.id_tahun_ajaran === riwayat.id_tahun_ajaran)
+      const siswaMap = new Map((await db.siswa.toArray()).map(s => [s.id, s]))
+      const withSiswa = filtered.map(r => ({
+        ...r,
+        siswa: siswaMap.get(r.id_siswa) ? { id: r.id_siswa, nama_lengkap: siswaMap.get(r.id_siswa).nama_lengkap, nisn: siswaMap.get(r.id_siswa).nisn } : null,
+      }))
       if (ignore) return
-
-      if (error) {
-        setStudents([])
-        setStudentsError('Gagal memuat daftar siswa: ' + error.message)
-      } else {
-        const sorted = (data ?? []).sort((a, b) => {
-          const nameA = a.siswa?.nama_lengkap?.toLocaleLowerCase('id-ID') || ''
-          const nameB = b.siswa?.nama_lengkap?.toLocaleLowerCase('id-ID') || ''
-          return nameA.localeCompare(nameB, 'id-ID')
-        })
-        setStudents(sorted)
-      }
-
+      const sorted = withSiswa.sort((a, b) => {
+        const nameA = a.siswa?.nama_lengkap?.toLocaleLowerCase('id-ID') || ''
+        const nameB = b.siswa?.nama_lengkap?.toLocaleLowerCase('id-ID') || ''
+        return nameA.localeCompare(nameB, 'id-ID')
+      })
+      setStudents(sorted)
+      
       setStudentsLoading(false)
     }
 

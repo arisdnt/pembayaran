@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { supabase } from '../../../lib/supabaseClient'
+import { db } from '../../../offline/db'
+import { updatePembayaranWithRincian } from '../../../offline/actions/pembayaran'
 
 export function useEditPembayaran() {
   const navigate = useNavigate()
@@ -26,30 +27,15 @@ export function useEditPembayaran() {
 
   const fetchData = async () => {
     setLoading(true)
-    
-    const { data: pembayaranData, error: pembayaranError } = await supabase
-      .from('pembayaran')
-      .select(`
-        *,
-        tagihan:id_tagihan(
-          *,
-          riwayat_kelas_siswa:id_riwayat_kelas_siswa(
-            siswa:id_siswa(nama_lengkap),
-            kelas:id_kelas(tingkat, nama_sub_kelas)
-          ),
-          rincian_tagihan(jumlah)
-        )
-      `)
-      .eq('id', id)
-      .single()
-    
-    if (pembayaranError) {
+    const pembayaranData = await db.pembayaran.get(id)
+    if (!pembayaranData) {
       setError('Pembayaran tidak ditemukan')
       setLoading(false)
       return
     }
-
-    const totalTagihan = pembayaranData.tagihan.rincian_tagihan?.reduce((sum, r) => sum + parseFloat(r.jumlah || 0), 0) || 0
+    const tagihan = await db.tagihan.get(pembayaranData.id_tagihan)
+    const rincianTagihan = tagihan ? await db.rincian_tagihan.where('id_tagihan').equals(tagihan.id).toArray() : []
+    const totalTagihan = rincianTagihan.reduce((sum, r) => sum + parseFloat(r.jumlah || 0), 0)
     
     setFormData({
       id_tagihan: pembayaranData.id_tagihan,
@@ -57,23 +43,16 @@ export function useEditPembayaran() {
       catatan: pembayaranData.catatan || '',
     })
 
-    setSelectedTagihan({
-      ...pembayaranData.tagihan,
-      total_tagihan: totalTagihan
-    })
+    setSelectedTagihan({ ...tagihan, total_tagihan: totalTagihan })
 
-    const { data: rincianData } = await supabase
-      .from('rincian_pembayaran')
-      .select('*')
-      .eq('id_pembayaran', id)
-      .order('cicilan_ke')
-    
+    const rincianAll = await db.rincian_pembayaran.where('id_pembayaran').equals(id).toArray()
+    const rincianData = rincianAll.sort((a, b) => (a.cicilan_ke || 0) - (b.cicilan_ke || 0))
     if (rincianData) {
       setRincianItems(rincianData.map(r => ({
         id: r.id,
         nomor_transaksi: r.nomor_transaksi,
         jumlah_dibayar: r.jumlah_dibayar,
-        tanggal_bayar: r.tanggal_bayar.split('T')[0],
+        tanggal_bayar: (r.tanggal_bayar || '').split('T')[0] || r.tanggal_bayar,
         metode_pembayaran: r.metode_pembayaran,
         referensi_pembayaran: r.referensi_pembayaran || '',
         catatan: r.catatan || '',
@@ -82,24 +61,15 @@ export function useEditPembayaran() {
       })))
     }
 
-    const { data: tagihanListData } = await supabase
-      .from('tagihan')
-      .select(`
-        *,
-        riwayat_kelas_siswa:id_riwayat_kelas_siswa(
-          siswa:id_siswa(nama_lengkap)
-        ),
-        rincian_tagihan(jumlah)
-      `)
-      .order('tanggal_tagihan', { ascending: false })
-    
-    if (tagihanListData) {
-      const withTotal = tagihanListData.map(t => ({
-        ...t,
-        total_tagihan: t.rincian_tagihan?.reduce((sum, r) => sum + parseFloat(r.jumlah || 0), 0) || 0
-      }))
-      setTagihanList(withTotal)
-    }
+    const tagihanListData = await db.tagihan.orderBy('tanggal_tagihan').reverse().toArray()
+    const rincianByTagihan = new Map((await db.rincian_tagihan.toArray()).reduce((acc, r) => {
+      const arr = acc.get(r.id_tagihan) || []
+      arr.push(r)
+      acc.set(r.id_tagihan, arr)
+      return acc
+    }, new Map()))
+    const withTotal = tagihanListData.map(t => ({ ...t, total_tagihan: (rincianByTagihan.get(t.id) || []).reduce((sum, r) => sum + parseFloat(r.jumlah || 0), 0) }))
+    setTagihanList(withTotal)
 
     setLoading(false)
   }
@@ -118,15 +88,6 @@ export function useEditPembayaran() {
   }
 
   const handleRemoveRincian = async (index) => {
-    const item = rincianItems[index]
-    
-    if (item.id) {
-      await supabase
-        .from('rincian_pembayaran')
-        .delete()
-        .eq('id', item.id)
-    }
-    
     setRincianItems(rincianItems.filter((_, i) => i !== index))
   }
 
@@ -163,49 +124,11 @@ export function useEditPembayaran() {
     }
 
     try {
-      const { error: pembayaranError } = await supabase
-        .from('pembayaran')
-        .update({
-          id_tagihan: formData.id_tagihan,
-          nomor_pembayaran: formData.nomor_pembayaran,
-          catatan: formData.catatan || null,
-        })
-        .eq('id', id)
-
-      if (pembayaranError) throw pembayaranError
-
-      for (const item of rincianItems) {
-        if (item.id) {
-          await supabase
-            .from('rincian_pembayaran')
-            .update({
-              nomor_transaksi: item.nomor_transaksi,
-              jumlah_dibayar: item.jumlah_dibayar,
-              tanggal_bayar: item.tanggal_bayar,
-              metode_pembayaran: item.metode_pembayaran,
-              referensi_pembayaran: item.referensi_pembayaran || null,
-              catatan: item.catatan || null,
-              status: item.status,
-              cicilan_ke: item.cicilan_ke,
-            })
-            .eq('id', item.id)
-        } else {
-          await supabase
-            .from('rincian_pembayaran')
-            .insert({
-              id_pembayaran: id,
-              nomor_transaksi: item.nomor_transaksi,
-              jumlah_dibayar: item.jumlah_dibayar,
-              tanggal_bayar: item.tanggal_bayar,
-              metode_pembayaran: item.metode_pembayaran,
-              referensi_pembayaran: item.referensi_pembayaran || null,
-              catatan: item.catatan || null,
-              status: item.status,
-              cicilan_ke: item.cicilan_ke,
-            })
-        }
-      }
-
+      await updatePembayaranWithRincian(id, {
+        id_tagihan: formData.id_tagihan,
+        nomor_pembayaran: formData.nomor_pembayaran,
+        catatan: formData.catatan || null,
+      }, rincianItems)
       navigate('/pembayaran')
     } catch (err) {
       setError(err.message)

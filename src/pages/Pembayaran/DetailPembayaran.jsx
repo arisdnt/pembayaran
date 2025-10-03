@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { PageLayout } from '../../layout/PageLayout'
 import { Text, Badge } from '@radix-ui/themes'
 import { ArrowLeft, Wallet, Hash, Receipt, FileText, Calendar, CreditCard, Clock, CheckCircle, XCircle } from 'lucide-react'
-import { supabase } from '../../lib/supabaseClient'
+import { db } from '../../offline/db'
 
 function formatCurrency(amount) {
   return new Intl.NumberFormat('id-ID', {
@@ -37,31 +37,30 @@ function DetailPembayaranContent() {
       try {
         setLoading(true)
 
-        const { data, error } = await supabase
-          .from('pembayaran')
-          .select(`
-            *,
-            tagihan:id_tagihan(
-              *,
-              riwayat_kelas_siswa:id_riwayat_kelas_siswa(
-                siswa:id_siswa(nama_lengkap, nisn),
-                kelas:id_kelas(tingkat, nama_sub_kelas),
-                tahun_ajaran:id_tahun_ajaran(nama)
-              ),
-              rincian_tagihan(
-                id, deskripsi, jumlah,
-                jenis_pembayaran:id_jenis_pembayaran(kode, nama)
-              )
-            ),
-            rincian_pembayaran(
-              *
-            )
-          `)
-          .eq('id', id)
-          .single()
+        const pembayaranRow = await db.pembayaran.get(id)
+        if (!pembayaranRow) throw new Error('Pembayaran tidak ditemukan')
+        const tagihan = await db.tagihan.get(pembayaranRow.id_tagihan)
+        const rks = tagihan ? await db.riwayat_kelas_siswa.get(tagihan.id_riwayat_kelas_siswa) : null
+        const siswa = rks ? await db.siswa.get(rks.id_siswa) : null
+        const kelas = rks ? await db.kelas.get(rks.id_kelas) : null
+        const tahun = rks ? await db.tahun_ajaran.get(rks.id_tahun_ajaran) : null
+        const rincianAll = await db.rincian_pembayaran.where('id_pembayaran').equals(id).toArray()
+        const rincianPembayaran = rincianAll.sort((a, b) => (a.cicilan_ke || 0) - (b.cicilan_ke || 0))
+        const rincianTagihan = tagihan ? await db.rincian_tagihan.where('id_tagihan').equals(tagihan.id).toArray() : []
 
-        if (error) throw error
-        setPembayaran(data)
+        setPembayaran({
+          ...pembayaranRow,
+          tagihan: tagihan && {
+            ...tagihan,
+            riwayat_kelas_siswa: rks && {
+              siswa: siswa && { nama_lengkap: siswa.nama_lengkap, nisn: siswa.nisn },
+              kelas: kelas && { tingkat: kelas.tingkat, nama_sub_kelas: kelas.nama_sub_kelas },
+              tahun_ajaran: tahun && { nama: tahun.nama },
+            },
+            rincian_tagihan: rincianTagihan,
+          },
+          rincian_pembayaran: rincianPembayaran,
+        })
       } catch (err) {
         console.error('Error fetching pembayaran:', err)
         setError(err.message)
@@ -104,7 +103,8 @@ function DetailPembayaranContent() {
 
   const totalTagihan = pembayaran.tagihan?.rincian_tagihan?.reduce((sum, r) => sum + parseFloat(r.jumlah || 0), 0) || 0
   const totalPembayaran = pembayaran.rincian_pembayaran?.reduce((sum, r) => sum + parseFloat(r.jumlah_dibayar || 0), 0) || 0
-  const totalVerified = pembayaran.rincian_pembayaran?.filter(r => r.status === 'verified').reduce((sum, r) => sum + parseFloat(r.jumlah_dibayar || 0), 0) || 0
+  const totalVerified = pembayaran.rincian_pembayaran?.filter(r => (r.status || '').toLowerCase() === 'verified')
+    .reduce((sum, r) => sum + parseFloat(r.jumlah_dibayar || 0), 0) || 0
 
   return (
     <PageLayout>

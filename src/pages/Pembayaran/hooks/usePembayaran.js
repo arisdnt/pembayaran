@@ -1,149 +1,69 @@
-import { useEffect, useState, useCallback } from 'react'
-import { supabase } from '../../../lib/supabaseClient'
-import { useAppRefresh } from '../../../hooks/useAppRefresh'
+import { useMemo, useState, useCallback } from 'react'
+import { useLiveQuery } from 'dexie-react-hooks'
+import { db } from '../../../offline/db'
+import { enqueueDelete, enqueueInsert, enqueueUpdate } from '../../../offline/outbox'
+import { useOffline } from '../../../contexts/OfflineContext'
 
 export function usePembayaran() {
-  const [data, setData] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [realtimeStatus, setRealtimeStatus] = useState('connecting')
+  const { status } = useOffline()
   const [error, setError] = useState('')
-  const [tagihanList, setTagihanList] = useState([])
 
-  const fetchData = useCallback(async () => {
-    const { data: result, error: queryError } = await supabase
-      .from('pembayaran')
-      .select(`
-        *,
-        tagihan:id_tagihan(
-          id, 
-          nomor_tagihan, 
-          judul,
-          riwayat_kelas_siswa:id_riwayat_kelas_siswa(
-            siswa:id_siswa(nama_lengkap, nisn)
-          )
-        ),
-        rincian_pembayaran(jumlah_dibayar)
-      `)
-      .order('tanggal_dibuat', { ascending: false })
+  const pembayaran = useLiveQuery(async () => db.pembayaran.orderBy('tanggal_dibuat').reverse().toArray(), [], undefined)
+  const rincianPembayaran = useLiveQuery(async () => db.rincian_pembayaran.toArray(), [], undefined)
+  const tagihan = useLiveQuery(async () => db.tagihan.toArray(), [], undefined)
+  const rks = useLiveQuery(async () => db.riwayat_kelas_siswa.toArray(), [], undefined)
+  const siswa = useLiveQuery(async () => db.siswa.toArray(), [], undefined)
 
-    if (queryError) {
-      setError('Gagal memuat data: ' + queryError.message)
-      return []
-    }
-    
-    // Calculate total pembayaran for each item
-    const dataWithTotals = (result ?? []).map(item => ({
-      ...item,
-      total_dibayar: (item.rincian_pembayaran || []).reduce(
-        (sum, r) => sum + parseFloat(r.jumlah_dibayar || 0), 
-        0
-      )
+  const tagihanList = useMemo(() => {
+    const sMap = new Map((siswa || []).map(s => [s.id, s]))
+    const rMap = new Map((rks || []).map(r => [r.id, r]))
+    return (tagihan || []).map(t => ({
+      id: t.id,
+      nomor_tagihan: t.nomor_tagihan,
+      judul: t.judul,
+      riwayat_kelas_siswa: rMap.get(t.id_riwayat_kelas_siswa) ? {
+        siswa: sMap.get(rMap.get(t.id_riwayat_kelas_siswa).id_siswa) ? { nama_lengkap: sMap.get(rMap.get(t.id_riwayat_kelas_siswa).id_siswa).nama_lengkap } : null
+      } : null
     }))
-    
-    return dataWithTotals
-  }, [])
+  }, [tagihan, rks, siswa])
 
-  const fetchTagihanList = useCallback(async () => {
-    const { data: result, error: queryError } = await supabase
-      .from('tagihan')
-      .select(`
-        id, 
-        nomor_tagihan, 
-        judul,
-        riwayat_kelas_siswa:id_riwayat_kelas_siswa(
-          siswa:id_siswa(nama_lengkap)
-        )
-      `)
-      .order('nomor_tagihan', { ascending: false })
-
-    if (!queryError) {
-      setTagihanList(result ?? [])
-    }
-  }, [])
-
-  const refreshData = useCallback(async () => {
-    const result = await fetchData()
-    setData(result)
-  }, [fetchData])
-
-  const handleAppRefresh = useCallback(() => refreshData(), [refreshData])
-  useAppRefresh(handleAppRefresh)
-
-  useEffect(() => {
-    let ignore = false
-    let channel
-
-    async function initializeData() {
-      setLoading(true)
-      setError('')
-
-      await fetchTagihanList()
-      const result = await fetchData()
-      
-      if (!ignore) {
-        setData(result)
-        setLoading(false)
-      }
-
-      channel = supabase
-        .channel('realtime-pembayaran')
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'pembayaran',
+  const data = useMemo(() => {
+    const rincianByPembayaran = new Map((rincianPembayaran || []).reduce((acc, rp) => {
+      const arr = acc.get(rp.id_pembayaran) || []
+      arr.push(rp)
+      acc.set(rp.id_pembayaran, arr)
+      return acc
+    }, new Map()))
+    const tagihanMap = new Map((tagihan || []).map(t => [t.id, t]))
+    const rksMap = new Map((rks || []).map(r => [r.id, r]))
+    const siswaMap = new Map((siswa || []).map(s => [s.id, s]))
+    return (pembayaran || []).map(p => {
+      const rp = rincianByPembayaran.get(p.id) || []
+      const total_dibayar = rp.reduce((sum, it) => sum + Number(it.jumlah_dibayar || 0), 0)
+      const t = tagihanMap.get(p.id_tagihan) || null
+      const r = t ? rksMap.get(t.id_riwayat_kelas_siswa) || null : null
+      const s = r ? siswaMap.get(r.id_siswa) || null : null
+      return {
+        ...p,
+        rincian_pembayaran: rp,
+        total_dibayar,
+        tagihan: t && {
+          id: t.id,
+          nomor_tagihan: t.nomor_tagihan,
+          judul: t.judul,
+          riwayat_kelas_siswa: r && {
+            siswa: s && { nama_lengkap: s.nama_lengkap, nisn: s.nisn },
           },
-          async () => {
-            const { data: refreshedData } = await supabase
-              .from('pembayaran')
-              .select(`
-                *,
-                tagihan:id_tagihan(
-                  id, 
-                  nomor_tagihan, 
-                  judul,
-                  riwayat_kelas_siswa:id_riwayat_kelas_siswa(
-                    siswa:id_siswa(nama_lengkap, nisn)
-                  )
-                )
-              `)
-              .order('tanggal_dibuat', { ascending: false })
-
-            if (!ignore && refreshedData) {
-              setData(refreshedData)
-            }
-          }
-        )
-        .subscribe((status) => {
-          if (status === 'SUBSCRIBED') {
-            setRealtimeStatus('connected')
-          }
-          if (status === 'TIMED_OUT' || status === 'CHANNEL_ERROR') {
-            setRealtimeStatus('disconnected')
-          }
-        })
-    }
-
-    initializeData()
-
-    return () => {
-      ignore = true
-      if (channel) {
-        supabase.removeChannel(channel)
+        },
       }
-    }
-  }, [fetchData, fetchTagihanList])
+    })
+  }, [pembayaran, rincianPembayaran, tagihan, rks, siswa])
+
+  const refreshData = useCallback(async () => data, [data])
 
   const deleteItem = async (id) => {
     try {
-      const { error: deleteError } = await supabase
-        .from('pembayaran')
-        .delete()
-        .eq('id', id)
-
-      if (deleteError) throw deleteError
-      await refreshData()
+      await enqueueDelete('pembayaran', id)
     } catch (err) {
       setError(err.message)
       throw err
@@ -153,30 +73,18 @@ export function usePembayaran() {
   const saveItem = async (formData, isEdit) => {
     try {
       if (isEdit) {
-        const { error: updateError } = await supabase
-          .from('pembayaran')
-          .update({
-            id_tagihan: formData.id_tagihan,
-            nomor_pembayaran: formData.nomor_pembayaran,
-            catatan: formData.catatan || null,
-            diperbarui_pada: new Date().toISOString(),
-          })
-          .eq('id', formData.id)
-
-        if (updateError) throw updateError
+        await enqueueUpdate('pembayaran', formData.id, {
+          id_tagihan: formData.id_tagihan,
+          nomor_pembayaran: formData.nomor_pembayaran,
+          catatan: formData.catatan || null,
+        })
       } else {
-        const { error: insertError } = await supabase
-          .from('pembayaran')
-          .insert({
-            id_tagihan: formData.id_tagihan,
-            nomor_pembayaran: formData.nomor_pembayaran,
-            catatan: formData.catatan || null,
-          })
-
-        if (insertError) throw insertError
+        await enqueueInsert('pembayaran', {
+          id_tagihan: formData.id_tagihan,
+          nomor_pembayaran: formData.nomor_pembayaran,
+          catatan: formData.catatan || null,
+        })
       }
-
-      await refreshData()
     } catch (err) {
       setError(err.message)
       throw err
@@ -185,8 +93,8 @@ export function usePembayaran() {
 
   return {
     data,
-    loading,
-    realtimeStatus,
+    loading: pembayaran === undefined,
+    realtimeStatus: status.realtime,
     error,
     setError,
     deleteItem,

@@ -4,6 +4,7 @@ import '@radix-ui/themes/styles.css'
 import './index.css'
 import App from './App.jsx'
 import { AuthProvider } from './contexts/AuthContext.jsx'
+import { OfflineProvider } from './contexts/OfflineContext.jsx'
 
 // Prevent dialogs from closing with Escape key and outside clicks
 function DialogProtection() {
@@ -63,8 +64,10 @@ function DialogProtection() {
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <AuthProvider>
-      <DialogProtection />
-      <App />
+      <OfflineProvider>
+        <DialogProtection />
+        <App />
+      </OfflineProvider>
     </AuthProvider>
   </StrictMode>,
 )

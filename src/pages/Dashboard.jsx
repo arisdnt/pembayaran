@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Text } from '@radix-ui/themes'
 import { Users, Receipt, Wallet, AlertCircle, RefreshCw, LayoutDashboard } from 'lucide-react'
-import { supabase } from '../lib/supabaseClient'
+import { db } from '../offline/db'
 import { useDashboardData } from '../hooks/useDashboardData'
 import { DashboardFilters } from '../components/dashboard/DashboardFilters'
 import { StatCard } from '../components/dashboard/StatCard'
@@ -33,18 +33,25 @@ function DashboardContent() {
 
   const fetchMasterData = async () => {
     try {
-      const [tahunResult, kelasResult] = await Promise.all([
-        supabase.from('tahun_ajaran').select('*').order('tanggal_mulai', { ascending: false }),
-        supabase.from('kelas').select('*').order('tingkat')
+      const [tahunAll, kelasAll] = await Promise.all([
+        db.tahun_ajaran.toArray(),
+        db.kelas.toArray()
       ])
-
-      const uniqueTingkat = [...new Set(kelasResult.data?.map(k => k.tingkat) || [])].sort()
-
-      setMasterData({
-        tahunAjaranList: tahunResult.data || [],
-        kelasList: kelasResult.data || [],
-        tingkatList: uniqueTingkat
+      
+      // Sort in JavaScript memory instead of using IndexedDB index
+      const tahun = (tahunAll || []).sort((a, b) => {
+        const dateA = new Date(a.tanggal_mulai || 0)
+        const dateB = new Date(b.tanggal_mulai || 0)
+        return dateB - dateA // descending (newest first)
       })
+      
+      const kelas = (kelasAll || []).sort((a, b) => {
+        // Sort by tingkat as string (works for "10", "11", "12", etc)
+        return (a.tingkat || '').localeCompare(b.tingkat || '')
+      })
+      
+      const uniqueTingkat = [...new Set(kelas.map(k => k.tingkat).filter(Boolean))].sort()
+      setMasterData({ tahunAjaranList: tahun, kelasList: kelas, tingkatList: uniqueTingkat })
     } catch (err) {
       console.error('Error fetching master data:', err)
     }

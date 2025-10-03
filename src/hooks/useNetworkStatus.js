@@ -141,6 +141,10 @@ export function useNetworkStatus() {
         ) {
           console.log('[NetworkStatus] Detected fetch error, checking connection...', errorMessage)
           checkConnection()
+          // Prevent React dev overlay from swallowing UX with unhandled rejection toast
+          if (event && typeof event.preventDefault === 'function') {
+            event.preventDefault()
+          }
         }
       }
     }

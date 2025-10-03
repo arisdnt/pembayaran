@@ -1,32 +1,18 @@
 import { useEffect, useState } from 'react'
-import { supabase } from '../../../lib/supabaseClient'
+import { db } from '../../../offline/db'
 
 export function useKelas() {
   const [kelasList, setKelasList] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetchKelas()
-  }, [])
-
-  const fetchKelas = async () => {
-    try {
+    (async () => {
       setLoading(true)
-      const { data, error } = await supabase
-        .from('kelas')
-        .select('*')
-        .order('tingkat', { ascending: true })
-        .order('nama_sub_kelas', { ascending: true })
-
-      if (error) throw error
+      const data = await db.kelas.orderBy('tingkat').toArray()
       setKelasList(data || [])
-    } catch (error) {
-      console.error('Error fetching kelas:', error)
-      setKelasList([])
-    } finally {
       setLoading(false)
-    }
-  }
+    })()
+  }, [])
 
   // Get unique tingkat values
   const tingkatList = [...new Set(kelasList.map(k => k.tingkat))].sort()

@@ -98,6 +98,11 @@ export const menuSections = [
         label: 'About',
         href: '/about',
       },
+      {
+        icon: Info,
+        label: 'Sync Status',
+        href: '/sync',
+      },
     ],
   },
 ]

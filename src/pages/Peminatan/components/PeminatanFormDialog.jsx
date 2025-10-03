@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Dialog, TextField, TextArea, Flex, Text, Button, Switch, Select, VisuallyHidden } from '@radix-ui/themes'
 import { AlertCircle, BookOpen, Edit3, Hash, FileText, TrendingUp, TrendingDown, Power, X } from 'lucide-react'
-import { supabase } from '../../../lib/supabaseClient'
+import { db } from '../../../offline/db'
 
 export function PeminatanFormDialog({
   open,
@@ -29,24 +29,15 @@ export function PeminatanFormDialog({
   useEffect(() => {
     const fetchTingkat = async () => {
       try {
-        const { data, error } = await supabase
-          .from('kelas')
-          .select('tingkat')
-          .order('tingkat')
-
-        if (error) throw error
-
-        // Get unique tingkat values
-        const uniqueTingkat = [...new Set(data.map(k => k.tingkat))].sort((a, b) => a - b)
+        const kelas = await db.kelas.orderBy('tingkat').toArray()
+        const uniqueTingkat = [...new Set(kelas.map(k => k.tingkat))].sort((a, b) => String(a).localeCompare(String(b), undefined, { numeric: true }))
         setTingkatOptions(uniqueTingkat)
       } catch (err) {
         console.error('Error fetching tingkat:', err)
       }
     }
 
-    if (open) {
-      fetchTingkat()
-    }
+    if (open) fetchTingkat()
   }, [open])
 
   const handleSubmit = async (e) => {

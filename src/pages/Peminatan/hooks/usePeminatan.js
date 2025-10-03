@@ -1,106 +1,49 @@
-import { useEffect, useState, useCallback } from 'react'
-import { supabase } from '../../../lib/supabaseClient'
+import { useEffect, useState, useCallback, useMemo } from 'react'
 import { useAppRefresh } from '../../../hooks/useAppRefresh'
-
-let cachedPeminatan = null
+import { db } from '../../../offline/db'
+import { enqueueDelete, enqueueInsert, enqueueUpdate } from '../../../offline/outbox'
+import { useOffline } from '../../../contexts/OfflineContext'
 
 export function usePeminatan() {
-  const [data, setData] = useState(() => cachedPeminatan ?? [])
-  const [loading, setLoading] = useState(() => !cachedPeminatan)
-  const [isRefreshing, setIsRefreshing] = useState(false)
+  const { status } = useOffline()
   const [error, setError] = useState('')
+  const [isRefreshing, setIsRefreshing] = useState(false)
+  const [loading, setLoading] = useState(true)
 
-  const fetchData = useCallback(async () => {
-    const { data: result, error: queryError } = await supabase
-      .from('peminatan')
-      .select()
-      .order('nama', { ascending: true })
-
-    if (queryError) {
-      setError('Gagal memuat data peminatan: ' + queryError.message)
-      return []
-    }
-
-    return (result ?? []).map((item) => ({
-      ...item,
-      total_siswa: item.peminatan_siswa?.length || 0,
-    }))
-  }, [])
+  const [peminatanRows, setPeminatanRows] = useState([])
+  const [psRows, setPsRows] = useState([])
 
   const refreshData = useCallback(async ({ withSpinner = true } = {}) => {
-    const showInitialSpinner = !cachedPeminatan
-    const showRefreshIndicator = cachedPeminatan && withSpinner
-
-    if (showInitialSpinner) {
-      setLoading(true)
-    }
-    if (showRefreshIndicator) {
-      setIsRefreshing(true)
-    }
-
-    setError('')
-
+    if (withSpinner) setIsRefreshing(true)
     try {
-      const result = await fetchData()
-      cachedPeminatan = result
-      setData(result)
-      return result
+      const [peminatan, peminatanSiswa] = await Promise.all([
+        db.peminatan.orderBy('nama').toArray(),
+        db.peminatan_siswa.toArray(),
+      ])
+      setPeminatanRows(peminatan)
+      setPsRows(peminatanSiswa)
+      setLoading(false)
+      return peminatan
     } finally {
-      if (showInitialSpinner) {
-        setLoading(false)
-      }
-      if (showRefreshIndicator) {
-        setIsRefreshing(false)
-      }
+      if (withSpinner) setIsRefreshing(false)
     }
-  }, [fetchData])
+  }, [])
 
   const handleAppRefresh = useCallback(() => refreshData(), [refreshData])
   useAppRefresh(handleAppRefresh)
 
-  useEffect(() => {
-    let ignore = false
-    const channels = []
+  useEffect(() => { refreshData({ withSpinner: false }) }, [refreshData])
 
-    async function initialize() {
-      await refreshData({ withSpinner: false })
-
-      const mainChannel = supabase
-        .channel('realtime-peminatan')
-        .on(
-          'postgres_changes',
-          { event: '*', schema: 'public', table: 'peminatan' },
-          async () => {
-            if (ignore) return
-            await refreshData({ withSpinner: false })
-          }
-        )
-        .subscribe()
-
-      const assignmentChannel = supabase
-        .channel('realtime-peminatan-siswa')
-        .on(
-          'postgres_changes',
-          { event: '*', schema: 'public', table: 'peminatan_siswa' },
-          async () => {
-            if (ignore) return
-            await refreshData({ withSpinner: false })
-          }
-        )
-        .subscribe()
-
-      channels.push(mainChannel, assignmentChannel)
-    }
-
-    initialize()
-
-    return () => {
-      ignore = true
-      channels.forEach((channel) => {
-        if (channel) supabase.removeChannel(channel)
-      })
-    }
-  }, [refreshData])
+  const data = useMemo(() => {
+    const countMap = new Map()
+    psRows.forEach(ps => {
+      countMap.set(ps.id_peminatan, (countMap.get(ps.id_peminatan) || 0) + 1)
+    })
+    return (peminatanRows || []).map(item => ({
+      ...item,
+      total_siswa: countMap.get(item.id) || 0,
+    }))
+  }, [peminatanRows, psRows])
 
   const saveItem = async (formData, isEdit) => {
     const payload = {
@@ -116,48 +59,34 @@ export function usePeminatan() {
       throw new Error('Tingkat minimum tidak boleh lebih besar dari tingkat maksimum')
     }
 
-    if (isEdit) {
-      const { error: updateError } = await supabase
-        .from('peminatan')
-        .update(payload)
-        .eq('id', formData.id)
-
-      if (updateError) throw updateError
-    } else {
-      const { error: insertError } = await supabase
-        .from('peminatan')
-        .insert(payload)
-
-      if (insertError) throw insertError
+    try {
+      if (isEdit) {
+        await enqueueUpdate('peminatan', formData.id, payload)
+      } else {
+        await enqueueInsert('peminatan', payload)
+      }
+    } catch (err) {
+      setError(err.message)
+      throw err
     }
-
-    await refreshData()
   }
 
   const deleteItem = async (id) => {
-    const { error: deleteError } = await supabase
-      .from('peminatan')
-      .delete()
-      .eq('id', id)
-
-    if (deleteError) throw deleteError
-
-    if (cachedPeminatan) {
-      cachedPeminatan = cachedPeminatan.filter((item) => item.id !== id)
+    try {
+      await enqueueDelete('peminatan', id)
+    } catch (err) {
+      setError(err.message)
+      throw err
     }
-
-    await refreshData({ withSpinner: false })
   }
 
   const toggleAktif = async (item) => {
-    const { error: updateError } = await supabase
-      .from('peminatan')
-      .update({ aktif: !item.aktif })
-      .eq('id', item.id)
-
-    if (updateError) throw updateError
-
-    await refreshData({ withSpinner: false })
+    try {
+      await enqueueUpdate('peminatan', item.id, { aktif: !item.aktif })
+    } catch (err) {
+      setError(err.message)
+      throw err
+    }
   }
 
   return {
@@ -170,5 +99,6 @@ export function usePeminatan() {
     saveItem,
     deleteItem,
     toggleAktif,
+    realtimeStatus: status.realtime,
   }
 }

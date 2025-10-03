@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { supabase } from '../../../lib/supabaseClient'
+import { db } from '../../../offline/db'
+import { createPembayaranWithRincian } from '../../../offline/actions/pembayaran'
 
 export function useCreatePembayaran() {
   const navigate = useNavigate()
@@ -23,25 +24,19 @@ export function useCreatePembayaran() {
   }, [])
 
   const fetchTagihan = async () => {
-    const { data } = await supabase
-      .from('tagihan')
-      .select(`
-        *,
-        riwayat_kelas_siswa:id_riwayat_kelas_siswa(
-          siswa:id_siswa(nama_lengkap, nisn),
-          kelas:id_kelas(tingkat, nama_sub_kelas)
-        ),
-        rincian_tagihan(jumlah)
-      `)
-      .order('tanggal_tagihan', { ascending: false })
-    
-    if (data) {
-      const withTotal = data.map(t => ({
-        ...t,
-        total_tagihan: t.rincian_tagihan?.reduce((sum, r) => sum + parseFloat(r.jumlah || 0), 0) || 0
-      }))
-      setTagihanList(withTotal)
-    }
+    const t = await db.tagihan.orderBy('tanggal_tagihan').reverse().toArray()
+    const rincianByTagihan = new Map((await db.rincian_tagihan.toArray()).reduce((acc, r) => {
+      const arr = acc.get(r.id_tagihan) || []
+      arr.push(r)
+      acc.set(r.id_tagihan, arr)
+      return acc
+    }, new Map()))
+    const enriched = t.map(x => ({
+      ...x,
+      rincian_tagihan: rincianByTagihan.get(x.id) || [],
+      total_tagihan: (rincianByTagihan.get(x.id) || []).reduce((sum, r) => sum + parseFloat(r.jumlah || 0), 0)
+    }))
+    setTagihanList(enriched)
   }
 
   const handleTagihanChange = async (tagihanId) => {
@@ -50,30 +45,15 @@ export function useCreatePembayaran() {
     setFormData({...formData, id_tagihan: tagihanId})
 
     if (tagihan) {
-      const { data: pembayaranData } = await supabase
-        .from('pembayaran')
-        .select(`
-          id,
-          rincian_pembayaran(jumlah_dibayar, status)
-        `)
-        .eq('id_tagihan', tagihanId)
-      
-      let totalPaid = 0
-      if (pembayaranData) {
-        pembayaranData.forEach(p => {
-          p.rincian_pembayaran?.forEach(r => {
-            if (r.status === 'terverifikasi') {
-              totalPaid += parseFloat(r.jumlah_dibayar || 0)
-            }
-          })
-        })
-      }
-      
-      setSelectedTagihan({
-        ...tagihan,
-        total_dibayar: totalPaid,
-        sisa_tagihan: tagihan.total_tagihan - totalPaid
-      })
+      const pembayaranByTagihan = (await db.pembayaran.where('id_tagihan').equals(tagihanId).toArray())
+      const rpByPembayaran = new Map((await db.rincian_pembayaran.toArray()).reduce((acc, rp) => {
+        const arr = acc.get(rp.id_pembayaran) || []
+        arr.push(rp)
+        acc.set(rp.id_pembayaran, arr)
+        return acc
+      }, new Map()))
+      const totalPaid = pembayaranByTagihan.reduce((sum, p) => sum + (rpByPembayaran.get(p.id) || []).reduce((s, r) => s + parseFloat(r.jumlah_dibayar || 0), 0), 0)
+      setSelectedTagihan({ ...tagihan, total_dibayar: totalPaid, sisa_tagihan: tagihan.total_tagihan - totalPaid })
     }
   }
 
@@ -127,20 +107,7 @@ export function useCreatePembayaran() {
     }
 
     try {
-      const { data: pembayaranData, error: pembayaranError } = await supabase
-        .from('pembayaran')
-        .insert({
-          id_tagihan: formData.id_tagihan,
-          nomor_pembayaran: formData.nomor_pembayaran,
-          catatan: formData.catatan || null,
-        })
-        .select()
-        .single()
-
-      if (pembayaranError) throw pembayaranError
-
-      const rincianData = rincianItems.map(item => ({
-        id_pembayaran: pembayaranData.id,
+      const items = rincianItems.map(item => ({
         nomor_transaksi: item.nomor_transaksi,
         jumlah_dibayar: item.jumlah_dibayar,
         tanggal_bayar: item.tanggal_bayar,
@@ -150,13 +117,11 @@ export function useCreatePembayaran() {
         status: item.status,
         cicilan_ke: item.cicilan_ke,
       }))
-
-      const { error: rincianError } = await supabase
-        .from('rincian_pembayaran')
-        .insert(rincianData)
-
-      if (rincianError) throw rincianError
-
+      await createPembayaranWithRincian({
+        id_tagihan: formData.id_tagihan,
+        nomor_pembayaran: formData.nomor_pembayaran,
+        catatan: formData.catatan || null,
+      }, items)
       navigate('/pembayaran')
     } catch (err) {
       setError(err.message)

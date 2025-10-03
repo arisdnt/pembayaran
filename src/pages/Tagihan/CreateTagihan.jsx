@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { PageLayout } from '../../layout/PageLayout'
 import { Text } from '@radix-ui/themes'
 import { AlertCircle } from 'lucide-react'
-import { supabase } from '../../lib/supabaseClient'
+import { db } from '../../offline/db'
+import { createTagihanWithRincian } from '../../offline/actions/tagihan'
 import { useTagihan } from './hooks/useTagihan'
 import { CreateTagihanHeader } from './components/CreateTagihanHeader'
 import { TargetSiswaSection } from './components/TargetSiswaSection'
@@ -38,41 +39,24 @@ function CreateTagihanContent() {
   // Fetch jenis pembayaran dengan filter
   useEffect(() => {
     const fetchJenis = async () => {
-      let query = supabase
-        .from('jenis_pembayaran')
-        .select(`
-          id, kode, nama, jumlah_default, id_tahun_ajaran, tingkat,
-          tahun_ajaran:id_tahun_ajaran(nama)
-        `)
-        .eq('status_aktif', true)
-
-      // Always use selectedTahunAjaran and selectedTingkat from dropdown
-      // For 'siswa' target, user must select tahun ajaran first to filter siswa list
+      const all = await db.jenis_pembayaran.orderBy('kode').toArray()
       let filterTahunAjaran = selectedTahunAjaran || null
       let filterTingkat = null
 
       if (targetType === 'siswa' && formData.id_riwayat_kelas_siswa) {
-        // For selected siswa, get tingkat to filter jenis pembayaran
         const selectedSiswa = riwayatKelasSiswaList?.find(s => s.id === formData.id_riwayat_kelas_siswa)
-        if (selectedSiswa) {
-          filterTingkat = selectedSiswa.kelas?.tingkat
-        }
+        if (selectedSiswa) filterTingkat = selectedSiswa.kelas?.tingkat || null
       } else {
-        // For kelas/tingkat/semua, use selected tingkat
-        filterTingkat = selectedTingkat
+        filterTingkat = selectedTingkat || null
       }
 
-      if (filterTahunAjaran) {
-        query = query.eq('id_tahun_ajaran', filterTahunAjaran)
-      }
-
-      if (filterTingkat) {
-        query = query.eq('tingkat', filterTingkat)
-      }
-
-      const { data } = await query.order('kode')
-
-      setJenisPembayaranList(data || [])
+      const filtered = all.filter(j => {
+        if (j.status_aktif === false) return false
+        if (filterTahunAjaran && j.id_tahun_ajaran !== filterTahunAjaran) return false
+        if (filterTingkat && j.tingkat !== filterTingkat) return false
+        return true
+      })
+      setJenisPembayaranList(filtered)
     }
     fetchJenis()
   }, [targetType, formData.id_riwayat_kelas_siswa, selectedTahunAjaran, selectedTingkat, riwayatKelasSiswaList])
@@ -163,34 +147,15 @@ function CreateTagihanContent() {
           ? `${formData.nomor_tagihan}-${String(i + 1).padStart(3, '0')}`
           : formData.nomor_tagihan
 
-        const { data: tagihanData, error: tagihanError } = await supabase
-          .from('tagihan')
-          .insert({
-            id_riwayat_kelas_siswa: targetList[i],
-            nomor_tagihan: nomorTagihan,
-            judul: formData.judul,
-            deskripsi: formData.deskripsi || null,
-            tanggal_tagihan: formData.tanggal_tagihan,
-            tanggal_jatuh_tempo: formData.tanggal_jatuh_tempo,
-          })
-          .select()
-          .single()
-
-        if (tagihanError) throw tagihanError
-
-        const rincianData = rincianItems.map(item => ({
-          id_tagihan: tagihanData.id,
-          id_jenis_pembayaran: item.id_jenis_pembayaran,
-          deskripsi: item.deskripsi,
-          jumlah: item.jumlah,
-          urutan: item.urutan,
-        }))
-
-        const { error: rincianError } = await supabase
-          .from('rincian_tagihan')
-          .insert(rincianData)
-
-        if (rincianError) throw rincianError
+        const header = {
+          id_riwayat_kelas_siswa: targetList[i],
+          nomor_tagihan: nomorTagihan,
+          judul: formData.judul,
+          deskripsi: formData.deskripsi || null,
+          tanggal_tagihan: formData.tanggal_tagihan,
+          tanggal_jatuh_tempo: formData.tanggal_jatuh_tempo,
+        }
+        await createTagihanWithRincian(header, rincianItems)
       }
 
       navigate('/tagihan')

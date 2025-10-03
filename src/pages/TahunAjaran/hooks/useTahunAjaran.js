@@ -1,148 +1,64 @@
-import { useEffect, useState, useCallback, useRef } from 'react'
-import { supabase } from '../../../lib/supabaseClient'
-import { useAppRefresh } from '../../../hooks/useAppRefresh'
-
-let cachedTahunAjaran = null
+import { useEffect, useMemo, useState, useCallback, useRef } from 'react'
+import { useLiveQuery } from 'dexie-react-hooks'
+import { db } from '../../../offline/db'
+import { enqueueDelete, enqueueInsert, enqueueUpdate } from '../../../offline/outbox'
+import { useOffline } from '../../../contexts/OfflineContext'
 
 export function useTahunAjaran() {
-  const [data, setData] = useState(() => cachedTahunAjaran ?? [])
-  const [loading, setLoading] = useState(() => !cachedTahunAjaran)
+  const { status } = useOffline()
   const [isRefreshing, setIsRefreshing] = useState(false)
-  const [realtimeStatus, setRealtimeStatus] = useState('connecting')
   const [error, setError] = useState('')
   const isMountedRef = useRef(true)
 
-  const fetchData = useCallback(async () => {
-    const { data: result, error: queryError } = await supabase
-      .from('tahun_ajaran')
-      .select(`
-        *,
-        riwayat_kelas_siswa(
-          id
-        )
-      `)
-      .order('tanggal_mulai', { ascending: false })
+  const tahunAjaran = useLiveQuery(
+    async () => {
+      return db.tahun_ajaran.orderBy('tanggal_mulai').reverse().toArray()
+    },
+    [],
+    undefined
+  )
 
-    if (queryError) {
-      setError('Gagal memuat data tahun ajaran: ' + queryError.message)
-      return []
-    }
-    
-    const dataWithCount = (result ?? []).map(item => ({
-      ...item,
-      total_siswa: item.riwayat_kelas_siswa?.length || 0
-    }))
-    
-    return dataWithCount
-  }, [])
+  const rks = useLiveQuery(
+    async () => db.riwayat_kelas_siswa.toArray(),
+    [],
+    undefined
+  )
 
-  const applyData = useCallback((result) => {
-    const next = Array.isArray(result) ? result : []
-    cachedTahunAjaran = next
-    setData(next)
-  }, [])
+  const data = useMemo(() => {
+    const list = tahunAjaran || []
+    const rksByTA = new Map()
+    ;(rks || []).forEach((x) => {
+      const key = x.id_tahun_ajaran
+      rksByTA.set(key, (rksByTA.get(key) || 0) + 1)
+    })
+    return list.map((it) => ({ ...it, total_siswa: rksByTA.get(it.id) || 0 }))
+  }, [tahunAjaran, rks])
 
-  const refreshData = useCallback(async ({ withSpinner = true } = {}) => {
-    const showInitialSpinner = !cachedTahunAjaran
-    const showRefreshIndicator = cachedTahunAjaran && withSpinner
+  const loading = tahunAjaran === undefined
 
-    if (showInitialSpinner) {
-      setLoading(true)
-    }
-    if (showRefreshIndicator) {
-      setIsRefreshing(true)
-    }
-
-    setError('')
-
-    try {
-      const result = await fetchData()
-      if (isMountedRef.current) {
-        applyData(result)
-      }
-      return result
-    } finally {
-      if (isMountedRef.current) {
-        if (showInitialSpinner) {
-          setLoading(false)
-        }
-        if (showRefreshIndicator) {
-          setIsRefreshing(false)
-        }
-      }
-    }
-  }, [fetchData, applyData])
-
-  const handleAppRefresh = useCallback(() => refreshData(), [refreshData])
-  useAppRefresh(handleAppRefresh)
+  const refreshData = useCallback(async () => {
+    setIsRefreshing(true)
+    setTimeout(() => isMountedRef.current && setIsRefreshing(false), 300)
+    return data
+  }, [data])
 
   useEffect(() => {
     isMountedRef.current = true
-
-    let ignore = false
-    let channel
-
-    async function initializeData() {
-      await refreshData()
-
-      channel = supabase
-        .channel('realtime-tahun-ajaran')
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'tahun_ajaran',
-          },
-          async (payload) => {
-            console.log('Realtime event received:', payload.eventType)
-            if (ignore) return
-            await refreshData({ withSpinner: false })
-          }
-        )
-        .subscribe((status) => {
-          console.log('Realtime status:', status)
-          if (!isMountedRef.current) return
-          if (status === 'SUBSCRIBED') {
-            setRealtimeStatus('connected')
-          }
-          if (status === 'TIMED_OUT' || status === 'CHANNEL_ERROR') {
-            setRealtimeStatus('disconnected')
-          }
-        })
-    }
-
-    initializeData()
-
-    return () => {
-      ignore = true
-      isMountedRef.current = false
-      if (channel) {
-        supabase.removeChannel(channel)
-      }
-    }
-  }, [refreshData])
+    return () => { isMountedRef.current = false }
+  }, [])
 
   const toggleStatus = async (item) => {
     try {
       if (!item.status_aktif) {
-        await supabase
-          .from('tahun_ajaran')
-          .update({ status_aktif: false })
-          .neq('id', item.id)
+        // Matikan semua TA aktif lain secara lokal & outbox
+        // Fetch all and filter in JavaScript (boolean cannot be indexed in IndexedDB)
+        const all = await db.tahun_ajaran.toArray()
+        const others = all.filter((x) => x.status_aktif === true && x.id !== item.id)
+        for (const row of others) {
+          await enqueueUpdate('tahun_ajaran', row.id, { status_aktif: false })
+        }
       }
-
-      const { error: updateError } = await supabase
-        .from('tahun_ajaran')
-        .update({
-          status_aktif: !item.status_aktif,
-          diperbarui_pada: new Date().toISOString(),
-        })
-        .eq('id', item.id)
-
-      if (updateError) throw updateError
-
-      await refreshData()
+      await enqueueUpdate('tahun_ajaran', item.id, { status_aktif: !item.status_aktif })
     } catch (err) {
       setError(err.message)
     }
@@ -150,14 +66,7 @@ export function useTahunAjaran() {
 
   const deleteItem = async (id) => {
     try {
-      const { error: deleteError } = await supabase
-        .from('tahun_ajaran')
-        .delete()
-        .eq('id', id)
-
-      if (deleteError) throw deleteError
-
-      await refreshData()
+      await enqueueDelete('tahun_ajaran', id)
     } catch (err) {
       setError(err.message)
       throw err
@@ -167,39 +76,28 @@ export function useTahunAjaran() {
   const saveItem = async (formData, isEdit) => {
     try {
       if (formData.status_aktif) {
-        await supabase
-          .from('tahun_ajaran')
-          .update({ status_aktif: false })
-          .neq('id', formData.id || '00000000-0000-0000-0000-000000000000')
+        // Fetch all and filter in JavaScript (boolean cannot be indexed in IndexedDB)
+        const all = await db.tahun_ajaran.toArray()
+        const others = all.filter((x) => x.status_aktif === true && x.id !== (formData.id || ''))
+        for (const row of others) {
+          await enqueueUpdate('tahun_ajaran', row.id, { status_aktif: false })
+        }
       }
-
       if (isEdit) {
-        const { error: updateError } = await supabase
-          .from('tahun_ajaran')
-          .update({
-            nama: formData.nama,
-            tanggal_mulai: formData.tanggal_mulai,
-            tanggal_selesai: formData.tanggal_selesai,
-            status_aktif: formData.status_aktif,
-            diperbarui_pada: new Date().toISOString(),
-          })
-          .eq('id', formData.id)
-
-        if (updateError) throw updateError
+        await enqueueUpdate('tahun_ajaran', formData.id, {
+          nama: formData.nama,
+          tanggal_mulai: formData.tanggal_mulai,
+          tanggal_selesai: formData.tanggal_selesai,
+          status_aktif: formData.status_aktif,
+        })
       } else {
-        const { error: insertError } = await supabase
-          .from('tahun_ajaran')
-          .insert({
-            nama: formData.nama,
-            tanggal_mulai: formData.tanggal_mulai,
-            tanggal_selesai: formData.tanggal_selesai,
-            status_aktif: formData.status_aktif,
-          })
-
-        if (insertError) throw insertError
+        await enqueueInsert('tahun_ajaran', {
+          nama: formData.nama,
+          tanggal_mulai: formData.tanggal_mulai,
+          tanggal_selesai: formData.tanggal_selesai,
+          status_aktif: formData.status_aktif,
+        })
       }
-
-      await refreshData()
     } catch (err) {
       setError(err.message)
       throw err
@@ -210,7 +108,7 @@ export function useTahunAjaran() {
     data,
     loading,
     isRefreshing,
-    realtimeStatus,
+    realtimeStatus: status.realtime,
     error,
     setError,
     toggleStatus,

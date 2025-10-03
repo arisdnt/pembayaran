@@ -1,132 +1,36 @@
 import { useEffect, useState, useCallback, useRef } from 'react'
-import { supabase } from '../../../lib/supabaseClient'
 import { useAppRefresh } from '../../../hooks/useAppRefresh'
+import { useIndexedTable } from '../../../offline/useIndexedTable'
+import { enqueueDelete, enqueueInsert, enqueueUpdate } from '../../../offline/outbox'
+import { useOffline } from '../../../contexts/OfflineContext'
 
 let cachedWaliKelas = null
 
 export function useWaliKelas() {
-  const [data, setData] = useState(() => cachedWaliKelas ?? [])
-  const [loading, setLoading] = useState(() => !cachedWaliKelas)
+  const { status } = useOffline()
+  const { data = [], loading } = useIndexedTable('wali_kelas', { orderBy: 'nama_lengkap' })
   const [isRefreshing, setIsRefreshing] = useState(false)
-  const [realtimeStatus, setRealtimeStatus] = useState('connecting')
   const [error, setError] = useState('')
   const isMountedRef = useRef(true)
 
-  const fetchData = useCallback(async () => {
-    const { data: result, error: queryError } = await supabase
-      .from('wali_kelas')
-      .select('*')
-      .order('nama_lengkap', { ascending: true })
-
-    if (queryError) {
-      setError('Gagal memuat data wali kelas: ' + queryError.message)
-      return []
-    }
-    
-    return result ?? []
-  }, [])
-
-  const applyData = useCallback((result) => {
-    const next = Array.isArray(result) ? result : []
-    cachedWaliKelas = next
-    setData(next)
-  }, [])
-
-  const refreshData = useCallback(async ({ withSpinner = true } = {}) => {
-    const showInitialSpinner = !cachedWaliKelas
-    const showRefreshIndicator = cachedWaliKelas && withSpinner
-
-    if (showInitialSpinner) {
-      setLoading(true)
-    }
-    if (showRefreshIndicator) {
-      setIsRefreshing(true)
-    }
-
-    if (withSpinner) {
-      setError('')
-    }
-
-    try {
-      const result = await fetchData()
-      if (isMountedRef.current) {
-        applyData(result)
-      }
-      return result
-    } finally {
-      if (isMountedRef.current) {
-        if (showInitialSpinner) {
-          setLoading(false)
-        }
-        if (showRefreshIndicator) {
-          setIsRefreshing(false)
-        }
-      }
-    }
-  }, [fetchData, applyData])
+  const refreshData = useCallback(async () => {
+    // Data flows from background sync; nothing to do here, keep API compatible
+    setIsRefreshing(true)
+    setTimeout(() => isMountedRef.current && setIsRefreshing(false), 300)
+    return data
+  }, [data])
 
   const handleAppRefresh = useCallback(() => refreshData(), [refreshData])
   useAppRefresh(handleAppRefresh)
 
   useEffect(() => {
     isMountedRef.current = true
-    let ignore = false
-    let channel
-
-    async function initializeData() {
-      await refreshData()
-
-      channel = supabase
-        .channel('realtime-wali-kelas')
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'wali_kelas',
-          },
-          async (payload) => {
-            console.log('Realtime event received:', payload.eventType)
-            if (ignore) return
-            await refreshData({ withSpinner: false })
-          }
-        )
-        .subscribe((status) => {
-          console.log('Realtime status:', status)
-          if (!isMountedRef.current) return
-          if (status === 'SUBSCRIBED') {
-            setRealtimeStatus('connected')
-          }
-          if (status === 'TIMED_OUT' || status === 'CHANNEL_ERROR') {
-            setRealtimeStatus('disconnected')
-          }
-        })
-    }
-
-    initializeData()
-
-    return () => {
-      ignore = true
-      isMountedRef.current = false
-      if (channel) {
-        supabase.removeChannel(channel)
-      }
-    }
-  }, [refreshData])
+    return () => { isMountedRef.current = false }
+  }, [])
 
   const toggleStatus = async (item) => {
     try {
-      const { error: updateError } = await supabase
-        .from('wali_kelas')
-        .update({
-          status_aktif: !item.status_aktif,
-          diperbarui_pada: new Date().toISOString(),
-        })
-        .eq('id', item.id)
-
-      if (updateError) throw updateError
-
-      await refreshData()
+      await enqueueUpdate('wali_kelas', item.id, { status_aktif: !item.status_aktif })
     } catch (err) {
       setError(err.message)
     }
@@ -134,14 +38,7 @@ export function useWaliKelas() {
 
   const deleteItem = async (id) => {
     try {
-      const { error: deleteError } = await supabase
-        .from('wali_kelas')
-        .delete()
-        .eq('id', id)
-
-      if (deleteError) throw deleteError
-
-      await refreshData()
+      await enqueueDelete('wali_kelas', id)
     } catch (err) {
       setError(err.message)
       throw err
@@ -151,34 +48,22 @@ export function useWaliKelas() {
   const saveItem = async (formData, isEdit) => {
     try {
       if (isEdit) {
-        const { error: updateError } = await supabase
-          .from('wali_kelas')
-          .update({
-            nama_lengkap: formData.nama_lengkap,
-            nip: formData.nip || null,
-            nomor_telepon: formData.nomor_telepon || null,
-            email: formData.email || null,
-            status_aktif: formData.status_aktif,
-            diperbarui_pada: new Date().toISOString(),
-          })
-          .eq('id', formData.id)
-
-        if (updateError) throw updateError
+        await enqueueUpdate('wali_kelas', formData.id, {
+          nama_lengkap: formData.nama_lengkap,
+          nip: formData.nip || null,
+          nomor_telepon: formData.nomor_telepon || null,
+          email: formData.email || null,
+          status_aktif: formData.status_aktif,
+        })
       } else {
-        const { error: insertError } = await supabase
-          .from('wali_kelas')
-          .insert({
-            nama_lengkap: formData.nama_lengkap,
-            nip: formData.nip || null,
-            nomor_telepon: formData.nomor_telepon || null,
-            email: formData.email || null,
-            status_aktif: formData.status_aktif,
-          })
-
-        if (insertError) throw insertError
+        await enqueueInsert('wali_kelas', {
+          nama_lengkap: formData.nama_lengkap,
+          nip: formData.nip || null,
+          nomor_telepon: formData.nomor_telepon || null,
+          email: formData.email || null,
+          status_aktif: formData.status_aktif,
+        })
       }
-
-      await refreshData()
     } catch (err) {
       setError(err.message)
       throw err
@@ -189,7 +74,7 @@ export function useWaliKelas() {
     data,
     loading,
     isRefreshing,
-    realtimeStatus,
+    realtimeStatus: status.realtime,
     error,
     setError,
     toggleStatus,

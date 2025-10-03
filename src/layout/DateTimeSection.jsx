@@ -28,7 +28,7 @@ export function DateTimeSection({ currentTime, battery }) {
         iconColor="text-green-600"
       />
       <Separator orientation="vertical" size="1" className="h-3 bg-gray-500" />
-      <Text size="1" className="text-gray-700">
+      <Text size="1" className="text-red-600 font-medium">
         {formatDate(currentTime)}
       </Text>
       <Separator orientation="vertical" size="1" className="h-3 bg-gray-500" />

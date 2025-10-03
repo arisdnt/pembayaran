@@ -1,127 +1,38 @@
-import { useEffect, useState, useCallback } from 'react'
-import { supabase } from '../../../lib/supabaseClient'
-import { useAppRefresh } from '../../../hooks/useAppRefresh'
+import { useEffect, useState, useCallback, useMemo } from 'react'
+import { useLiveQuery } from 'dexie-react-hooks'
+import { db } from '../../../offline/db'
+import { enqueueDelete, enqueueInsert, enqueueUpdate } from '../../../offline/outbox'
+import { useOffline } from '../../../contexts/OfflineContext'
 
 export function useRincianTagihan() {
-  const [data, setData] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [realtimeStatus, setRealtimeStatus] = useState('connecting')
+  const { status } = useOffline()
   const [error, setError] = useState('')
-  const [tagihanList, setTagihanList] = useState([])
-  const [jenisPembayaranList, setJenisPembayaranList] = useState([])
 
-  const fetchData = useCallback(async () => {
-    const { data: result, error: queryError } = await supabase
-      .from('rincian_tagihan')
-      .select(`
-        *,
-        tagihan:id_tagihan(id, nomor_tagihan, judul),
-        jenis_pembayaran:id_jenis_pembayaran(id, kode, nama)
-      `)
-      .order('tanggal_dibuat', { ascending: false })
+  const rt = useLiveQuery(async () => db.rincian_tagihan.toArray(), [], undefined)
+  const tg = useLiveQuery(async () => db.tagihan.toArray(), [], undefined)
+  const jp = useLiveQuery(async () => db.jenis_pembayaran.toArray(), [], undefined)
 
-    if (queryError) {
-      setError('Gagal memuat data: ' + queryError.message)
-      return []
-    }
-    
-    return result ?? []
-  }, [])
+  const data = useMemo(() => {
+    const rows = rt || []
+    const tagihanMap = new Map((tg || []).map(t => [t.id, t]))
+    const jpMap = new Map((jp || []).map(x => [x.id, x]))
+    return [...rows]
+      .sort((a, b) => new Date(b.tanggal_dibuat || 0) - new Date(a.tanggal_dibuat || 0))
+      .map(r => ({
+        ...r,
+        tagihan: tagihanMap.get(r.id_tagihan) ? { id: r.id_tagihan, nomor_tagihan: tagihanMap.get(r.id_tagihan).nomor_tagihan, judul: tagihanMap.get(r.id_tagihan).judul } : null,
+        jenis_pembayaran: jpMap.get(r.id_jenis_pembayaran) ? { id: r.id_jenis_pembayaran, kode: jpMap.get(r.id_jenis_pembayaran).kode, nama: jpMap.get(r.id_jenis_pembayaran).nama } : null,
+      }))
+  }, [rt, tg, jp])
 
-  const fetchLookupData = useCallback(async () => {
-    const [tagihanRes, jenisRes] = await Promise.all([
-      supabase
-        .from('tagihan')
-        .select('id, nomor_tagihan, judul')
-        .order('nomor_tagihan', { ascending: false }),
-      supabase
-        .from('jenis_pembayaran')
-        .select('id, kode, nama, jumlah_default')
-        .eq('status_aktif', true)
-        .order('kode')
-    ])
+  const loading = rt === undefined || tg === undefined || jp === undefined
+  const realtimeStatus = status.realtime
 
-    if (!tagihanRes.error) setTagihanList(tagihanRes.data ?? [])
-    if (!jenisRes.error) setJenisPembayaranList(jenisRes.data ?? [])
-  }, [])
-
-  const refreshData = useCallback(async () => {
-    const result = await fetchData()
-    setData(result)
-  }, [fetchData])
-
-  const handleAppRefresh = useCallback(() => refreshData(), [refreshData])
-  useAppRefresh(handleAppRefresh)
-
-  useEffect(() => {
-    let ignore = false
-    let channel
-
-    async function initializeData() {
-      setLoading(true)
-      setError('')
-
-      await fetchLookupData()
-      const result = await fetchData()
-      
-      if (!ignore) {
-        setData(result)
-        setLoading(false)
-      }
-
-      channel = supabase
-        .channel('realtime-rincian-tagihan')
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'rincian_tagihan',
-          },
-          async () => {
-            const { data: refreshedData } = await supabase
-              .from('rincian_tagihan')
-              .select(`
-                *,
-                tagihan:id_tagihan(id, nomor_tagihan, judul),
-                jenis_pembayaran:id_jenis_pembayaran(id, kode, nama)
-              `)
-              .order('tanggal_dibuat', { ascending: false })
-
-            if (!ignore && refreshedData) {
-              setData(refreshedData)
-            }
-          }
-        )
-        .subscribe((status) => {
-          if (status === 'SUBSCRIBED') {
-            setRealtimeStatus('connected')
-          }
-          if (status === 'TIMED_OUT' || status === 'CHANNEL_ERROR') {
-            setRealtimeStatus('disconnected')
-          }
-        })
-    }
-
-    initializeData()
-
-    return () => {
-      ignore = true
-      if (channel) {
-        supabase.removeChannel(channel)
-      }
-    }
-  }, [fetchData, fetchLookupData])
+  const refreshData = useCallback(async () => data, [data])
 
   const deleteItem = async (id) => {
     try {
-      const { error: deleteError } = await supabase
-        .from('rincian_tagihan')
-        .delete()
-        .eq('id', id)
-
-      if (deleteError) throw deleteError
-      await refreshData()
+      await enqueueDelete('rincian_tagihan', id)
     } catch (err) {
       setError(err.message)
       throw err
@@ -131,38 +42,39 @@ export function useRincianTagihan() {
   const saveItem = async (formData, isEdit) => {
     try {
       if (isEdit) {
-        const { error: updateError } = await supabase
-          .from('rincian_tagihan')
-          .update({
-            id_tagihan: formData.id_tagihan,
-            id_jenis_pembayaran: formData.id_jenis_pembayaran,
-            deskripsi: formData.deskripsi,
-            jumlah: formData.jumlah,
-            urutan: formData.urutan,
-          })
-          .eq('id', formData.id)
-
-        if (updateError) throw updateError
+        await enqueueUpdate('rincian_tagihan', formData.id, {
+          id_tagihan: formData.id_tagihan,
+          id_jenis_pembayaran: formData.id_jenis_pembayaran,
+          deskripsi: formData.deskripsi,
+          jumlah: formData.jumlah,
+          urutan: formData.urutan,
+        })
       } else {
-        const { error: insertError } = await supabase
-          .from('rincian_tagihan')
-          .insert({
-            id_tagihan: formData.id_tagihan,
-            id_jenis_pembayaran: formData.id_jenis_pembayaran,
-            deskripsi: formData.deskripsi,
-            jumlah: formData.jumlah,
-            urutan: formData.urutan,
-          })
-
-        if (insertError) throw insertError
+        await enqueueInsert('rincian_tagihan', {
+          id_tagihan: formData.id_tagihan,
+          id_jenis_pembayaran: formData.id_jenis_pembayaran,
+          deskripsi: formData.deskripsi,
+          jumlah: formData.jumlah,
+          urutan: formData.urutan,
+        })
       }
-
-      await refreshData()
     } catch (err) {
       setError(err.message)
       throw err
     }
   }
+
+  const [tagihanList, setTagihanList] = useState([])
+  const [jenisPembayaranList, setJenisPembayaranList] = useState([])
+
+  useEffect(() => {
+    ;(async () => {
+      const tagihan = await db.tagihan.orderBy('nomor_tagihan').reverse().toArray()
+      const jps = await db.jenis_pembayaran.orderBy('kode').toArray()
+      setTagihanList(tagihan.map(t => ({ id: t.id, nomor_tagihan: t.nomor_tagihan, judul: t.judul })))
+      setJenisPembayaranList(jps.filter(j => j.status_aktif !== false).map(j => ({ id: j.id, kode: j.kode, nama: j.nama, jumlah_default: j.jumlah_default })))
+    })()
+  }, [])
 
   return {
     data,

@@ -17,7 +17,10 @@ import {
   HamburgerMenuIcon,
   ChevronDownIcon,
 } from '@radix-ui/react-icons'
-import { User, GraduationCap, Wallet, Minus, Square, X, Maximize2, Maximize, Minimize, RefreshCw } from 'lucide-react'
+import { User, GraduationCap, Wallet, Minus, Square, X, Maximize2, Maximize, Minimize, RefreshCw, Info } from 'lucide-react'
+import { useLiveQuery } from 'dexie-react-hooks'
+import { db } from '../offline/db'
+import { retryOutboxItem, retryAllErrorOutbox } from '../offline/outbox'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
 import { useAuth } from '../contexts/AuthContext'
@@ -31,6 +34,7 @@ import { invoke } from '@tauri-apps/api/core'
 const sectionIcons = {
   'Akademik': GraduationCap,
   'Keuangan': Wallet,
+  'Info': Info,
 }
 
 // Warna icon untuk setiap section
@@ -38,7 +42,7 @@ const sectionIconColors = {
   'Utama': 'text-blue-300',
   'Akademik': 'text-green-300',
   'Keuangan': 'text-amber-300',
-  'Info': 'text-indigo-300',
+  'Info': 'text-cyan-300',
 }
 
 export function Navbar({ realtimeStatus = 'disconnected' }) {
@@ -349,11 +353,17 @@ export function Navbar({ realtimeStatus = 'disconnected' }) {
                         {section.items.map((item) => {
                           const Icon = item.icon
                           const active = isActive(item.href)
-                          
+
                           return (
                             <DropdownMenu.Item
                               key={item.href}
-                              onClick={() => navigate(item.href)}
+                              onClick={() => {
+                                if (item.href === '/about') {
+                                  setIsAboutModalOpen(true)
+                                } else {
+                                  navigate(item.href)
+                                }
+                              }}
                               className={`flex items-center gap-3 px-3 py-2 cursor-pointer ${
                                 active ? 'bg-blue-50' : ''
                               }`}
@@ -404,19 +414,98 @@ export function Navbar({ realtimeStatus = 'disconnected' }) {
               </button>
             </Tooltip>
 
-            {/* Notifications */}
-            <Tooltip content="Notifications">
-              <button
-                className="h-8 w-8 flex items-center justify-center text-white/80 hover:text-white hover:bg-white/10 transition-colors relative"
-                style={{ WebkitAppRegion: 'no-drag' }}
-                type="button"
-              >
-                <BellIcon className="h-4 w-4" />
-                <div className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 text-[10px] text-white flex items-center justify-center font-semibold">
-                  3
-                </div>
-              </button>
-            </Tooltip>
+            {/* Notifications: Outbox sync failures */}
+            {(() => {
+              const errorItems = useLiveQuery(async () => {
+                const list = await db.outbox.where('status').equals('error').toArray()
+                return list.sort((a, b) => new Date(b.updated_at || b.created_at) - new Date(a.updated_at || a.created_at))
+              }, [], []) || []
+              const errorCount = errorItems.length
+              return (
+                <DropdownMenu.Root>
+                  <DropdownMenu.Trigger>
+                    <button
+                      className="h-8 w-8 flex items-center justify-center text-white/80 hover:text-white hover:bg-white/10 transition-colors relative"
+                      style={{ WebkitAppRegion: 'no-drag' }}
+                      type="button"
+                      aria-label="Notifikasi sinkronisasi"
+                    >
+                      <BellIcon className="h-4 w-4" />
+                      {errorCount > 0 && (
+                        <div className="absolute -top-1 -right-1 min-h-3 min-w-3 px-1 bg-red-500 text-[10px] text-white flex items-center justify-center font-semibold rounded-full">
+                          {errorCount}
+                        </div>
+                      )}
+                    </button>
+                  </DropdownMenu.Trigger>
+                  <DropdownMenu.Content align="end" className="w-[340px] p-0" style={{ borderRadius: 0 }}>
+                    <div className="px-3 py-2 border-b border-slate-200 bg-slate-50">
+                      <Text size="2" weight="bold" className="text-slate-800">Notifikasi Sinkronisasi</Text>
+                      <Text size="1" className="text-slate-500 block">Item outbox yang gagal tersinkron</Text>
+                    </div>
+                    <div className="max-h-72 overflow-auto">
+                      {errorCount === 0 ? (
+                        <div className="px-3 py-4">
+                          <Text size="2" className="text-slate-600">Tidak ada notifikasi.</Text>
+                        </div>
+                      ) : (
+                        errorItems.slice(0, 6).map((it) => (
+                          <DropdownMenu.Item key={it.id} className="px-3 py-2 cursor-default">
+                            <div className="flex items-start gap-2">
+                              <div className="h-2 w-2 rounded-full bg-red-500 mt-2" />
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center justify-between gap-2">
+                                  <Text size="2" weight="bold" className="text-slate-800 truncate">{it.table} • {it.op}</Text>
+                                  <Text size="1" className="text-slate-500 whitespace-nowrap">{new Date(it.updated_at || it.created_at).toLocaleString()}</Text>
+                                </div>
+                                <Text size="1" className="text-slate-600 truncate">PK: {String(it.pk)}</Text>
+                                {it.error_message && (
+                                  <Text size="1" className="text-red-600 line-clamp-2 whitespace-pre-wrap">{it.error_message}</Text>
+                                )}
+                                <div className="mt-1 flex gap-2">
+                                  <button
+                                    className="text-xs px-2 py-1 border border-slate-300 bg-white hover:bg-slate-50"
+                                    onClick={async (e) => { e.preventDefault(); e.stopPropagation(); await retryOutboxItem(it.id) }}
+                                    type="button"
+                                  >
+                                    Retry
+                                  </button>
+                                  <button
+                                    className="text-xs px-2 py-1 border border-slate-300 bg-white hover:bg-slate-50"
+                                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); navigate('/sync') }}
+                                    type="button"
+                                  >
+                                    Lihat
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          </DropdownMenu.Item>
+                        ))
+                      )}
+                    </div>
+                    <div className="px-3 py-2 border-t border-slate-200 bg-slate-50 flex items-center justify-between">
+                      <button
+                        className="text-xs px-2 py-1 border border-slate-300 bg-white hover:bg-slate-50"
+                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); navigate('/sync') }}
+                        type="button"
+                      >
+                        Buka Halaman Sync
+                      </button>
+                      {errorCount > 0 && (
+                        <button
+                          className="text-xs px-2 py-1 border border-red-300 bg-red-50 text-red-700 hover:bg-red-100"
+                          onClick={async (e) => { e.preventDefault(); e.stopPropagation(); await retryAllErrorOutbox() }}
+                          type="button"
+                        >
+                          Retry Semua
+                        </button>
+                      )}
+                    </div>
+                  </DropdownMenu.Content>
+                </DropdownMenu.Root>
+              )
+            })()}
 
             {/* Separator */}
             <Separator orientation="vertical" size="2" className="h-6 bg-white/20" />
@@ -424,42 +513,60 @@ export function Navbar({ realtimeStatus = 'disconnected' }) {
             {/* User Menu */}
             <DropdownMenu.Root>
               <DropdownMenu.Trigger>
-                <button className="h-8 w-8 flex items-center justify-center text-white/80 hover:text-white hover:bg-white/10 transition-colors" style={{ WebkitAppRegion: 'no-drag' }} type="button">
+                <button
+                  className="h-8 w-8 flex items-center justify-center text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+                  style={{ WebkitAppRegion: 'no-drag' }}
+                  type="button"
+                  aria-label="Menu pengguna"
+                >
                   <User className="h-4 w-4" />
                 </button>
               </DropdownMenu.Trigger>
 
-              <DropdownMenu.Content className="w-56 mt-2" align="end">
-                <DropdownMenu.Item
-                  className="flex items-center space-x-2 p-3 cursor-pointer"
-                  onClick={() => navigate('/ubah-password')}
-                >
-                  <User className="h-4 w-4" />
-                  <div>
-                    <div className="font-medium">{user?.email?.split('@')[0] || 'User'}</div>
-                    <div className="text-xs text-gray-500">{user?.email}</div>
+              <DropdownMenu.Content align="end" className="w-[280px] p-0" style={{ borderRadius: 0 }}>
+                {/* User Info */}
+                <div className="px-3 py-3 border-b border-slate-200 bg-slate-50">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center bg-indigo-100 border border-indigo-300">
+                      <User className="h-5 w-5 text-indigo-600" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <Text size="2" weight="bold" className="text-slate-900 truncate block">
+                        {user?.email?.split('@')[0] || 'User'}
+                      </Text>
+                      <Text size="1" className="text-slate-500 truncate block" title={user?.email}>
+                        {user?.email}
+                      </Text>
+                    </div>
                   </div>
-                </DropdownMenu.Item>
+                </div>
 
-                <DropdownMenu.Separator />
+                {/* Menu Items */}
+                <div className="py-2">
+                  <DropdownMenu.Item
+                    className="px-3 py-2 cursor-pointer hover:bg-slate-50 flex items-center gap-2"
+                    onClick={() => navigate('/ubah-password')}
+                  >
+                    <GearIcon className="h-5 w-5 text-slate-600" />
+                    <div className="flex-1">
+                      <Text size="2" weight="medium" className="text-slate-800">Ubah Password</Text>
+                      <Text size="1" className="text-slate-500 block">Perbarui kata sandi akun</Text>
+                    </div>
+                  </DropdownMenu.Item>
 
-                <DropdownMenu.Item
-                  className="flex items-center space-x-2 p-2 cursor-pointer"
-                  onClick={() => navigate('/ubah-password')}
-                >
-                  <GearIcon className="h-4 w-4" />
-                  <span>Ubah Password</span>
-                </DropdownMenu.Item>
+                  <div className="border-t border-slate-200 mx-3 my-3" />
 
-                <DropdownMenu.Separator />
-
-                <DropdownMenu.Item
-                  className="flex items-center space-x-2 p-2 text-red-600 focus:text-red-600 cursor-pointer"
-                  onClick={handleLogout}
-                >
-                  <ExitIcon className="h-4 w-4" />
-                  <span>Sign Out</span>
-                </DropdownMenu.Item>
+                  <DropdownMenu.Item
+                    className="px-3 py-2 cursor-pointer hover:bg-red-50 flex items-center gap-2"
+                    onClick={handleLogout}
+                  >
+                    <ExitIcon className="h-5 w-5 text-red-600" />
+                    <div className="flex-1">
+                      <Text size="2" weight="medium" className="text-red-700">Sign Out</Text>
+                      <Text size="1" className="text-red-600 block">Keluar dari aplikasi</Text>
+                    </div>
+                  </DropdownMenu.Item>
+                </div>
               </DropdownMenu.Content>
             </DropdownMenu.Root>
 

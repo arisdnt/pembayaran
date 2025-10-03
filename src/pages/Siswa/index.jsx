@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 import { PageLayout } from '../../layout/PageLayout'
 import { Text } from '@radix-ui/themes'
@@ -11,6 +12,7 @@ import { DetailPanel } from './components/DetailPanel'
 import { SiswaDetailModal } from './components/SiswaDetailModal'
 
 function SiswaContent() {
+  const navigate = useNavigate()
   const {
     data,
     loading,
@@ -88,7 +90,7 @@ function SiswaContent() {
 
   const handleOpenDetail = (item) => {
     // Navigate to detail page instead of opening modal
-    window.location.href = `/siswa/${item.id}`
+    navigate(`/siswa/${item.id}`)
   }
 
   return (

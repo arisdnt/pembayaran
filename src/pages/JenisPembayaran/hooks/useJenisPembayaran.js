@@ -1,107 +1,36 @@
-import { useEffect, useState, useCallback } from 'react'
-import { supabase } from '../../../lib/supabaseClient'
-import { useAppRefresh } from '../../../hooks/useAppRefresh'
+import { useEffect, useMemo, useState, useCallback } from 'react'
+import { useLiveQuery } from 'dexie-react-hooks'
+import { db } from '../../../offline/db'
+import { enqueueDelete, enqueueInsert, enqueueUpdate } from '../../../offline/outbox'
+import { useOffline } from '../../../contexts/OfflineContext'
 
 export function useJenisPembayaran() {
-  const [data, setData] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [realtimeStatus, setRealtimeStatus] = useState('connecting')
+  const { status } = useOffline()
   const [error, setError] = useState('')
+  const [isRefreshing, setIsRefreshing] = useState(false)
 
-  const fetchData = useCallback(async () => {
-    const { data: result, error: queryError } = await supabase
-      .from('jenis_pembayaran')
-      .select(`
-        id, kode, nama, deskripsi, jumlah_default, tipe_pembayaran, wajib,
-        status_aktif, dibuat_pada, diperbarui_pada, id_tahun_ajaran, tingkat,
-        tahun_ajaran:id_tahun_ajaran(id, nama)
-      `)
-      .order('kode')
+  const jp = useLiveQuery(async () => db.jenis_pembayaran.orderBy('kode').toArray(), [], undefined)
+  const tahun = useLiveQuery(async () => db.tahun_ajaran.toArray(), [], undefined)
 
-    if (queryError) {
-      setError('Gagal memuat data: ' + queryError.message)
-      return []
-    }
-    
-    return result ?? []
-  }, [])
+  const data = useMemo(() => {
+    const list = jp || []
+    const tahunMap = new Map((tahun || []).map((t) => [t.id, { id: t.id, nama: t.nama }]))
+    return list.map((it) => ({
+      ...it,
+      tahun_ajaran: tahunMap.get(it.id_tahun_ajaran) || null,
+    }))
+  }, [jp, tahun])
+
+  const loading = jp === undefined
 
   const refreshData = useCallback(async () => {
-    const result = await fetchData()
-    setData(result)
-  }, [fetchData])
-
-  const handleAppRefresh = useCallback(() => refreshData(), [refreshData])
-  useAppRefresh(handleAppRefresh)
-
-  useEffect(() => {
-    let ignore = false
-    let channel
-
-    async function initializeData() {
-      setLoading(true)
-      setError('')
-
-      const result = await fetchData()
-      
-      if (!ignore) {
-        setData(result)
-        setLoading(false)
-      }
-
-      channel = supabase
-        .channel('realtime-jenis-pembayaran')
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'jenis_pembayaran',
-          },
-          async () => {
-            const { data: refreshedData } = await supabase
-              .from('jenis_pembayaran')
-              .select(`
-                id, kode, nama, deskripsi, jumlah_default, tipe_pembayaran, wajib,
-                status_aktif, dibuat_pada, diperbarui_pada, id_tahun_ajaran, tingkat,
-                tahun_ajaran:id_tahun_ajaran(id, nama)
-              `)
-              .order('kode')
-
-            if (!ignore && refreshedData) {
-              setData(refreshedData)
-            }
-          }
-        )
-        .subscribe((status) => {
-          if (status === 'SUBSCRIBED') {
-            setRealtimeStatus('connected')
-          }
-          if (status === 'TIMED_OUT' || status === 'CHANNEL_ERROR') {
-            setRealtimeStatus('disconnected')
-          }
-        })
-    }
-
-    initializeData()
-
-    return () => {
-      ignore = true
-      if (channel) {
-        supabase.removeChannel(channel)
-      }
-    }
-  }, [fetchData])
+    setIsRefreshing(true)
+    setTimeout(() => setIsRefreshing(false), 300)
+  }, [])
 
   const deleteItem = async (id) => {
     try {
-      const { error: deleteError } = await supabase
-        .from('jenis_pembayaran')
-        .delete()
-        .eq('id', id)
-
-      if (deleteError) throw deleteError
-      await refreshData()
+      await enqueueDelete('jenis_pembayaran', id)
     } catch (err) {
       setError(err.message)
       throw err
@@ -110,53 +39,35 @@ export function useJenisPembayaran() {
 
   const saveItem = async (formData, isEdit) => {
     try {
-      // Validasi field wajib
-      if (!formData.id_tahun_ajaran) {
-        throw new Error('Tahun Ajaran wajib dipilih')
-      }
-      if (!formData.tingkat) {
-        throw new Error('Tingkat Kelas wajib dipilih')
-      }
-      if (!formData.tipe_pembayaran) {
-        throw new Error('Tipe Pembayaran wajib dipilih')
-      }
+      if (!formData.id_tahun_ajaran) throw new Error('Tahun Ajaran wajib dipilih')
+      if (!formData.tingkat) throw new Error('Tingkat Kelas wajib dipilih')
+      if (!formData.tipe_pembayaran) throw new Error('Tipe Pembayaran wajib dipilih')
 
       if (isEdit) {
-        const { error: updateError } = await supabase
-          .from('jenis_pembayaran')
-          .update({
-            kode: formData.kode,
-            nama: formData.nama,
-            deskripsi: formData.deskripsi || null,
-            jumlah_default: formData.jumlah_default || null,
-            tipe_pembayaran: formData.tipe_pembayaran,
-            wajib: formData.wajib,
-            status_aktif: formData.status_aktif,
-            id_tahun_ajaran: formData.id_tahun_ajaran,
-            tingkat: formData.tingkat,
-            diperbarui_pada: new Date().toISOString(),
-          })
-          .eq('id', formData.id)
-
-        if (updateError) throw updateError
+        await enqueueUpdate('jenis_pembayaran', formData.id, {
+          kode: formData.kode,
+          nama: formData.nama,
+          deskripsi: formData.deskripsi || null,
+          jumlah_default: formData.jumlah_default || null,
+          tipe_pembayaran: formData.tipe_pembayaran,
+          wajib: formData.wajib,
+          status_aktif: formData.status_aktif,
+          id_tahun_ajaran: formData.id_tahun_ajaran,
+          tingkat: formData.tingkat,
+        })
       } else {
-        const { error: insertError } = await supabase
-          .from('jenis_pembayaran')
-          .insert({
-            kode: formData.kode,
-            nama: formData.nama,
-            deskripsi: formData.deskripsi || null,
-            jumlah_default: formData.jumlah_default || null,
-            tipe_pembayaran: formData.tipe_pembayaran,
-            wajib: formData.wajib,
-            status_aktif: formData.status_aktif,
-            id_tahun_ajaran: formData.id_tahun_ajaran,
-            tingkat: formData.tingkat,
-          })
-        if (insertError) throw insertError
+        await enqueueInsert('jenis_pembayaran', {
+          kode: formData.kode,
+          nama: formData.nama,
+          deskripsi: formData.deskripsi || null,
+          jumlah_default: formData.jumlah_default || null,
+          tipe_pembayaran: formData.tipe_pembayaran,
+          wajib: formData.wajib,
+          status_aktif: formData.status_aktif,
+          id_tahun_ajaran: formData.id_tahun_ajaran,
+          tingkat: formData.tingkat,
+        })
       }
-
-      await refreshData()
     } catch (err) {
       setError(err.message)
       throw err
@@ -166,7 +77,8 @@ export function useJenisPembayaran() {
   return {
     data,
     loading,
-    realtimeStatus,
+    isRefreshing,
+    realtimeStatus: status.realtime,
     error,
     setError,
     deleteItem,

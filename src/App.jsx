@@ -22,6 +22,7 @@ import { EditPembayaran } from './pages/Pembayaran/EditPembayaran'
 import { DetailPembayaran } from './pages/Pembayaran/DetailPembayaran'
 import { UbahPassword } from './pages/UbahPassword'
 import { ProtectedShell } from './components/ProtectedShell'
+import { SyncStatus } from './pages/SyncStatus'
 
 const routes = [
   { path: 'dashboard', element: <Dashboard /> },
@@ -43,6 +44,7 @@ const routes = [
   { path: 'pembayaran/edit/:id', element: <EditPembayaran /> },
   { path: 'pembayaran/detail/:id', element: <DetailPembayaran /> },
   { path: 'ubah-password', element: <UbahPassword /> },
+  { path: 'sync', element: <SyncStatus /> },
 ]
 
 function App() {

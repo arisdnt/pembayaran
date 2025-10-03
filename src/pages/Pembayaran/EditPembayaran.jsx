@@ -3,7 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { PageLayout } from '../../layout/PageLayout'
 import { Text } from '@radix-ui/themes'
 import { AlertCircle } from 'lucide-react'
-import { supabase } from '../../lib/supabaseClient'
+import { db } from '../../offline/db'
+import { updatePembayaranWithRincian } from '../../offline/actions/pembayaran'
 import { CreatePembayaranHeader } from './components/CreatePembayaranHeader'
 import { TagihanSelectorSection } from './components/TagihanSelectorSection'
 import { InformasiPembayaranSection } from './components/InformasiPembayaranSection'
@@ -47,39 +48,12 @@ function EditPembayaranContent() {
       try {
         setLoading(true)
         
-        // Fetch pembayaran header
-        const { data: pembayaranData, error: pembayaranError } = await supabase
-          .from('pembayaran')
-          .select(`
-            *,
-            tagihan:id_tagihan(
-              *,
-              riwayat_kelas_siswa:id_riwayat_kelas_siswa(
-                id,
-                siswa:id_siswa(id, nama_lengkap, nisn),
-                kelas:id_kelas(id, tingkat, nama_sub_kelas),
-                tahun_ajaran:id_tahun_ajaran(id, nama)
-              ),
-              rincian_tagihan(id, deskripsi, jumlah),
-              pembayaran(
-                id, nomor_pembayaran,
-                rincian_pembayaran(jumlah_dibayar, status)
-              )
-            )
-          `)
-          .eq('id', id)
-          .single()
+        const pembayaranData = await db.pembayaran.get(id)
+        const tagihan = pembayaranData ? await db.tagihan.get(pembayaranData.id_tagihan) : null
+        const rks = tagihan ? await db.riwayat_kelas_siswa.get(tagihan.id_riwayat_kelas_siswa) : null
 
-        if (pembayaranError) throw pembayaranError
-
-        // Fetch rincian items
-        const { data: rincianData, error: rincianError } = await supabase
-          .from('rincian_pembayaran')
-          .select('*')
-          .eq('id_pembayaran', id)
-          .order('cicilan_ke')
-
-        if (rincianError) throw rincianError
+        const rincianAll = await db.rincian_pembayaran.where('id_pembayaran').equals(id).toArray()
+        const rincianData = rincianAll.sort((a, b) => (a.cicilan_ke || 0) - (b.cicilan_ke || 0))
 
         // Set form data
         setFormData({
@@ -101,15 +75,13 @@ function EditPembayaranContent() {
           cicilan_ke: item.cicilan_ke,
         })))
 
-        // Set selected tagihan
-        setSelectedTagihan(pembayaranData.tagihan)
+        setSelectedTagihan(tagihan)
         
         // Set filters from tagihan data
-        const rks = pembayaranData.tagihan?.riwayat_kelas_siswa
         if (rks) {
-          setSelectedTahunAjaran(rks.tahun_ajaran?.id || '')
-          setSelectedTingkat(rks.kelas?.tingkat || '')
-          setSelectedKelas(rks.kelas?.id || '')
+          setSelectedTahunAjaran(rks.id_tahun_ajaran || '')
+          setSelectedTingkat(undefined)
+          setSelectedKelas(rks.id_kelas || '')
           setSelectedSiswa(rks.id || '')
         }
 
@@ -133,18 +105,10 @@ function EditPembayaranContent() {
 
   const fetchMasterData = async () => {
     try {
-      // Fetch tahun ajaran
-      const { data: tahunData } = await supabase
-        .from('tahun_ajaran')
-        .select('*')
-        .order('tanggal_mulai', { ascending: false })
+      const tahunData = await db.tahun_ajaran.orderBy('tanggal_mulai').reverse().toArray()
       setTahunAjaranList(tahunData || [])
 
-      // Fetch kelas untuk get tingkat
-      const { data: kelasData } = await supabase
-        .from('kelas')
-        .select('*')
-        .order('tingkat', { ascending: true })
+      const kelasData = await db.kelas.orderBy('tingkat').toArray()
       setKelasList(kelasData || [])
       
       // Extract unique tingkat
@@ -165,19 +129,16 @@ function EditPembayaranContent() {
       }
 
       try {
-        let query = supabase
-          .from('riwayat_kelas_siswa')
-          .select(`
-            id,
-            siswa:id_siswa(id, nama_lengkap, nisn),
-            kelas:id_kelas(id, tingkat, nama_sub_kelas),
-            tahun_ajaran:id_tahun_ajaran(id, nama)
-          `)
-          .eq('id_tahun_ajaran', selectedTahunAjaran)
-
-        const { data } = await query
-
-        let filteredData = data || []
+        const rks = await db.riwayat_kelas_siswa.where('id_tahun_ajaran').equals(selectedTahunAjaran).toArray()
+        const siswaMap = new Map((await db.siswa.toArray()).map(s => [s.id, s]))
+        const kelasMap = new Map((await db.kelas.toArray()).map(k => [k.id, k]))
+        const tahunMap = new Map((await db.tahun_ajaran.toArray()).map(t => [t.id, t]))
+        let filteredData = rks.map(r => ({
+          id: r.id,
+          siswa: siswaMap.get(r.id_siswa) ? { id: r.id_siswa, nama_lengkap: siswaMap.get(r.id_siswa).nama_lengkap, nisn: siswaMap.get(r.id_siswa).nisn } : null,
+          kelas: kelasMap.get(r.id_kelas) ? { id: r.id_kelas, tingkat: kelasMap.get(r.id_kelas).tingkat, nama_sub_kelas: kelasMap.get(r.id_kelas).nama_sub_kelas } : null,
+          tahun_ajaran: tahunMap.get(r.id_tahun_ajaran) ? { id: r.id_tahun_ajaran, nama: tahunMap.get(r.id_tahun_ajaran).nama } : null,
+        }))
         
         if (selectedTingkat) {
           filteredData = filteredData.filter(s => s.kelas?.tingkat === selectedTingkat)
@@ -207,26 +168,36 @@ function EditPembayaranContent() {
       }
 
       try {
-        const { data } = await supabase
-          .from('tagihan')
-          .select(`
-            *,
-            riwayat_kelas_siswa:id_riwayat_kelas_siswa(
-              siswa:id_siswa(nama_lengkap, nisn),
-              kelas:id_kelas(tingkat, nama_sub_kelas),
-              tahun_ajaran:id_tahun_ajaran(nama)
-            ),
-            rincian_tagihan(
-              id, deskripsi, jumlah,
-              jenis_pembayaran:id_jenis_pembayaran(kode, nama)
-            ),
-            pembayaran(
-              id, nomor_pembayaran,
-              rincian_pembayaran(jumlah_dibayar, status)
-            )
-          `)
-          .eq('id_riwayat_kelas_siswa', selectedSiswa)
-          .order('tanggal_tagihan', { ascending: false })
+        const tAll = await db.tagihan.where('id_riwayat_kelas_siswa').equals(selectedSiswa).toArray()
+        const t = tAll.sort((a, b) => {
+          const dateA = new Date(a.tanggal_tagihan || 0)
+          const dateB = new Date(b.tanggal_tagihan || 0)
+          return dateB - dateA // descending (newest first)
+        })
+        const rincianByTagihan = new Map((await db.rincian_tagihan.toArray()).reduce((acc, r) => {
+          const arr = acc.get(r.id_tagihan) || []
+          arr.push(r)
+          acc.set(r.id_tagihan, arr)
+          return acc
+        }, new Map()))
+        const pembayaranByTagihan = new Map((await db.pembayaran.toArray()).reduce((acc, p) => {
+          const arr = acc.get(p.id_tagihan) || []
+          arr.push(p)
+          acc.set(p.id_tagihan, arr)
+          return acc
+        }, new Map()))
+        const rpByPembayaran = new Map((await db.rincian_pembayaran.toArray()).reduce((acc, rp) => {
+          const arr = acc.get(rp.id_pembayaran) || []
+          arr.push(rp)
+          acc.set(rp.id_pembayaran, arr)
+          return acc
+        }, new Map()))
+        const data = t.map(x => ({
+          ...x,
+          riwayat_kelas_siswa: { id: selectedSiswa },
+          rincian_tagihan: rincianByTagihan.get(x.id) || [],
+          pembayaran: (pembayaranByTagihan.get(x.id) || []).map(p => ({ ...p, rincian_pembayaran: rpByPembayaran.get(p.id) || [] })),
+        }))
 
         setTagihanList(data || [])
       } catch (err) {
@@ -345,43 +316,11 @@ function EditPembayaranContent() {
 
     try {
       // 1. Update pembayaran header
-      const { error: headerError } = await supabase
-        .from('pembayaran')
-        .update({
-          id_tagihan: formData.id_tagihan,
-          nomor_pembayaran: formData.nomor_pembayaran,
-          catatan: formData.catatan || null,
-        })
-        .eq('id', id)
-
-      if (headerError) throw headerError
-
-      // 2. Delete existing rincian (simple approach - replace all)
-      const { error: deleteError } = await supabase
-        .from('rincian_pembayaran')
-        .delete()
-        .eq('id_pembayaran', id)
-
-      if (deleteError) throw deleteError
-
-      // 3. Insert new rincian items
-      const rincianData = rincianItems.map((item) => ({
-        id_pembayaran: id,
-        nomor_transaksi: item.nomor_transaksi,
-        jumlah_dibayar: parseFloat(item.jumlah_dibayar),
-        tanggal_bayar: item.tanggal_bayar,
-        metode_pembayaran: item.metode_pembayaran,
-        referensi_pembayaran: item.referensi_pembayaran || null,
-        catatan: item.catatan || null,
-        status: item.status || 'pending',
-        cicilan_ke: item.cicilan_ke,
-      }))
-
-      const { error: rincianError } = await supabase
-        .from('rincian_pembayaran')
-        .insert(rincianData)
-
-      if (rincianError) throw rincianError
+      await updatePembayaranWithRincian(id, {
+        id_tagihan: formData.id_tagihan,
+        nomor_pembayaran: formData.nomor_pembayaran,
+        catatan: formData.catatan || null,
+      }, rincianItems)
 
       // Navigate back
       navigate('/pembayaran')
