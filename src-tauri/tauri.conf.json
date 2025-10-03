@@ -1,0 +1,54 @@
+{
+  "productName": "kas-sekolah",
+  "version": "0.0.0",
+  "identifier": "com.kassekolah.app",
+  "build": {
+    "beforeDevCommand": "npm run dev:vite",
+    "beforeBuildCommand": "npm run build",
+    "devUrl": "http://localhost:5175",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "security": {
+      "csp": null,
+      "capabilities": [
+        {
+          "identifier": "main-capability",
+          "windows": ["main"],
+          "permissions": [
+            "core:default",
+            "core:window:allow-minimize",
+            "core:window:allow-maximize",
+            "core:window:allow-unmaximize",
+            "core:window:allow-close",
+            "core:window:allow-is-maximized",
+            "core:window:allow-is-minimized",
+            "core:window:allow-destroy"
+          ]
+        }
+      ]
+    },
+    "windows": [
+      {
+        "fullscreen": false,
+        "resizable": true,
+        "title": "kas-sekolah",
+        "width": 1200,
+        "height": 800,
+        "decorations": false,
+        "titleBarStyle": "Overlay",
+        "maximized": true,
+        "minWidth": 800,
+        "minHeight": 600
+      }
+    ]
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/icon.ico"
+    ]
+  },
+  "plugins": {}
+}

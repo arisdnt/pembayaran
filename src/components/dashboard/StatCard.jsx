@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { Text } from '@radix-ui/themes'
 
 function formatCurrency(amount) {
@@ -8,12 +9,11 @@ function formatCurrency(amount) {
   }).format(amount || 0)
 }
 
-export function StatCard({ title, value, icon: Icon, color, isCurrency, loading }) {
-  const displayValue = loading 
-    ? '...' 
-    : isCurrency 
-      ? formatCurrency(value) 
-      : `Rp ${value.toLocaleString('id-ID')}`
+export const StatCard = memo(function StatCard({ title, value, icon: Icon, color, isCurrency, loading }) {
+  // Tampilkan data yang ada, tidak menampilkan loading state saat refresh
+  const displayValue = isCurrency
+    ? formatCurrency(value)
+    : `Rp ${value.toLocaleString('id-ID')}`
 
   return (
     <div className="border-2 border-slate-300 bg-white shadow-lg flex flex-col">
@@ -26,10 +26,10 @@ export function StatCard({ title, value, icon: Icon, color, isCurrency, loading 
         </div>
       </div>
       <div className="px-3 py-1.5 text-right">
-        <Text size="8" weight="bold" className={`${color} font-mono`}>
+        <Text size="8" weight="bold" className={`${color} font-mono transition-all duration-300`}>
           {displayValue}
         </Text>
       </div>
     </div>
   )
-}
+})

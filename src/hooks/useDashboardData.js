@@ -54,11 +54,17 @@ export function useDashboardData(filters = {}) {
     }
   })
   const [loading, setLoading] = useState(true)
+  const [isRefreshing, setIsRefreshing] = useState(false)
   const [error, setError] = useState(null)
 
-  const fetchDashboardData = useCallback(async () => {
+  const fetchDashboardData = useCallback(async (isBackgroundRefresh = false) => {
     try {
-      setLoading(true)
+      // Hanya set loading true jika bukan background refresh
+      if (!isBackgroundRefresh) {
+        setLoading(true)
+      } else {
+        setIsRefreshing(true)
+      }
       setError(null)
 
       // Determine tahun ajaran to use
@@ -286,17 +292,18 @@ export function useDashboardData(filters = {}) {
       setError(err.message)
     } finally {
       setLoading(false)
+      setIsRefreshing(false)
     }
   }, [filters])
 
-  const handleAppRefresh = useCallback(() => fetchDashboardData(), [fetchDashboardData])
+  const handleAppRefresh = useCallback(() => fetchDashboardData(true), [fetchDashboardData])
   useAppRefresh(handleAppRefresh)
 
   useEffect(() => {
-    fetchDashboardData()
+    fetchDashboardData(false)
   }, [fetchDashboardData])
 
-  return { data, loading, error, refresh: fetchDashboardData }
+  return { data, loading, error, isRefreshing, refresh: () => fetchDashboardData(false) }
 }
 
 function processChartData(rincianPembayaran, tagihan) {

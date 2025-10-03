@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { Text } from '@radix-ui/themes'
 import { TrendingUp } from 'lucide-react'
 
@@ -16,16 +17,9 @@ function getMonthName(monthKey) {
   return `${months[parseInt(month) - 1]} ${year}`
 }
 
-export function PembayaranChart({ data, loading }) {
-  if (loading) {
-    return (
-      <div className="border-2 border-slate-300 bg-white shadow-lg h-full flex items-center justify-center">
-        <Text size="2" className="text-slate-500">Memuat data...</Text>
-      </div>
-    )
-  }
-
-  const maxValue = Math.max(...data.map(d => d.total), 1)
+export const PembayaranChart = memo(function PembayaranChart({ data, loading }) {
+  // Tetap tampilkan chart meski sedang refresh, hanya data yang berubah
+  const maxValue = Math.max(...(data?.map(d => d.total) || [1]), 1)
 
   return (
     <div className="border-2 border-slate-300 bg-white shadow-lg flex flex-col h-full overflow-hidden">
@@ -39,13 +33,13 @@ export function PembayaranChart({ data, loading }) {
       </div>
       <div className="p-4 flex-1 flex flex-col justify-end overflow-hidden">
         <div className="flex items-end justify-between gap-2 h-40 relative">
-          {data.map((item, index) => {
+          {(data || []).map((item, index) => {
             const height = maxValue > 0 ? (item.total / maxValue) * 100 : 0
             return (
-              <div key={index} className="flex-1 flex flex-col items-center gap-2 min-w-0">
+              <div key={item.month || index} className="flex-1 flex flex-col items-center gap-2 min-w-0">
                 <div className="w-full relative group">
-                  <div 
-                    className="w-full bg-gradient-to-t from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 transition-all cursor-pointer border-2 border-blue-700"
+                  <div
+                    className="w-full bg-gradient-to-t from-blue-600 to-blue-400 hover:from-blue-700 hover:to-blue-500 transition-all duration-300 cursor-pointer border-2 border-blue-700"
                     style={{ height: `${Math.max(height, 2)}%` }}
                     title={formatCurrency(item.total)}
                   />
@@ -60,4 +54,4 @@ export function PembayaranChart({ data, loading }) {
       </div>
     </div>
   )
-}
+})

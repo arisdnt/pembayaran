@@ -7,23 +7,63 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies
 node_modules
+
+# Build outputs - Frontend
 dist
 dist-ssr
+dist-windows
 *.local
 
-# Electron
-release
-*.tgz
-app-builds
+# Build outputs - Tauri/Rust
+src-tauri/target
+src-tauri/gen
+src-tauri/Cargo.lock
 
-# Editor directories and files
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Temporary and test files
+*.txt
+!BUILD.md
+!PERBAIKAN_X86.md
+!TAURI_BORDERLESS_SETUP.md
+!README.md
+
+# Binary and archive files
+*.exe
+*.zip
+*.tgz
+*.dll
+*.so
+*.dylib
+
+# OS specific
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE and editors
 .vscode/*
 !.vscode/extensions.json
+!.vscode/settings.json
 .idea
-.DS_Store
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+*.swp
+*~
+
+# Cargo and Rust
+.cargo/config.toml
+**/*.rs.bk
+*.pdb
+
+# Release artifacts
+release
+app-builds
