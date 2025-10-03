@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Badge, IconButton, Switch, Text, Button, TextField, Select } from '@radix-ui/themes'
 import { Pencil1Icon, TrashIcon, MagnifyingGlassIcon } from '@radix-ui/react-icons'
-import { Clock, Plus, X, Users, Eye } from 'lucide-react'
+import { Clock, Plus, X, Users, Eye, Copy, Check } from 'lucide-react'
 
 function formatDateTime(dateStr) {
   if (!dateStr) return '—'
@@ -52,6 +52,7 @@ export function SiswaTable({
   const [filterTahunAjaran, setFilterTahunAjaran] = useState('all')
   const [filterTingkat, setFilterTingkat] = useState('all')
   const [filterKelas, setFilterKelas] = useState('all')
+  const [copiedWA, setCopiedWA] = useState(null)
 
   const {
     tahunAjaranOptions,
@@ -395,7 +396,7 @@ export function SiswaTable({
                     NISN
                   </th>
                   <th className="px-4 py-3 text-left text-[0.7rem] font-bold uppercase tracking-wider text-slate-700 border-r border-slate-300">
-                    No. WhatsApp Wali
+                    Wali Siswa
                   </th>
                   <th className="px-4 py-3 text-left text-[0.7rem] font-bold uppercase tracking-wider text-slate-700 border-r border-slate-300">
                     Kelas & Peminatan
@@ -437,13 +438,16 @@ export function SiswaTable({
                           <div className="h-4 w-32 bg-slate-200" />
                         </td>
                         <td className="px-4 py-3 border-r border-slate-200">
-                          <div className="h-4 w-24 bg-slate-200" />
+                          <div className="space-y-1">
+                            <div className="h-4 w-32 bg-slate-200" />
+                            <div className="h-3 w-40 bg-slate-200" />
+                          </div>
                         </td>
                         <td className="px-4 py-3 border-r border-slate-200">
-                          <div className="h-4 w-40 bg-slate-200" />
-                        </td>
-                        <td className="px-4 py-3 border-r border-slate-200">
-                          <div className="h-4 w-24 bg-slate-200" />
+                          <div className="space-y-1">
+                            <div className="h-4 w-24 bg-slate-200" />
+                            <div className="h-3 w-32 bg-slate-200" />
+                          </div>
                         </td>
                         <td className="px-4 py-3 border-r border-slate-200">
                           <div className="h-4 w-32 bg-slate-200" />
@@ -496,9 +500,36 @@ export function SiswaTable({
                       </Text>
                     </td>
                     <td className="px-4 py-3 border-r border-slate-200">
-                      <Text size="2" className="text-slate-700 font-mono">
-                        {item.nomor_whatsapp_wali || '—'}
-                      </Text>
+                      <div className="flex flex-col gap-0.5">
+                        <div className="flex items-center gap-1.5">
+                          <Text size="2" weight="bold" className="text-slate-900 font-mono leading-tight">
+                            {item.nomor_whatsapp_wali || '—'}
+                          </Text>
+                          {item.nomor_whatsapp_wali && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                navigator.clipboard.writeText(item.nomor_whatsapp_wali)
+                                setCopiedWA(item.id)
+                                setTimeout(() => setCopiedWA(null), 2000)
+                              }}
+                              className="flex h-5 w-5 items-center justify-center hover:bg-red-50 transition-colors border border-slate-300 hover:border-red-400 group"
+                              title="Salin nomor WhatsApp"
+                            >
+                              {copiedWA === item.id ? (
+                                <Check className="h-3 w-3 text-green-600" />
+                              ) : (
+                                <Copy className="h-3 w-3 text-slate-600 group-hover:text-red-600 transition-colors" />
+                              )}
+                            </button>
+                          )}
+                        </div>
+                        {item.nama_wali_siswa && (
+                          <Text size="1" className="text-red-600 leading-tight">
+                            {item.nama_wali_siswa}
+                          </Text>
+                        )}
+                      </div>
                     </td>
                     <td className="px-4 py-3 border-r border-slate-200">
                       <div className="flex flex-col gap-0.5">

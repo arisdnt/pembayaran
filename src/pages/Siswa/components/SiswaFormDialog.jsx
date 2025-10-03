@@ -17,6 +17,7 @@ function SiswaFormDialog({
       tanggal_lahir: '',
       jenis_kelamin: '',
       alamat: '',
+      nama_wali_siswa: '',
       nomor_whatsapp_wali: '',
       status_aktif: true,
     }
@@ -45,6 +46,7 @@ function SiswaFormDialog({
         tanggal_lahir: '',
         jenis_kelamin: '',
         alamat: '',
+        nama_wali_siswa: '',
         nomor_whatsapp_wali: '',
         status_aktif: true,
       })
@@ -164,7 +166,7 @@ function SiswaFormDialog({
               </label>
             </div>
 
-            {/* Row 3: Jenis Kelamin & Nomor WhatsApp - 2 Columns */}
+            {/* Row 3: Jenis Kelamin & Nama Wali - 2 Columns */}
             <div className="grid grid-cols-2 gap-4 mb-4">
               <label>
                 <div className="flex items-center gap-1.5 mb-1">
@@ -210,6 +212,27 @@ function SiswaFormDialog({
 
               <label>
                 <div className="flex items-center gap-1.5 mb-1">
+                  <User className="h-3.5 w-3.5 text-orange-500" />
+                  <Text as="div" size="2" weight="medium">
+                    Nama Wali Siswa
+                  </Text>
+                </div>
+                <TextField.Root
+                  placeholder="Nama lengkap wali/orang tua"
+                  value={formData.nama_wali_siswa}
+                  onChange={(e) => setFormData({ ...formData, nama_wali_siswa: e.target.value })}
+                  style={{ borderRadius: 0 }}
+                />
+                <Text size="1" className="text-slate-500 mt-1">
+                  Opsional - Nama orang tua/wali siswa
+                </Text>
+              </label>
+            </div>
+
+            {/* Row 4: Nomor WhatsApp Wali - Full Width */}
+            <div className="mb-4">
+              <label>
+                <div className="flex items-center gap-1.5 mb-1">
                   <Phone className="h-3.5 w-3.5 text-green-500" />
                   <Text as="div" size="2" weight="medium">
                     Nomor WhatsApp Wali
@@ -227,7 +250,7 @@ function SiswaFormDialog({
               </label>
             </div>
 
-            {/* Row 4: Alamat - Full Width */}
+            {/* Row 5: Alamat - Full Width */}
             <div className="mb-4">
               <label>
                 <div className="flex items-center gap-1.5 mb-1">
@@ -246,7 +269,7 @@ function SiswaFormDialog({
               </label>
             </div>
 
-            {/* Row 5: Status Aktif - Full Width */}
+            {/* Row 6: Status Aktif - Full Width */}
             <div className="mb-4">
               <div className="flex items-center gap-1.5 mb-1">
                 <ToggleLeft className="h-3.5 w-3.5 text-teal-500" />
