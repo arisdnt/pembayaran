@@ -1,13 +1,13 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Dialog, TextField, Flex, Text, Button, Select, Switch, TextArea } from '@radix-ui/themes'
 import { AlertCircle, UserPlus, Edit3, User, Hash, Calendar, MapPin, Phone, X, ToggleLeft } from 'lucide-react'
 
-function SiswaFormDialog({ 
-  open, 
-  onOpenChange, 
-  onSubmit, 
-  initialData, 
-  isEdit 
+function SiswaFormDialog({
+  open,
+  onOpenChange,
+  onSubmit,
+  initialData,
+  isEdit
 }) {
   const [formData, setFormData] = useState(
     initialData || {
@@ -24,6 +24,24 @@ function SiswaFormDialog({
   )
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
+
+  useEffect(() => {
+    if (initialData) {
+      setFormData(initialData)
+    } else {
+      setFormData({
+        id: '',
+        nama_lengkap: '',
+        nisn: '',
+        tanggal_lahir: '',
+        jenis_kelamin: '',
+        alamat: '',
+        nama_wali_siswa: '',
+        nomor_whatsapp_wali: '',
+        status_aktif: true,
+      })
+    }
+  }, [initialData])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -87,7 +105,7 @@ function SiswaFormDialog({
               <Text size="3" weight="bold" className="text-slate-800 uppercase tracking-wider">
                 {isEdit ? 'Edit Siswa' : 'Tambah Siswa'}
               </Text>
-              <Text size="1" className="text-slate-600">
+              <Text size="1" className="text-slate-500 block mt-0.5">
                 {isEdit ? 'Perbarui informasi siswa' : 'Tambahkan siswa baru ke sistem'}
               </Text>
             </div>
@@ -105,8 +123,8 @@ function SiswaFormDialog({
         {/* Content */}
         <form onSubmit={handleSubmit} className="overflow-auto bg-white" style={{ maxHeight: 'calc(90vh - 140px)' }}>
           <div className="p-6">
-            {/* Row 1: Nama Lengkap - Full Width */}
-            <div className="mb-4">
+            {/* Row 1: Nama Lengkap & Jenis Kelamin - 2 Columns */}
+            <div className="grid grid-cols-2 gap-4 mb-4">
               <label>
                 <div className="flex items-center gap-1.5 mb-1">
                   <User className="h-3.5 w-3.5 text-indigo-500" />
@@ -121,6 +139,48 @@ function SiswaFormDialog({
                   style={{ borderRadius: 0 }}
                   required
                 />
+              </label>
+
+              <label>
+                <div className="flex items-center gap-1.5 mb-1">
+                  <User className="h-3.5 w-3.5 text-indigo-500" />
+                  <Text as="div" size="2" weight="medium">
+                    Jenis Kelamin
+                  </Text>
+                </div>
+                <Select.Root
+                  value={formData.jenis_kelamin}
+                  onValueChange={(value) => setFormData({ ...formData, jenis_kelamin: value })}
+                >
+                  <Select.Trigger
+                    style={{ borderRadius: 0, width: '100%', height: '36px' }}
+                    placeholder="Pilih jenis kelamin"
+                    className="cursor-pointer"
+                  />
+                  <Select.Content
+                    position="popper"
+                    side="bottom"
+                    align="start"
+                    sideOffset={4}
+                    style={{ borderRadius: 0, minWidth: 'var(--radix-select-trigger-width)' }}
+                    className="border-2 border-slate-300 shadow-lg bg-white z-50"
+                  >
+                    <Select.Item
+                      value="Laki-laki"
+                      className="hover:bg-blue-50 cursor-pointer px-3 py-2 focus:bg-blue-100"
+                      style={{ borderRadius: 0 }}
+                    >
+                      Laki-laki
+                    </Select.Item>
+                    <Select.Item
+                      value="Perempuan"
+                      className="hover:bg-blue-50 cursor-pointer px-3 py-2 focus:bg-blue-100"
+                      style={{ borderRadius: 0 }}
+                    >
+                      Perempuan
+                    </Select.Item>
+                  </Select.Content>
+                </Select.Root>
               </label>
             </div>
 
@@ -156,7 +216,7 @@ function SiswaFormDialog({
                   value={formData.tanggal_lahir}
                   onChange={(e) => setFormData({ ...formData, tanggal_lahir: e.target.value })}
                   className="w-full px-3 border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-slate-900"
-                  style={{ 
+                  style={{
                     borderRadius: 0,
                     height: '36px',
                     fontSize: '14px',
@@ -166,50 +226,8 @@ function SiswaFormDialog({
               </label>
             </div>
 
-            {/* Row 3: Jenis Kelamin & Nama Wali - 2 Columns */}
+            {/* Row 3: Nama Wali & Nomor WhatsApp - 2 Columns */}
             <div className="grid grid-cols-2 gap-4 mb-4">
-              <label>
-                <div className="flex items-center gap-1.5 mb-1">
-                  <User className="h-3.5 w-3.5 text-indigo-500" />
-                  <Text as="div" size="2" weight="medium">
-                    Jenis Kelamin
-                  </Text>
-                </div>
-                <Select.Root 
-                  value={formData.jenis_kelamin} 
-                  onValueChange={(value) => setFormData({ ...formData, jenis_kelamin: value })}
-                >
-                  <Select.Trigger 
-                    style={{ borderRadius: 0, width: '100%', height: '36px' }}
-                    placeholder="Pilih jenis kelamin"
-                    className="cursor-pointer"
-                  />
-                  <Select.Content 
-                    position="popper"
-                    side="bottom"
-                    align="start"
-                    sideOffset={4}
-                    style={{ borderRadius: 0, minWidth: 'var(--radix-select-trigger-width)' }}
-                    className="border-2 border-slate-300 shadow-lg bg-white z-50"
-                  >
-                    <Select.Item 
-                      value="Laki-laki"
-                      className="hover:bg-blue-50 cursor-pointer px-3 py-2 focus:bg-blue-100"
-                      style={{ borderRadius: 0 }}
-                    >
-                      Laki-laki
-                    </Select.Item>
-                    <Select.Item 
-                      value="Perempuan"
-                      className="hover:bg-blue-50 cursor-pointer px-3 py-2 focus:bg-blue-100"
-                      style={{ borderRadius: 0 }}
-                    >
-                      Perempuan
-                    </Select.Item>
-                  </Select.Content>
-                </Select.Root>
-              </label>
-
               <label>
                 <div className="flex items-center gap-1.5 mb-1">
                   <User className="h-3.5 w-3.5 text-orange-500" />
@@ -223,14 +241,8 @@ function SiswaFormDialog({
                   onChange={(e) => setFormData({ ...formData, nama_wali_siswa: e.target.value })}
                   style={{ borderRadius: 0 }}
                 />
-                <Text size="1" className="text-slate-500 mt-1">
-                  Opsional - Nama orang tua/wali siswa
-                </Text>
               </label>
-            </div>
 
-            {/* Row 4: Nomor WhatsApp Wali - Full Width */}
-            <div className="mb-4">
               <label>
                 <div className="flex items-center gap-1.5 mb-1">
                   <Phone className="h-3.5 w-3.5 text-green-500" />
@@ -244,13 +256,10 @@ function SiswaFormDialog({
                   onChange={(e) => setFormData({ ...formData, nomor_whatsapp_wali: e.target.value })}
                   style={{ borderRadius: 0 }}
                 />
-                <Text size="1" className="text-slate-500 mt-1">
-                  Untuk notifikasi tagihan ke orang tua/wali
-                </Text>
               </label>
             </div>
 
-            {/* Row 5: Alamat - Full Width */}
+            {/* Row 4: Alamat - Full Width */}
             <div className="mb-4">
               <label>
                 <div className="flex items-center gap-1.5 mb-1">
@@ -259,12 +268,11 @@ function SiswaFormDialog({
                     Alamat
                   </Text>
                 </div>
-                <TextArea
+                <TextField.Root
                   placeholder="Alamat lengkap siswa"
                   value={formData.alamat}
                   onChange={(e) => setFormData({ ...formData, alamat: e.target.value })}
                   style={{ borderRadius: 0 }}
-                  rows={3}
                 />
               </label>
             </div>
