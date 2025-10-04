@@ -102,7 +102,7 @@ export function JenisPembayaranFormDialog({
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Content
         style={{
-          maxWidth: '600px',
+          maxWidth: '800px',
           width: '95vw',
           maxHeight: '90vh',
           padding: 0,
