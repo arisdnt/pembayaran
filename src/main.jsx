@@ -5,6 +5,7 @@ import './index.css'
 import App from './App.jsx'
 import { AuthProvider } from './contexts/AuthContext.jsx'
 import { OfflineProvider } from './contexts/OfflineContext.jsx'
+import { CalculatorProvider } from './contexts/CalculatorContext.jsx'
 
 // Prevent dialogs from closing with Escape key and outside clicks
 function DialogProtection() {
@@ -65,8 +66,10 @@ createRoot(document.getElementById('root')).render(
   <StrictMode>
     <AuthProvider>
       <OfflineProvider>
-        <DialogProtection />
-        <App />
+        <CalculatorProvider>
+          <DialogProtection />
+          <App />
+        </CalculatorProvider>
       </OfflineProvider>
     </AuthProvider>
   </StrictMode>,

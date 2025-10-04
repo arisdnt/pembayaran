@@ -17,13 +17,14 @@ import {
   HamburgerMenuIcon,
   ChevronDownIcon,
 } from '@radix-ui/react-icons'
-import { User, GraduationCap, Wallet, Minus, Square, X, Maximize2, Maximize, Minimize, RefreshCw, Info } from 'lucide-react'
+import { User, GraduationCap, Wallet, Minus, Square, X, Maximize2, Maximize, Minimize, RefreshCw, Info, Calculator } from 'lucide-react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../offline/db'
 import { retryOutboxItem, retryAllErrorOutbox } from '../offline/outbox'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
 import { useAuth } from '../contexts/AuthContext'
+import { useCalculator } from '../contexts/CalculatorContext'
 import { menuSections } from '../config/menuData'
 import { AboutModal } from '../components/AboutModal'
 import { ConfirmExitDialog } from '../components/ConfirmExitDialog'
@@ -47,6 +48,7 @@ const sectionIconColors = {
 
 export function Navbar({ realtimeStatus = 'disconnected' }) {
   const { user } = useAuth()
+  const { toggleCalculator } = useCalculator()
   const navigate = useNavigate()
   const location = useLocation()
   const [isMaximized, setIsMaximized] = useState(false)
@@ -414,6 +416,19 @@ export function Navbar({ realtimeStatus = 'disconnected' }) {
               </button>
             </Tooltip>
 
+            {/* Calculator Button */}
+            <Tooltip content="Calculator">
+              <button
+                onClick={toggleCalculator}
+                className="h-8 w-8 flex items-center justify-center text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+                style={{ WebkitAppRegion: 'no-drag' }}
+                type="button"
+                aria-label="Toggle Calculator"
+              >
+                <Calculator className="h-4 w-4" />
+              </button>
+            </Tooltip>
+
             {/* Notifications: Outbox sync failures */}
             {(() => {
               const errorItems = useLiveQuery(async () => {
@@ -544,26 +559,30 @@ export function Navbar({ realtimeStatus = 'disconnected' }) {
                 {/* Menu Items */}
                 <div className="py-2">
                   <DropdownMenu.Item
-                    className="px-3 py-2 cursor-pointer hover:bg-slate-50 flex items-center gap-2"
+                    className="profile-menu-item px-3 py-2 cursor-pointer transition-colors flex items-center gap-3 group hover:bg-transparent focus:bg-transparent data-[highlighted]:bg-transparent outline-none"
                     onClick={() => navigate('/ubah-password')}
                   >
-                    <GearIcon className="h-5 w-5 text-slate-600" />
+                    <div className="flex h-8 w-8 items-center justify-center border border-slate-300 bg-slate-50 transition-colors">
+                      <GearIcon className="h-4 w-4 text-slate-600 group-hover:text-indigo-600 transition-colors" />
+                    </div>
                     <div className="flex-1">
-                      <Text size="2" weight="medium" className="text-slate-800">Ubah Password</Text>
-                      <Text size="1" className="text-slate-500 block">Perbarui kata sandi akun</Text>
+                      <Text size="2" weight="medium" className="text-slate-800 group-hover:text-indigo-600 transition-colors">Ubah Password</Text>
+                      <Text size="1" className="text-slate-500 transition-colors block">Perbarui kata sandi akun</Text>
                     </div>
                   </DropdownMenu.Item>
 
-                  <div className="border-t border-slate-200 mx-3 my-3" />
+                  <div className="border-t border-slate-200 mx-3 my-2" />
 
                   <DropdownMenu.Item
-                    className="px-3 py-2 cursor-pointer hover:bg-red-50 flex items-center gap-2"
+                    className="profile-menu-item px-3 py-2 cursor-pointer transition-colors flex items-center gap-3 group hover:bg-transparent focus:bg-transparent data-[highlighted]:bg-transparent outline-none"
                     onClick={handleLogout}
                   >
-                    <ExitIcon className="h-5 w-5 text-red-600" />
+                    <div className="flex h-8 w-8 items-center justify-center border border-slate-300 bg-slate-50 transition-colors">
+                      <ExitIcon className="h-4 w-4 text-slate-600 group-hover:text-red-600 transition-colors" />
+                    </div>
                     <div className="flex-1">
-                      <Text size="2" weight="medium" className="text-red-700">Sign Out</Text>
-                      <Text size="1" className="text-red-600 block">Keluar dari aplikasi</Text>
+                      <Text size="2" weight="medium" className="text-slate-800 group-hover:text-red-600 transition-colors">Sign Out</Text>
+                      <Text size="1" className="text-slate-500 transition-colors block">Keluar dari aplikasi</Text>
                     </div>
                   </DropdownMenu.Item>
                 </div>

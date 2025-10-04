@@ -26,16 +26,9 @@ export function TimelineSection({ formData, setFormData, tahunAjaranList = [] })
   const tanggalMasukDisplay = formatDateDisplay(formData.tanggal_masuk)
   const tanggalKeluarDisplay = formatDateDisplay(formData.tanggal_keluar)
 
-  let tahunAjaranSummary = ''
-  if (selectedTahun) {
-    const parts = []
-    if (selectedTahun.nama) parts.push(selectedTahun.nama)
-    if (tanggalMasukDisplay) parts.push(tanggalMasukDisplay)
-    if (selectedTahun.tanggal_selesai) {
-      parts.push(tanggalKeluarDisplay || 'Tanggal selesai belum diatur')
-    }
-    tahunAjaranSummary = parts.join(' - ')
-  }
+  const tanggalKeluarText = selectedTahun?.tanggal_selesai
+    ? tanggalKeluarDisplay || 'Mengikuti akhir tahun ajaran'
+    : 'Tidak tersedia'
 
   return (
     <div>
@@ -46,21 +39,6 @@ export function TimelineSection({ formData, setFormData, tahunAjaranList = [] })
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        <div className="col-span-2 border border-blue-200 bg-blue-50 px-3 py-2">
-          <Text size="2" weight="medium" className="text-blue-800">
-            Tanggal riwayat mengikuti tahun ajaran terpilih.
-          </Text>
-          {selectedTahun ? (
-            <Text size="1" className="text-blue-700 block mt-1">
-              {tahunAjaranSummary || 'Tanggal tahun ajaran belum lengkap'}
-            </Text>
-          ) : (
-            <Text size="1" className="text-blue-700 block mt-1">
-              Pilih tahun ajaran untuk mengisi tanggal secara otomatis.
-            </Text>
-          )}
-        </div>
-
         <div className="border border-slate-200 bg-slate-50 px-3 py-3">
           <Text size="2" weight="medium" className="text-slate-800 flex items-center gap-2">
             <Calendar className="h-4 w-4 text-slate-600" />
@@ -77,10 +55,27 @@ export function TimelineSection({ formData, setFormData, tahunAjaranList = [] })
             Tanggal Keluar
           </Text>
           <Text size="2" className="text-slate-700 mt-2 block">
-            {selectedTahun?.tanggal_selesai
-              ? tanggalKeluarDisplay || 'Mengikuti akhir tahun ajaran'
-              : 'Tidak tersedia'}
+            {tanggalKeluarText}
           </Text>
+        </div>
+
+        <div className="col-span-2">
+          <label>
+            <Text as="div" size="2" mb="2" weight="medium">
+              <div className="flex items-center gap-2">
+                <FileText className="h-4 w-4 text-slate-600" />
+                Catatan
+              </div>
+            </Text>
+            <input
+              type="text"
+              placeholder="Catatan tambahan (opsional)..."
+              value={formData.catatan}
+              onChange={(e) => setFormData((prev) => ({ ...prev, catatan: e.target.value }))}
+              className="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              style={{ height: '40px' }}
+            />
+          </label>
         </div>
 
         {formData.tanggal_masuk && (

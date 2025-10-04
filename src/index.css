@@ -237,6 +237,12 @@ a {
   color: white;
 }
 
+/* Override for profile menu items - no background on hover */
+.rt-DropdownMenuItem.profile-menu-item[data-highlighted] {
+  background: transparent !important;
+  color: inherit !important;
+}
+
 /* Modern Popover Styles */
 .rt-PopoverContent {
   border: 1px solid rgb(226, 232, 240);

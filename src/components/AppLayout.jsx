@@ -3,6 +3,7 @@ import { Navbar } from '../layout/Navbar'
 import { StatusBar } from '../layout/StatusBar'
 import { NetworkStatusToast } from './NetworkStatusToast'
 import { SyncOutboxToast } from './SyncOutboxToast'
+import { Calculator } from './Calculator'
 
 const MemoizedNavbar = memo(Navbar)
 const MemoizedStatusBar = memo(StatusBar)
@@ -16,6 +17,9 @@ export const AppLayout = memo(function AppLayout({ children, realtimeStatus = 'd
       {/* Network Status Toast Notification */}
       <NetworkStatusToast />
       <SyncOutboxToast />
+      
+      {/* Global Calculator */}
+      <Calculator />
 
       <main
         className="overflow-hidden bg-white flex flex-col route-container"

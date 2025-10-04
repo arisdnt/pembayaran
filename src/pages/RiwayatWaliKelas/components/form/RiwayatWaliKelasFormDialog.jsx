@@ -74,7 +74,7 @@ function RiwayatWaliKelasFormDialog({
               <Text size="3" weight="bold" className="text-slate-800 uppercase tracking-wider">
                 {isEdit ? 'Edit Riwayat Wali Kelas' : 'Tambah Riwayat Wali Kelas'}
               </Text>
-              <Text size="1" className="text-slate-600">
+              <Text size="1" className="text-slate-500 block mt-0.5">
                 {isEdit ? 'Perbarui data riwayat penugasan wali kelas' : 'Tambahkan riwayat penugasan wali kelas baru'}
               </Text>
             </div>
@@ -225,25 +225,6 @@ function RiwayatWaliKelasFormDialog({
                 </div>
               </div>
             </div>
-
-            {/* Info Tanggal Otomatis - Full width below form (only in create mode) */}
-            {!isEdit && formData.id_tahun_ajaran && formData.tanggal_mulai && (
-              <div className="border border-blue-200 bg-blue-50 px-3 py-3 mt-6">
-                <Text size="2" weight="medium" className="text-blue-800 mb-2 block">
-                  Tanggal Penugasan (Otomatis dari Tahun Ajaran)
-                </Text>
-                <div className="space-y-1">
-                  <Text size="1" className="text-blue-700 block">
-                    Mulai: {new Date(formData.tanggal_mulai).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}
-                  </Text>
-                  {formData.tanggal_selesai && (
-                    <Text size="1" className="text-blue-700 block">
-                      Selesai: {new Date(formData.tanggal_selesai).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}
-                    </Text>
-                  )}
-                </div>
-              </div>
-            )}
 
             {/* Error Alert */}
             {error && (
