@@ -1,0 +1,242 @@
+import { TextField, Text, Select, Switch } from '@radix-ui/themes'
+import { Hash, Tag, FileText, DollarSign, Calendar, GraduationCap, School, BookOpen } from 'lucide-react'
+
+export function JenisPembayaranFormFields({ 
+  formData, 
+  setFormData, 
+  tahunAjaranList,
+  tingkatList,
+  filteredKelasList,
+  filteredPeminatanList 
+}) {
+  return (
+    <>
+      <div className="grid grid-cols-2 gap-4 mb-4">
+        <label>
+          <div className="flex items-center gap-1.5 mb-1">
+            <Hash className="h-3.5 w-3.5 text-blue-500" />
+            <Text size="2" weight="medium">Kode <span className="text-red-600">*</span></Text>
+          </div>
+          <TextField.Root
+            placeholder="Contoh: SPP, SERAGAM"
+            value={formData.kode}
+            onChange={(e) => setFormData({ ...formData, kode: e.target.value.toUpperCase() })}
+            style={{ borderRadius: 0 }}
+            required
+          />
+        </label>
+
+        <label>
+          <div className="flex items-center gap-1.5 mb-1">
+            <Tag className="h-3.5 w-3.5 text-indigo-500" />
+            <Text size="2" weight="medium">Nama <span className="text-red-600">*</span></Text>
+          </div>
+          <TextField.Root
+            placeholder="Nama jenis pembayaran"
+            value={formData.nama}
+            onChange={(e) => setFormData({ ...formData, nama: e.target.value })}
+            style={{ borderRadius: 0 }}
+            required
+          />
+        </label>
+      </div>
+
+      <div className="mb-4">
+        <label>
+          <div className="flex items-center gap-1.5 mb-1">
+            <FileText className="h-3.5 w-3.5 text-slate-500" />
+            <Text size="2" weight="medium">Deskripsi</Text>
+          </div>
+          <TextField.Root
+            placeholder="Keterangan tambahan..."
+            value={formData.deskripsi}
+            onChange={(e) => setFormData({ ...formData, deskripsi: e.target.value })}
+            style={{ borderRadius: 0 }}
+          />
+        </label>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4 mb-4">
+        <label>
+          <div className="flex items-center gap-1.5 mb-1">
+            <DollarSign className="h-3.5 w-3.5 text-green-500" />
+            <Text size="2" weight="medium">Jumlah Default</Text>
+          </div>
+          <TextField.Root
+            type="number"
+            placeholder="0"
+            value={formData.jumlah_default}
+            onChange={(e) => setFormData({ ...formData, jumlah_default: e.target.value })}
+            style={{ borderRadius: 0 }}
+          />
+          <Text size="1" className="text-slate-500 mt-1">Jumlah dalam Rupiah</Text>
+        </label>
+
+        <label>
+          <div className="flex items-center gap-1.5 mb-1">
+            <Calendar className="h-3.5 w-3.5 text-purple-500" />
+            <Text size="2" weight="medium">Tipe Pembayaran <span className="text-red-600">*</span></Text>
+          </div>
+          <Select.Root 
+            value={formData.tipe_pembayaran} 
+            onValueChange={(value) => setFormData({ ...formData, tipe_pembayaran: value })}
+            required
+          >
+            <Select.Trigger style={{ borderRadius: 0, width: '100%' }} placeholder="Pilih tipe" />
+            <Select.Content style={{ borderRadius: 0 }}>
+              <Select.Item value="bulanan">Bulanan</Select.Item>
+              <Select.Item value="tahunan">Tahunan</Select.Item>
+              <Select.Item value="sekali">Sekali (One-time)</Select.Item>
+            </Select.Content>
+          </Select.Root>
+        </label>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4 mb-4">
+        <label>
+          <div className="flex items-center gap-1.5 mb-1">
+            <Calendar className="h-3.5 w-3.5 text-blue-500" />
+            <Text size="2" weight="medium">Tahun Ajaran <span className="text-red-600">*</span></Text>
+          </div>
+          <Select.Root
+            value={formData.id_tahun_ajaran}
+            onValueChange={(value) => {
+              setFormData({ ...formData, id_tahun_ajaran: value, tingkat: '', id_kelas: '', id_peminatan: '' })
+            }}
+            required
+          >
+            <Select.Trigger style={{ borderRadius: 0, width: '100%' }} placeholder="Pilih tahun ajaran" />
+            <Select.Content style={{ borderRadius: 0 }}>
+              {tahunAjaranList.map((tahun) => (
+                <Select.Item key={tahun.id} value={tahun.id}>
+                  {tahun.nama} {tahun.status_aktif && '(Aktif)'}
+                </Select.Item>
+              ))}
+            </Select.Content>
+          </Select.Root>
+          <Text size="1" className="text-slate-500 mt-1">Wajib dipilih untuk isolasi data per tahun ajaran</Text>
+        </label>
+
+        <label>
+          <div className="flex items-center gap-1.5 mb-1">
+            <GraduationCap className="h-3.5 w-3.5 text-indigo-500" />
+            <Text size="2" weight="medium">Tingkat Kelas <span className="text-red-600">*</span></Text>
+          </div>
+          <Select.Root
+            value={formData.tingkat || 'all'}
+            onValueChange={(value) => {
+              const newTingkat = value === 'all' ? '' : value
+              setFormData({ ...formData, tingkat: newTingkat, id_kelas: '', id_peminatan: '' })
+            }}
+            disabled={!formData.id_tahun_ajaran}
+            required
+          >
+            <Select.Trigger
+              style={{ borderRadius: 0, width: '100%' }}
+              placeholder={!formData.id_tahun_ajaran ? "Pilih tahun ajaran dulu" : "Pilih tingkat"}
+            />
+            <Select.Content style={{ borderRadius: 0 }}>
+              <Select.Item value="all">Semua Tingkat</Select.Item>
+              {tingkatList.map((tingkat) => (
+                <Select.Item key={tingkat} value={tingkat}>
+                  Kelas {tingkat}
+                </Select.Item>
+              ))}
+            </Select.Content>
+          </Select.Root>
+          <Text size="1" className="text-slate-500 mt-1">
+            {!formData.id_tahun_ajaran ? '⚠️ Pilih tahun ajaran terlebih dahulu' : 'Pilih tingkat atau semua tingkat'}
+          </Text>
+        </label>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4 mb-4">
+        <label>
+          <div className="flex items-center gap-1.5 mb-1">
+            <School className="h-3.5 w-3.5 text-teal-500" />
+            <Text size="2" weight="medium">Kelas Spesifik</Text>
+          </div>
+          <Select.Root
+            value={formData.id_kelas || 'all'}
+            onValueChange={(value) => setFormData({ ...formData, id_kelas: value === 'all' ? '' : value, id_peminatan: '' })}
+            disabled={!formData.tingkat}
+          >
+            <Select.Trigger
+              style={{ borderRadius: 0, width: '100%' }}
+              placeholder={!formData.tingkat ? "Pilih tingkat dulu" : "Semua kelas"}
+            />
+            <Select.Content style={{ borderRadius: 0 }}>
+              <Select.Item value="all">Semua Kelas Spesifik</Select.Item>
+              {filteredKelasList.map((kelas) => (
+                <Select.Item key={kelas.id} value={kelas.id}>
+                  Kelas {kelas.tingkat} {kelas.nama_sub_kelas}
+                </Select.Item>
+              ))}
+            </Select.Content>
+          </Select.Root>
+          <Text size="1" className="text-slate-500 mt-1">
+            {!formData.tingkat ? '⚠️ Pilih "Semua Tingkat" tidak dapat memilih kelas spesifik' : 'Pilih kelas atau semua kelas'}
+          </Text>
+        </label>
+
+        <label>
+          <div className="flex items-center gap-1.5 mb-1">
+            <BookOpen className="h-3.5 w-3.5 text-orange-500" />
+            <Text size="2" weight="medium">Peminatan</Text>
+          </div>
+          <Select.Root
+            value={formData.id_peminatan || 'all'}
+            onValueChange={(value) => setFormData({ ...formData, id_peminatan: value === 'all' ? '' : value })}
+            disabled={!formData.id_kelas}
+          >
+            <Select.Trigger
+              style={{ borderRadius: 0, width: '100%' }}
+              placeholder={!formData.id_kelas ? "Pilih kelas spesifik dulu" : "Semua peminatan"}
+            />
+            <Select.Content style={{ borderRadius: 0 }}>
+              <Select.Item value="all">Semua Peminatan</Select.Item>
+              {filteredPeminatanList && filteredPeminatanList.map((peminatan) => (
+                <Select.Item key={peminatan.id} value={peminatan.id}>
+                  {peminatan.kode} - {peminatan.nama}
+                </Select.Item>
+              ))}
+            </Select.Content>
+          </Select.Root>
+          <Text size="1" className="text-slate-500 mt-1">
+            {!formData.id_kelas ? '⚠️ Pilih "Semua Kelas" tidak dapat memilih peminatan spesifik' : 'Pilih peminatan atau semua peminatan'}
+          </Text>
+        </label>
+      </div>
+
+      <div className="border-t-2 border-slate-200 pt-4">
+        <div className="grid grid-cols-2 gap-4">
+          <div className="flex items-center gap-3 bg-slate-50 border border-slate-300 p-3">
+            <Switch
+              checked={formData.wajib}
+              onCheckedChange={(checked) => setFormData({ ...formData, wajib: checked })}
+              size="2"
+            />
+            <div className="flex-1">
+              <Text size="2" weight="medium" className="text-slate-900">
+                {formData.wajib ? 'Pembayaran Wajib' : 'Pembayaran Opsional'}
+              </Text>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 bg-slate-50 border border-slate-300 p-3">
+            <Switch
+              checked={formData.status_aktif}
+              onCheckedChange={(checked) => setFormData({ ...formData, status_aktif: checked })}
+              size="2"
+            />
+            <div className="flex-1">
+              <Text size="2" weight="medium" className="text-slate-900">
+                {formData.status_aktif ? 'Status Aktif' : 'Status Nonaktif'}
+              </Text>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  )
+}

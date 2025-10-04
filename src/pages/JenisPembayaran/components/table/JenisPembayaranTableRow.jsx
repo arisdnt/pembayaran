@@ -1,8 +1,8 @@
 import { Badge, Text } from '@radix-ui/themes'
 import { Pencil1Icon, TrashIcon } from '@radix-ui/react-icons'
 import { Eye } from 'lucide-react'
-import { formatCurrency } from '../utils/currencyFormatter'
-import { getTipeBadgeColor } from '../utils/badgeHelper'
+import { formatCurrency } from '../../utils/currencyFormatter'
+import { getTipeBadgeColor } from '../../utils/badgeHelper'
 
 export function JenisPembayaranTableRow({ item, index, onEdit, onDelete, onViewDetail, selectedItem, onSelectItem }) {
   const isSelected = selectedItem?.id === item.id

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { PageLayout } from '../../layout/PageLayout'
-import { Text, Badge } from '@radix-ui/themes'
+import { Text, Badge, Button } from '@radix-ui/themes'
 import { ArrowLeft, Wallet, Hash, Receipt, FileText, Calendar, CreditCard, Clock, CheckCircle, XCircle } from 'lucide-react'
 import { db } from '../../offline/db'
 
@@ -31,6 +31,12 @@ function DetailPembayaranContent() {
   const [loading, setLoading] = useState(true)
   const [pembayaran, setPembayaran] = useState(null)
   const [error, setError] = useState('')
+
+  const schoolName = import.meta.env.VITE_SCHOOL_NAME || 'NAMA SEKOLAH'
+  const schoolAddress = import.meta.env.VITE_SCHOOL_ADDRESS || ''
+  const schoolPhone = import.meta.env.VITE_SCHOOL_PHONE || ''
+  const schoolEmail = import.meta.env.VITE_SCHOOL_EMAIL || ''
+  const schoolWebsite = import.meta.env.VITE_SCHOOL_WEBSITE || ''
 
   useEffect(() => {
     const fetchPembayaran = async () => {
@@ -108,187 +114,379 @@ function DetailPembayaranContent() {
 
   return (
     <PageLayout>
-      <div className="flex flex-col h-full">
-        {/* Header */}
-        <div className="shrink-0 bg-white px-6 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Wallet className="h-5 w-5 text-blue-600" />
-              <Text size="4" weight="bold" className="text-slate-900">
-                Detail Pembayaran
-              </Text>
-            </div>
-            <button
-              onClick={() => navigate('/pembayaran')}
-              className="flex items-center gap-2 px-4 py-2 border border-slate-300 bg-white hover:bg-slate-50 transition-colors"
+      <div className="flex flex-col h-full bg-white">
+        {/* Header dengan tombol aksi */}
+        <div className="shrink-0 px-6 py-4">
+          <div className="flex items-center justify-end gap-3">
+            <Button
+              onClick={() => window.print()}
+              className="cursor-pointer text-white font-medium shadow-sm hover:shadow transition-all"
+              style={{ borderRadius: 0 }}
+              size="2"
             >
-              <ArrowLeft className="h-4 w-4 text-slate-600" />
-              <Text size="2" weight="medium" className="text-slate-700">
-                Kembali
-              </Text>
-            </button>
+              <FileText className="h-4 w-4" />
+              Cetak Invoice
+            </Button>
+            <Button
+              onClick={() => navigate('/pembayaran')}
+              variant="soft"
+              color="gray"
+              size="2"
+              style={{ borderRadius: 0 }}
+              className="cursor-pointer hover:bg-slate-200 transition-colors"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Kembali
+            </Button>
           </div>
         </div>
 
-        {/* Content */}
-        <div className="flex-1 overflow-auto px-6 pb-6">
-          <div className="max-w-6xl mx-auto space-y-4">
-            {/* Header Info */}
-            <div className="border-2 border-slate-300 bg-white shadow-lg">
-              <div className="bg-gradient-to-b from-slate-100 to-slate-50 px-6 py-4 border-b-2 border-slate-300">
-                <Text size="1" className="text-slate-600 uppercase tracking-wider mb-2 block">
-                  Nomor Pembayaran
-                </Text>
-                <Text size="6" weight="bold" className="text-slate-900 font-mono">
-                  {pembayaran.nomor_pembayaran}
-                </Text>
-              </div>
-              <div className="p-6 grid grid-cols-3 gap-6">
-                <div>
-                  <Text size="1" className="text-slate-500 uppercase tracking-wider mb-2 block">ID Pembayaran</Text>
-                  <Text size="2" className="text-slate-700 font-mono">{pembayaran.id}</Text>
-                </div>
-                <div>
-                  <Text size="1" className="text-slate-500 uppercase tracking-wider mb-2 block">Tanggal Dibuat</Text>
-                  <Text size="2" className="text-slate-700">{formatDateTime(pembayaran.tanggal_dibuat)}</Text>
-                </div>
-                {pembayaran.catatan && (
-                  <div className="col-span-3">
-                    <Text size="1" className="text-slate-500 uppercase tracking-wider mb-2 block">Catatan</Text>
-                    <Text size="2" className="text-slate-700">{pembayaran.catatan}</Text>
-                  </div>
-                )}
-              </div>
-            </div>
+        {/* Invoice Container */}
+        <div className="flex-1 overflow-auto px-6 py-8">
+          <div className="w-full flex justify-center">
+            {/* Paper-like Invoice - A4 Size */}
+            <div className="bg-white shadow-xl border border-slate-200 print:shadow-none print:border-0 w-full max-w-[210mm]" style={{minHeight: '297mm'}}>
 
-            {/* Tagihan Info */}
-            {pembayaran.tagihan && (
-              <div className="border-2 border-slate-300 bg-white shadow-lg">
-                <div className="bg-gradient-to-b from-slate-100 to-slate-50 px-6 py-3 border-b-2 border-slate-300">
-                  <div className="flex items-center gap-2">
-                    <Receipt className="h-4 w-4 text-slate-600" />
-                    <Text size="2" weight="bold" className="text-slate-700 uppercase tracking-wider">
-                      Informasi Tagihan
+              {/* Invoice Header */}
+              <div className="px-12 pt-8 pb-6">
+                <div className="flex items-start justify-between mb-6">
+                  <div>
+                    <Text size="5" weight="bold" className="text-slate-900 block mb-1">
+                      {schoolName}
+                    </Text>
+                    {schoolAddress && (
+                      <Text size="1" className="text-slate-600 block mb-1 max-w-sm">
+                        {schoolAddress}
+                      </Text>
+                    )}
+                    {schoolPhone && (
+                      <Text size="1" className="text-slate-600 block">
+                        Telp: {schoolPhone}
+                      </Text>
+                    )}
+                    {schoolEmail && (
+                      <Text size="1" className="text-slate-600 block">
+                        Email: {schoolEmail}
+                      </Text>
+                    )}
+                    {schoolWebsite && (
+                      <Text size="1" className="text-slate-600 block">
+                        Website: {schoolWebsite}
+                      </Text>
+                    )}
+                  </div>
+                  <div className="text-right">
+                    <Text size="1" className="text-slate-500 uppercase tracking-wider block mb-1">
+                      Invoice Number
+                    </Text>
+                    <Text size="4" weight="bold" className="text-slate-900 font-mono block pb-2 border-b border-slate-300">
+                      {pembayaran.nomor_pembayaran}
+                    </Text>
+                    <Text size="1" className="text-slate-500 mt-2 block">
+                      {formatDateTime(pembayaran.tanggal_dibuat)}
                     </Text>
                   </div>
                 </div>
-                <div className="p-6 space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+
+                {/* Bill To Section */}
+                {pembayaran.tagihan?.riwayat_kelas_siswa && (
+                  <div className="grid grid-cols-2 gap-8">
                     <div>
-                      <Text size="1" className="text-slate-500 uppercase tracking-wider mb-2 block">Nomor Tagihan</Text>
-                      <Text size="2" weight="bold" className="text-slate-900 font-mono">{pembayaran.tagihan.nomor_tagihan}</Text>
+                      <Text size="1" className="text-slate-500 uppercase tracking-wider mb-2 block font-semibold">
+                        Tagihan Untuk
+                      </Text>
+                      <div className="space-y-0.5">
+                        <Text size="2" weight="bold" className="text-slate-900 block">
+                          {pembayaran.tagihan.riwayat_kelas_siswa.siswa?.nama_lengkap}
+                        </Text>
+                        <Text size="1" className="text-slate-600 block font-mono">
+                          NISN: {pembayaran.tagihan.riwayat_kelas_siswa.siswa?.nisn}
+                        </Text>
+                        <Text size="1" className="text-slate-600 block">
+                          Kelas {pembayaran.tagihan.riwayat_kelas_siswa.kelas?.tingkat} {pembayaran.tagihan.riwayat_kelas_siswa.kelas?.nama_sub_kelas}
+                        </Text>
+                        <Text size="1" className="text-slate-600 block">
+                          {pembayaran.tagihan.riwayat_kelas_siswa.tahun_ajaran?.nama}
+                        </Text>
+                      </div>
                     </div>
                     <div>
-                      <Text size="1" className="text-slate-500 uppercase tracking-wider mb-2 block">Judul</Text>
-                      <Text size="2" className="text-slate-700">{pembayaran.tagihan.judul}</Text>
+                      <Text size="1" className="text-slate-500 uppercase tracking-wider mb-2 block font-semibold">
+                        Detail Tagihan
+                      </Text>
+                      <div className="space-y-0.5">
+                        <Text size="1" className="text-slate-600 block">
+                          <span className="text-slate-500">No. Tagihan:</span>{' '}
+                          <span className="font-mono font-semibold">{pembayaran.tagihan.nomor_tagihan}</span>
+                        </Text>
+                        <Text size="1" className="text-slate-600 block">
+                          <span className="text-slate-500">Keterangan:</span>{' '}
+                          <span className="font-medium">{pembayaran.tagihan.judul}</span>
+                        </Text>
+                      </div>
                     </div>
                   </div>
-                  {pembayaran.tagihan.riwayat_kelas_siswa && (
-                    <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-200">
-                      <div>
-                        <Text size="1" className="text-slate-500 uppercase tracking-wider mb-2 block">Nama Siswa</Text>
-                        <Text size="2" className="text-slate-900">{pembayaran.tagihan.riwayat_kelas_siswa.siswa?.nama_lengkap}</Text>
-                        <Text size="1" className="text-slate-500 font-mono">{pembayaran.tagihan.riwayat_kelas_siswa.siswa?.nisn}</Text>
-                      </div>
-                      <div>
-                        <Text size="1" className="text-slate-500 uppercase tracking-wider mb-2 block">Kelas</Text>
-                        <Text size="2" className="text-slate-700">
-                          {pembayaran.tagihan.riwayat_kelas_siswa.kelas?.tingkat} {pembayaran.tagihan.riwayat_kelas_siswa.kelas?.nama_sub_kelas}
+                )}
+              </div>
+
+              {/* Invoice Items Table */}
+              <div className="px-12 py-8">
+                <Text size="2" weight="bold" className="text-slate-900 uppercase tracking-wider mb-4 block">
+                  Rincian Transaksi Pembayaran
+                </Text>
+
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b-2 border-slate-900">
+                      <th className="text-left py-3 px-2">
+                        <Text size="1" weight="bold" className="text-slate-700 uppercase tracking-wider">
+                          No
                         </Text>
-                        <Text size="1" className="text-slate-500">{pembayaran.tagihan.riwayat_kelas_siswa.tahun_ajaran?.nama}</Text>
-                      </div>
+                      </th>
+                      <th className="text-left py-3 px-2">
+                        <Text size="1" weight="bold" className="text-slate-700 uppercase tracking-wider">
+                          Nomor Transaksi
+                        </Text>
+                      </th>
+                      <th className="text-left py-3 px-2">
+                        <Text size="1" weight="bold" className="text-slate-700 uppercase tracking-wider">
+                          Cicilan
+                        </Text>
+                      </th>
+                      <th className="text-left py-3 px-2">
+                        <Text size="1" weight="bold" className="text-slate-700 uppercase tracking-wider">
+                          Tanggal
+                        </Text>
+                      </th>
+                      <th className="text-left py-3 px-2">
+                        <Text size="1" weight="bold" className="text-slate-700 uppercase tracking-wider">
+                          Metode
+                        </Text>
+                      </th>
+                      <th className="text-left py-3 px-2">
+                        <Text size="1" weight="bold" className="text-slate-700 uppercase tracking-wider">
+                          Status
+                        </Text>
+                      </th>
+                      <th className="text-right py-3 px-2">
+                        <Text size="1" weight="bold" className="text-slate-700 uppercase tracking-wider">
+                          Jumlah
+                        </Text>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {pembayaran.rincian_pembayaran && pembayaran.rincian_pembayaran.length > 0 ? (
+                      pembayaran.rincian_pembayaran.map((rincian, index) => (
+                        <tr key={rincian.id} className="border-b border-slate-200 hover:bg-slate-50">
+                          <td className="py-4 px-2">
+                            <Text size="2" className="text-slate-700">
+                              {index + 1}
+                            </Text>
+                          </td>
+                          <td className="py-4 px-2">
+                            <Text size="2" className="text-slate-900 font-mono">
+                              {rincian.nomor_transaksi}
+                            </Text>
+                            {rincian.referensi_pembayaran && (
+                              <Text size="1" className="text-slate-500 font-mono block mt-1">
+                                Ref: {rincian.referensi_pembayaran}
+                              </Text>
+                            )}
+                          </td>
+                          <td className="py-4 px-2">
+                            <Text size="2" className="text-slate-700">
+                              Ke-{rincian.cicilan_ke}
+                            </Text>
+                          </td>
+                          <td className="py-4 px-2">
+                            <Text size="2" className="text-slate-700">
+                              {formatDateTime(rincian.tanggal_bayar)}
+                            </Text>
+                          </td>
+                          <td className="py-4 px-2">
+                            <Text size="2" className="text-slate-700 capitalize">
+                              {rincian.metode_pembayaran}
+                            </Text>
+                          </td>
+                          <td className="py-4 px-2">
+                            <Badge
+                              size="1"
+                              color={rincian.status === 'verified' ? 'green' : rincian.status === 'rejected' ? 'red' : 'gray'}
+                            >
+                              {rincian.status === 'verified' ? (
+                                <span className="flex items-center gap-1">
+                                  <CheckCircle className="h-3 w-3" />
+                                  Verified
+                                </span>
+                              ) : rincian.status === 'rejected' ? (
+                                <span className="flex items-center gap-1">
+                                  <XCircle className="h-3 w-3" />
+                                  Rejected
+                                </span>
+                              ) : (
+                                <span className="flex items-center gap-1">
+                                  <Clock className="h-3 w-3" />
+                                  Pending
+                                </span>
+                              )}
+                            </Badge>
+                          </td>
+                          <td className="py-4 px-2 text-right">
+                            <Text size="2" weight="bold" className="text-slate-900 font-mono">
+                              {formatCurrency(rincian.jumlah_dibayar)}
+                            </Text>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="7" className="py-8 text-center">
+                          <Text size="2" className="text-slate-500">
+                            Tidak ada rincian transaksi
+                          </Text>
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Invoice Summary */}
+              <div className="px-12 pb-8">
+                <div className="flex justify-end">
+                  <div className="w-80 space-y-1">
+                    <div className="flex justify-between items-center pb-1">
+                      <Text size="2" className="text-slate-600">
+                        Total Tagihan:
+                      </Text>
+                      <Text size="3" className="text-slate-900 font-mono">
+                        {formatCurrency(totalTagihan)}
+                      </Text>
                     </div>
-                  )}
-                  <div className="pt-4 border-t border-slate-200">
-                    <Text size="1" className="text-slate-500 uppercase tracking-wider mb-2 block">Total Tagihan</Text>
-                    <Text size="4" weight="bold" className="text-slate-900 font-mono">{formatCurrency(totalTagihan)}</Text>
+
+                    <div className="flex justify-between items-center pb-1 border-t border-slate-200 pt-1">
+                      <Text size="2" className="text-slate-600">
+                        Total Pembayaran:
+                      </Text>
+                      <Text size="3" className="text-slate-900 font-mono">
+                        {formatCurrency(totalPembayaran)}
+                      </Text>
+                    </div>
+
+                    <div className="flex justify-between items-center pb-1">
+                      <Text size="2" className="text-green-700">
+                        Terverifikasi:
+                      </Text>
+                      <Text size="3" weight="medium" className="text-green-700 font-mono">
+                        {formatCurrency(totalVerified)}
+                      </Text>
+                    </div>
+
+                    <div className="flex justify-between items-center pb-2">
+                      <Text size="2" className="text-amber-700">
+                        Pending Verifikasi:
+                      </Text>
+                      <Text size="3" weight="medium" className="text-amber-700 font-mono">
+                        {formatCurrency(totalPembayaran - totalVerified)}
+                      </Text>
+                    </div>
+
+                    <div className="flex justify-between items-center py-3 border-t-2 border-slate-900">
+                      <Text size="3" weight="bold" className="text-slate-900 uppercase">
+                        Sisa Tagihan:
+                      </Text>
+                      <Text size="5" weight="bold" className="text-slate-900 font-mono">
+                        {formatCurrency(Math.max(0, totalTagihan - totalVerified))}
+                      </Text>
+                    </div>
                   </div>
                 </div>
               </div>
-            )}
 
-            {/* Rincian Pembayaran */}
-            <div className="border-2 border-slate-300 bg-white shadow-lg">
-              <div className="bg-gradient-to-b from-slate-100 to-slate-50 px-6 py-3 border-b-2 border-slate-300">
-                <div className="flex items-center gap-2">
-                  <CreditCard className="h-4 w-4 text-slate-600" />
-                  <Text size="2" weight="bold" className="text-slate-700 uppercase tracking-wider">
-                    Rincian Transaksi
+              {/* Notes & Footer */}
+              {pembayaran.catatan && (
+                <div className="px-12 pb-8 border-t border-slate-200 pt-8">
+                  <Text size="1" className="text-slate-500 uppercase tracking-wider mb-2 block font-semibold">
+                    Catatan Pembayaran
+                  </Text>
+                  <Text size="2" className="text-slate-700 leading-relaxed">
+                    {pembayaran.catatan}
+                  </Text>
+                </div>
+              )}
+
+              {/* Invoice Footer */}
+              <div className="px-12 py-6 bg-white border-t border-slate-200">
+                <div className="grid grid-cols-3 gap-8 mb-6">
+                  <div className="text-center">
+                    <Text size="1" className="text-slate-500 uppercase tracking-wider mb-12 block">
+                      Diserahkan Oleh
+                    </Text>
+                    <div className="border-t border-slate-900 pt-2 mt-8">
+                      <Text size="2" className="text-slate-700">
+                        (..................................)
+                      </Text>
+                    </div>
+                  </div>
+                  <div className="text-center">
+                    <Text size="1" className="text-slate-500 uppercase tracking-wider mb-12 block">
+                      Diterima Oleh
+                    </Text>
+                    <div className="border-t border-slate-900 pt-2 mt-8">
+                      <Text size="2" className="text-slate-700">
+                        (..................................)
+                      </Text>
+                    </div>
+                  </div>
+                  <div className="text-center">
+                    <Text size="1" className="text-slate-500 uppercase tracking-wider mb-12 block">
+                      Mengetahui
+                    </Text>
+                    <div className="border-t border-slate-900 pt-2 mt-8">
+                      <Text size="2" className="text-slate-700">
+                        (..................................)
+                      </Text>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="text-center border-t border-slate-200 pt-4">
+                  <Text size="1" className="text-slate-500">
+                    Invoice ID: {pembayaran.id}
+                  </Text>
+                  <Text size="1" className="text-slate-400 block mt-1">
+                    Dokumen ini dicetak secara otomatis dan sah tanpa tanda tangan basah
                   </Text>
                 </div>
               </div>
-              <div className="p-6">
-                {pembayaran.rincian_pembayaran && pembayaran.rincian_pembayaran.length > 0 ? (
-                  <div className="space-y-4">
-                    {pembayaran.rincian_pembayaran.map((rincian, index) => (
-                      <div key={rincian.id} className="border border-slate-200 bg-slate-50">
-                        <div className="bg-gradient-to-r from-slate-100 to-white px-4 py-2 border-b border-slate-200 flex items-center justify-between">
-                          <Text size="2" weight="bold" className="text-slate-700">
-                            Transaksi #{index + 1} - Cicilan ke-{rincian.cicilan_ke}
-                          </Text>
-                          <Badge color={rincian.status === 'verified' ? 'green' : rincian.status === 'rejected' ? 'red' : 'gray'}>
-                            {rincian.status === 'verified' ? 'Terverifikasi' : rincian.status === 'rejected' ? 'Ditolak' : 'Pending'}
-                          </Badge>
-                        </div>
-                        <div className="p-4 grid grid-cols-3 gap-4">
-                          <div>
-                            <Text size="1" className="text-slate-500 uppercase tracking-wider mb-1 block">Nomor Transaksi</Text>
-                            <Text size="2" className="text-slate-900 font-mono">{rincian.nomor_transaksi}</Text>
-                          </div>
-                          <div>
-                            <Text size="1" className="text-slate-500 uppercase tracking-wider mb-1 block">Jumlah Dibayar</Text>
-                            <Text size="2" weight="bold" className="text-green-600 font-mono">{formatCurrency(rincian.jumlah_dibayar)}</Text>
-                          </div>
-                          <div>
-                            <Text size="1" className="text-slate-500 uppercase tracking-wider mb-1 block">Tanggal Bayar</Text>
-                            <Text size="2" className="text-slate-700">{formatDateTime(rincian.tanggal_bayar)}</Text>
-                          </div>
-                          <div>
-                            <Text size="1" className="text-slate-500 uppercase tracking-wider mb-1 block">Metode</Text>
-                            <Text size="2" className="text-slate-700 capitalize">{rincian.metode_pembayaran}</Text>
-                          </div>
-                          {rincian.referensi_pembayaran && (
-                            <div>
-                              <Text size="1" className="text-slate-500 uppercase tracking-wider mb-1 block">Referensi</Text>
-                              <Text size="2" className="text-slate-700 font-mono">{rincian.referensi_pembayaran}</Text>
-                            </div>
-                          )}
-                          {rincian.catatan && (
-                            <div className="col-span-3">
-                              <Text size="1" className="text-slate-500 uppercase tracking-wider mb-1 block">Catatan</Text>
-                              <Text size="2" className="text-slate-700">{rincian.catatan}</Text>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <Text size="2" className="text-slate-500 text-center py-8">Tidak ada rincian transaksi</Text>
-                )}
-              </div>
-            </div>
 
-            {/* Summary */}
-            <div className="border-2 border-slate-300 bg-gradient-to-b from-slate-50 to-white shadow-lg p-6">
-              <div className="grid grid-cols-3 gap-6">
-                <div>
-                  <Text size="1" className="text-slate-500 uppercase tracking-wider mb-2 block">Total Pembayaran</Text>
-                  <Text size="4" weight="bold" className="text-slate-900 font-mono">{formatCurrency(totalPembayaran)}</Text>
-                </div>
-                <div>
-                  <Text size="1" className="text-slate-500 uppercase tracking-wider mb-2 block">Terverifikasi</Text>
-                  <Text size="4" weight="bold" className="text-green-600 font-mono">{formatCurrency(totalVerified)}</Text>
-                </div>
-                <div>
-                  <Text size="1" className="text-slate-500 uppercase tracking-wider mb-2 block">Pending</Text>
-                  <Text size="4" weight="bold" className="text-amber-600 font-mono">{formatCurrency(totalPembayaran - totalVerified)}</Text>
-                </div>
-              </div>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Print Styles */}
+      <style>{`
+        @media print {
+          body * {
+            visibility: hidden;
+          }
+          .print\\:shadow-none,
+          .print\\:shadow-none * {
+            visibility: visible;
+          }
+          .print\\:shadow-none {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+          }
+          button {
+            display: none !important;
+          }
+        }
+      `}</style>
     </PageLayout>
   )
 }

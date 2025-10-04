@@ -642,17 +642,22 @@ export function SyncStatus() {
         >
           {selectedItem && (
             <div className="bg-white">
-              <div className="flex items-center justify-between border-b border-slate-300 bg-gradient-to-b from-slate-50 to-slate-100 px-4 py-2">
-                <Text size="2" weight="medium" className="text-slate-700">
-                  Payload
-                </Text>
+              <div className="flex items-center justify-between border-b-2 border-slate-300 bg-gradient-to-b from-slate-50 to-slate-100 px-5 py-3">
+                <div>
+                  <Text size="3" weight="bold" className="text-slate-800 uppercase tracking-wider">
+                    Detail Payload
+                  </Text>
+                  <Text size="1" className="text-red-600 block mt-0.5 font-medium">
+                    Tabel: {selectedItem.table} • Operasi: {selectedItem.op}
+                  </Text>
+                </div>
                 <Dialog.Close asChild>
                   <button
-                    className="flex h-6 w-6 items-center justify-center text-slate-500 hover:text-slate-700"
+                    className="flex h-8 w-8 items-center justify-center hover:bg-red-50 hover:border-red-400 transition-all border border-slate-300 group"
                     aria-label="Tutup"
                     type="button"
                   >
-                    ×
+                    <XCircle className="h-4 w-4 text-slate-600 group-hover:text-red-600 transition-colors" />
                   </button>
                 </Dialog.Close>
               </div>
@@ -661,6 +666,19 @@ export function SyncStatus() {
                   <pre className="whitespace-pre-wrap break-words">
                     {selectedItem.payload ? JSON.stringify(selectedItem.payload, null, 2) : 'Tidak ada payload'}
                   </pre>
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className="border-t-2 border-slate-300 bg-gradient-to-b from-slate-50 to-slate-100 px-5 py-3">
+                <div className="flex justify-end">
+                  <Dialog.Close asChild>
+                    <button
+                      className="px-6 py-2 border border-slate-400 bg-white text-slate-700 hover:bg-slate-50 font-medium transition-colors"
+                    >
+                      Tutup
+                    </button>
+                  </Dialog.Close>
                 </div>
               </div>
             </div>

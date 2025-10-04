@@ -2,7 +2,6 @@ import { Dialog, Text } from '@radix-ui/themes'
 import { BookOpen, Edit3, X } from 'lucide-react'
 import { useRiwayatKelasSiswaForm } from '../../hooks/useRiwayatKelasSiswaForm'
 import { PrimaryInfoSection } from '../detail/components/PrimaryInfoSection'
-import { TimelineSection } from '../detail/components/TimelineSection'
 import { FormError } from './FormError'
 import { FormActions } from './FormActions'
 
@@ -72,20 +71,13 @@ function RiwayatKelasSiswaFormDialog({
         {/* Content */}
         <form onSubmit={handleSubmit} className="overflow-auto bg-white" style={{ maxHeight: 'calc(90vh - 140px)' }}>
           <div className="p-6 space-y-6">
-            {/* Row 1: Informasi Utama */}
+            {/* Informasi Utama */}
             <PrimaryInfoSection
               formData={formData}
               setFormData={setFormData}
               siswaList={siswaList}
               kelasList={kelasList}
               tahunAjaranList={tahunAjaranList}
-            />
-
-            {/* Row 2: Timeline & Detail */}
-            <TimelineSection
-              formData={formData}
-              setFormData={setFormData}
-              siswaList={siswaList}
             />
 
             <FormError error={error} />

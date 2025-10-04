@@ -117,39 +117,49 @@ export function RiwayatWaliKelasDetailInfo({ riwayat }) {
   const tahunAjaranName = riwayat.tahun_ajaran?.nama || '—'
 
   return (
-    <div className="space-y-1">
-      {/* Informasi Wali Kelas */}
-      <div className="bg-gradient-to-b from-slate-50 to-white border border-slate-200 p-3 mb-3">
-        <div className="flex-1 min-w-0">
-          <Text size="1" className="text-slate-500 uppercase tracking-wider text-[0.65rem] mb-1 block">
+    <div className="grid grid-cols-2 gap-4">
+      {/* Left Column */}
+      <div className="space-y-1">
+        {/* Informasi Wali Kelas */}
+        <div className="bg-gradient-to-b from-slate-50 to-white border border-slate-200 p-4 mb-3">
+          <Text size="1" className="text-slate-500 uppercase tracking-wider text-[0.65rem] mb-2 block">
             Wali Kelas
           </Text>
-          <Text size="3" weight="bold" className="text-slate-900 leading-tight">
+          <Text size="4" weight="bold" className="text-slate-900 leading-tight">
             {waliKelasName}
           </Text>
           {riwayat.wali_kelas?.nip && (
-            <Text size="1" className="text-slate-500 block mt-0.5">
+            <Text size="2" className="text-slate-500 block mt-1">
               NIP: {riwayat.wali_kelas.nip}
             </Text>
           )}
-          <Text size="2" className="text-slate-600 block mt-1">
+          <Text size="2" className="text-slate-600 block mt-2">
             {tahunAjaranName} • Kelas {kelasName}
           </Text>
         </div>
+
+        {/* Periode Penugasan */}
+        <Section title="Periode Penugasan" icon={Calendar}>
+          <Text size="2" className="text-slate-800">
+            {formatDate(riwayat.tanggal_mulai)} - {riwayat.tanggal_selesai ? formatDate(riwayat.tanggal_selesai) : 'sekarang'}
+          </Text>
+          <Text size="1" className="text-slate-500 block mt-1">
+            Durasi {calculateDuration(riwayat.tanggal_mulai, riwayat.tanggal_selesai)}
+          </Text>
+        </Section>
+
+        {/* Catatan */}
+        {riwayat.catatan && (
+          <Section title="Catatan" icon={FileText} className="border-b-0 pb-0 mb-0">
+            <Text size="2" className="text-slate-700 leading-relaxed whitespace-pre-wrap">
+              {riwayat.catatan}
+            </Text>
+          </Section>
+        )}
       </div>
 
-      {/* Periode Penugasan */}
-      <Section title="Periode Penugasan" icon={Calendar}>
-        <Text size="2" className="text-slate-800">
-          {formatDate(riwayat.tanggal_mulai)} - {riwayat.tanggal_selesai ? formatDate(riwayat.tanggal_selesai) : 'sekarang'}
-        </Text>
-        <Text size="1" className="text-slate-500 block mt-0.5">
-          Durasi {calculateDuration(riwayat.tanggal_mulai, riwayat.tanggal_selesai)}
-        </Text>
-      </Section>
-
-      {/* Daftar Siswa */}
-      <Section title="Daftar Siswa" icon={Users} className={riwayat.catatan ? '' : 'border-b-0 pb-0 mb-0'}>
+      {/* Right Column */}
+      <div>
         {studentsLoading ? (
           <Text size="2" className="text-slate-500">
             Memuat daftar siswa...
@@ -163,29 +173,27 @@ export function RiwayatWaliKelasDetailInfo({ riwayat }) {
             Tidak ada siswa yang terhubung dengan wali kelas ini pada tahun ajaran terpilih.
           </Text>
         ) : (
-          <div className="max-h-60 overflow-y-auto">
+          <div className="max-h-[500px] overflow-y-auto border border-slate-200">
             {students.map((item, index) => (
               <div
                 key={item.id}
-                className={`flex items-center gap-2 px-2 py-1 ${
+                className={`flex items-center gap-2 px-2 py-2 border-b border-slate-100 last:border-b-0 ${
                   index % 2 === 0 ? 'bg-slate-50' : 'bg-white'
                 }`}
               >
                 <Text size="1" className="text-slate-500 font-mono w-6 shrink-0">
                   {index + 1}.
                 </Text>
-                <Text size="2" weight="medium" className="text-slate-900 truncate">
-                  {item.siswa?.nama_lengkap || 'Tanpa nama'}
-                </Text>
-                {item.siswa?.nisn && (
-                  <>
-                    <span className="text-slate-400">•</span>
-                    <Text size="1" className="text-red-600 font-mono">
-                      {item.siswa.nisn}
+                <div className="flex-1 min-w-0">
+                  <Text size="2" weight="medium" className="text-slate-900 truncate block">
+                    {item.siswa?.nama_lengkap || 'Tanpa nama'}
+                  </Text>
+                  {item.siswa?.nisn && (
+                    <Text size="1" className="text-slate-500 font-mono block mt-0.5">
+                      NISN: {item.siswa.nisn}
                     </Text>
-                  </>
-                )}
-                <span className="text-slate-400">•</span>
+                  )}
+                </div>
                 <Badge color={getStudentMeta(item.status).color} variant="soft" size="1" style={{ borderRadius: 0 }}>
                   {getStudentMeta(item.status).label}
                 </Badge>
@@ -193,16 +201,7 @@ export function RiwayatWaliKelasDetailInfo({ riwayat }) {
             ))}
           </div>
         )}
-      </Section>
-
-      {/* Catatan */}
-      {riwayat.catatan && (
-        <Section title="Catatan" icon={FileText} className="border-b-0 pb-0 mb-0">
-          <Text size="2" className="text-slate-700 leading-relaxed whitespace-pre-wrap">
-            {riwayat.catatan}
-          </Text>
-        </Section>
-      )}
+      </div>
     </div>
   )
 }

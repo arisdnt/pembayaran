@@ -1,7 +1,7 @@
 import { Text, Badge } from '@radix-ui/themes'
 import { Clock, DollarSign, FileText, Hash, Tag, Calendar, CheckCircle, AlertCircle } from 'lucide-react'
-import { formatCurrency } from '../utils/currencyFormatter'
-import { getTipeBadgeColor } from '../utils/badgeHelper'
+import { formatCurrency } from '../../utils/currencyFormatter'
+import { getTipeBadgeColor } from '../../utils/badgeHelper'
 
 function formatDateTime(dateStr) {
   if (!dateStr) return '—'

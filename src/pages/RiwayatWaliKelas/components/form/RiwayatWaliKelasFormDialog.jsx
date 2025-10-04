@@ -1,6 +1,7 @@
 import { Dialog, Text, TextField, Select, Button } from '@radix-ui/themes'
 import { UserCheck, Edit3, X, Calendar, FileText, AlertCircle } from 'lucide-react'
 import { useRiwayatWaliKelasForm } from '../../hooks/useRiwayatWaliKelasForm'
+import { useEffect } from 'react'
 
 function RiwayatWaliKelasFormDialog({
   open,
@@ -18,6 +19,31 @@ function RiwayatWaliKelasFormDialog({
     isEdit,
     onOpenChange
   )
+
+  // Auto-fill tanggal mulai and tanggal selesai based on selected tahun ajaran
+  useEffect(() => {
+    if (formData.id_tahun_ajaran && tahunAjaranList.length > 0) {
+      const tahun = tahunAjaranList.find(ta => ta.id === formData.id_tahun_ajaran)
+      if (tahun) {
+        const formatDate = (dateStr) => {
+          if (!dateStr) return ''
+          try {
+            const date = new Date(dateStr)
+            if (Number.isNaN(date.getTime())) return ''
+            return date.toISOString().split('T')[0]
+          } catch {
+            return ''
+          }
+        }
+
+        setFormData(prev => ({
+          ...prev,
+          tanggal_mulai: formatDate(tahun.tanggal_mulai),
+          tanggal_selesai: formatDate(tahun.tanggal_selesai)
+        }))
+      }
+    }
+  }, [formData.id_tahun_ajaran, tahunAjaranList, setFormData])
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -156,44 +182,6 @@ function RiwayatWaliKelasFormDialog({
 
               {/* Right Column */}
               <div className="space-y-4">
-                {/* Tanggal Mulai */}
-                <div>
-                  <label className="flex items-center gap-1.5 mb-2">
-                    <Calendar className="h-3.5 w-3.5 text-slate-600" />
-                    <Text size="2" weight="medium" className="text-slate-700">
-                      Tanggal Mulai <span className="text-red-500">*</span>
-                    </Text>
-                  </label>
-                  <TextField.Root
-                    type="date"
-                    value={formData.tanggal_mulai}
-                    onChange={(e) => setFormData({ ...formData, tanggal_mulai: e.target.value })}
-                    className="border-slate-300"
-                    style={{ borderRadius: 0 }}
-                    required
-                  />
-                </div>
-
-                {/* Tanggal Selesai */}
-                <div>
-                  <label className="flex items-center gap-1.5 mb-2">
-                    <Calendar className="h-3.5 w-3.5 text-slate-600" />
-                    <Text size="2" weight="medium" className="text-slate-700">
-                      Tanggal Selesai
-                    </Text>
-                  </label>
-                  <TextField.Root
-                    type="date"
-                    value={formData.tanggal_selesai}
-                    onChange={(e) => setFormData({ ...formData, tanggal_selesai: e.target.value })}
-                    className="border-slate-300"
-                    style={{ borderRadius: 0 }}
-                  />
-                  <Text size="1" className="text-slate-500 mt-1 block">
-                    Opsional - Diisi jika penugasan sudah selesai
-                  </Text>
-                </div>
-
                 {/* Status */}
                 <div>
                   <label className="flex items-center gap-1.5 mb-2">
@@ -218,25 +206,44 @@ function RiwayatWaliKelasFormDialog({
                     </Select.Content>
                   </Select.Root>
                 </div>
+
+                {/* Catatan */}
+                <div>
+                  <label className="flex items-center gap-1.5 mb-2">
+                    <FileText className="h-3.5 w-3.5 text-slate-600" />
+                    <Text size="2" weight="medium" className="text-slate-700">
+                      Catatan
+                    </Text>
+                  </label>
+                  <TextField.Root
+                    value={formData.catatan}
+                    onChange={(e) => setFormData({ ...formData, catatan: e.target.value })}
+                    placeholder="Catatan tambahan (opsional)"
+                    className="border-slate-300"
+                    style={{ borderRadius: 0 }}
+                  />
+                </div>
               </div>
             </div>
 
-            {/* Catatan - Full Width */}
-            <div className="mt-6">
-              <label className="flex items-center gap-1.5 mb-2">
-                <FileText className="h-3.5 w-3.5 text-slate-600" />
-                <Text size="2" weight="medium" className="text-slate-700">
-                  Catatan
+            {/* Info Tanggal Otomatis - Full width below form (only in create mode) */}
+            {!isEdit && formData.id_tahun_ajaran && formData.tanggal_mulai && (
+              <div className="border border-blue-200 bg-blue-50 px-3 py-3 mt-6">
+                <Text size="2" weight="medium" className="text-blue-800 mb-2 block">
+                  Tanggal Penugasan (Otomatis dari Tahun Ajaran)
                 </Text>
-              </label>
-              <textarea
-                value={formData.catatan}
-                onChange={(e) => setFormData({ ...formData, catatan: e.target.value })}
-                placeholder="Catatan tambahan (opsional)"
-                className="w-full min-h-[100px] px-3 py-2 border border-slate-300 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                style={{ borderRadius: 0 }}
-              />
-            </div>
+                <div className="space-y-1">
+                  <Text size="1" className="text-blue-700 block">
+                    Mulai: {new Date(formData.tanggal_mulai).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}
+                  </Text>
+                  {formData.tanggal_selesai && (
+                    <Text size="1" className="text-blue-700 block">
+                      Selesai: {new Date(formData.tanggal_selesai).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}
+                    </Text>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Error Alert */}
             {error && (

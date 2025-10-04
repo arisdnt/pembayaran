@@ -114,6 +114,31 @@ export function PeminatanSiswaFormDialog({
     }
   }, [initialData, isEdit, riwayatKelasSiswa])
 
+  // Auto-fill tanggal mulai and tanggal selesai based on selected tahun ajaran
+  useEffect(() => {
+    if (selectedTahunAjaran && tahunAjaranList.length > 0) {
+      const tahun = tahunAjaranList.find(ta => ta.id === selectedTahunAjaran)
+      if (tahun) {
+        const formatDate = (dateStr) => {
+          if (!dateStr) return ''
+          try {
+            const date = new Date(dateStr)
+            if (Number.isNaN(date.getTime())) return ''
+            return date.toISOString().split('T')[0]
+          } catch {
+            return ''
+          }
+        }
+
+        setFormData(prev => ({
+          ...prev,
+          tanggal_mulai: formatDate(tahun.tanggal_mulai),
+          tanggal_selesai: formatDate(tahun.tanggal_selesai)
+        }))
+      }
+    }
+  }, [selectedTahunAjaran, tahunAjaranList])
+
   // Reset nested selection state when dialog opens/closes or when creating new
   useEffect(() => {
     if (open && !isEdit) {
@@ -137,12 +162,6 @@ export function PeminatanSiswaFormDialog({
 
     if (!formData.tingkat) {
       setError('Tingkat wajib diisi')
-      setSubmitting(false)
-      return
-    }
-
-    if (!formData.tanggal_mulai) {
-      setError('Tanggal mulai wajib diisi')
       setSubmitting(false)
       return
     }
@@ -226,8 +245,8 @@ export function PeminatanSiswaFormDialog({
                       1. Tahun Ajaran <span className="text-red-600">*</span>
                     </Text>
                   </div>
-                  <Select.Root 
-                    value={selectedTahunAjaran} 
+                  <Select.Root
+                    value={selectedTahunAjaran}
                     onValueChange={(value) => {
                       setSelectedTahunAjaran(value)
                       setFormData({ ...formData, id_tahun_ajaran: value })
@@ -238,18 +257,18 @@ export function PeminatanSiswaFormDialog({
                     }}
                     required
                   >
-                    <Select.Trigger 
+                    <Select.Trigger
                       style={{ borderRadius: 0, width: '100%' }}
                       placeholder="Pilih tahun ajaran..."
                     />
-                    <Select.Content 
+                    <Select.Content
                       position="popper"
                       style={{ borderRadius: 0 }}
                       className="border-2 border-slate-300 shadow-lg bg-white z-50"
                     >
                       {tahunAjaranList.map((ta) => (
-                        <Select.Item 
-                          key={ta.id} 
+                        <Select.Item
+                          key={ta.id}
                           value={ta.id}
                           style={{ borderRadius: 0 }}
                           className="hover:bg-blue-50 cursor-pointer px-3 py-2"
@@ -272,8 +291,8 @@ export function PeminatanSiswaFormDialog({
                       2. Tingkat <span className="text-red-600">*</span>
                     </Text>
                   </div>
-                  <Select.Root 
-                    value={selectedTingkat} 
+                  <Select.Root
+                    value={selectedTingkat}
                     onValueChange={(value) => {
                       setSelectedTingkat(value)
                       setFormData({ ...formData, tingkat: value })
@@ -284,18 +303,18 @@ export function PeminatanSiswaFormDialog({
                     disabled={!selectedTahunAjaran}
                     required
                   >
-                    <Select.Trigger 
+                    <Select.Trigger
                       style={{ borderRadius: 0, width: '100%' }}
                       placeholder={!selectedTahunAjaran ? "Pilih tahun ajaran dulu" : "Pilih tingkat..."}
                     />
-                    <Select.Content 
+                    <Select.Content
                       position="popper"
                       style={{ borderRadius: 0 }}
                       className="border-2 border-slate-300 shadow-lg bg-white z-50"
                     >
                       {tingkatOptions.map((tingkat) => (
-                        <Select.Item 
-                          key={tingkat} 
+                        <Select.Item
+                          key={tingkat}
                           value={String(tingkat)}
                           style={{ borderRadius: 0 }}
                           className="hover:bg-blue-50 cursor-pointer px-3 py-2"
@@ -318,8 +337,8 @@ export function PeminatanSiswaFormDialog({
                       3. Kelas <span className="text-red-600">*</span>
                     </Text>
                   </div>
-                  <Select.Root 
-                    value={selectedKelas} 
+                  <Select.Root
+                    value={selectedKelas}
                     onValueChange={(value) => {
                       setSelectedKelas(value)
                       // Reset siswa selection
@@ -328,18 +347,18 @@ export function PeminatanSiswaFormDialog({
                     disabled={!selectedTingkat}
                     required
                   >
-                    <Select.Trigger 
+                    <Select.Trigger
                       style={{ borderRadius: 0, width: '100%' }}
                       placeholder={!selectedTingkat ? "Pilih tingkat dulu" : "Pilih kelas..."}
                     />
-                    <Select.Content 
+                    <Select.Content
                       position="popper"
                       style={{ borderRadius: 0, maxHeight: '300px' }}
                       className="border-2 border-slate-300 shadow-lg bg-white z-50"
                     >
                       {kelasOptions.map((kelas) => (
-                        <Select.Item 
-                          key={kelas.id} 
+                        <Select.Item
+                          key={kelas.id}
                           value={kelas.id}
                           style={{ borderRadius: 0 }}
                           className="hover:bg-blue-50 cursor-pointer px-3 py-2"
@@ -353,7 +372,10 @@ export function PeminatanSiswaFormDialog({
                     {!selectedTingkat ? '⚠️ Pilih tingkat terlebih dahulu' : 'Pilih kelas spesifik'}
                   </Text>
                 </label>
+              </div>
 
+              {/* Right Column */}
+              <div className="space-y-4">
                 {/* Step 4: Siswa */}
                 <label>
                   <div className="flex items-center gap-1.5 mb-1">
@@ -362,17 +384,17 @@ export function PeminatanSiswaFormDialog({
                       4. Siswa <span className="text-red-600">*</span>
                     </Text>
                   </div>
-                  <Select.Root 
-                    value={formData.id_siswa} 
+                  <Select.Root
+                    value={formData.id_siswa}
                     onValueChange={(value) => setFormData({ ...formData, id_siswa: value })}
                     disabled={!selectedKelas}
                     required
                   >
-                    <Select.Trigger 
+                    <Select.Trigger
                       style={{ borderRadius: 0, width: '100%' }}
                       placeholder={!selectedKelas ? "Pilih kelas dulu" : "Pilih siswa..."}
                     />
-                    <Select.Content 
+                    <Select.Content
                       position="popper"
                       style={{ borderRadius: 0, maxHeight: '300px' }}
                       className="border-2 border-slate-300 shadow-lg bg-white z-50"
@@ -383,8 +405,8 @@ export function PeminatanSiswaFormDialog({
                         </div>
                       )}
                       {filteredSiswaList.map((siswa) => (
-                        <Select.Item 
-                          key={siswa.id} 
+                        <Select.Item
+                          key={siswa.id}
                           value={siswa.id}
                           style={{ borderRadius: 0 }}
                           className="hover:bg-blue-50 cursor-pointer px-3 py-2"
@@ -399,35 +421,31 @@ export function PeminatanSiswaFormDialog({
                   </Text>
                 </label>
 
-              </div>
-
-              {/* Right Column */}
-              <div className="space-y-4">
                 {/* Peminatan */}
                 <label>
                   <div className="flex items-center gap-1.5 mb-1">
                     <BookOpen className="h-3.5 w-3.5 text-orange-500" />
                     <Text as="div" size="2" weight="medium">
-                      Peminatan <span className="text-red-600">*</span>
+                      5. Peminatan <span className="text-red-600">*</span>
                     </Text>
                   </div>
-                  <Select.Root 
-                    value={formData.id_peminatan} 
+                  <Select.Root
+                    value={formData.id_peminatan}
                     onValueChange={(value) => setFormData({ ...formData, id_peminatan: value })}
                     required
                   >
-                    <Select.Trigger 
+                    <Select.Trigger
                       style={{ borderRadius: 0, width: '100%' }}
                       placeholder="Pilih peminatan..."
                     />
-                    <Select.Content 
+                    <Select.Content
                       position="popper"
                       style={{ borderRadius: 0, maxHeight: '300px' }}
                       className="border-2 border-slate-300 shadow-lg bg-white z-50"
                     >
                       {peminatanList.map((peminatan) => (
-                        <Select.Item 
-                          key={peminatan.id} 
+                        <Select.Item
+                          key={peminatan.id}
                           value={peminatan.id}
                           style={{ borderRadius: 0 }}
                           className="hover:bg-blue-50 cursor-pointer px-3 py-2"
@@ -441,58 +459,20 @@ export function PeminatanSiswaFormDialog({
                     Pilih peminatan untuk siswa
                   </Text>
                 </label>
-                {/* Tanggal Mulai */}
-                <label>
-                  <div className="flex items-center gap-1.5 mb-1">
-                    <Calendar className="h-3.5 w-3.5 text-green-500" />
-                    <Text as="div" size="2" weight="medium">
-                      Tanggal Mulai <span className="text-red-600">*</span>
-                    </Text>
-                  </div>
-                  <TextField.Root
-                    type="date"
-                    value={formData.tanggal_mulai}
-                    onChange={(e) => setFormData({ ...formData, tanggal_mulai: e.target.value })}
-                    style={{ borderRadius: 0 }}
-                    required
-                  />
-                  <Text size="1" className="text-slate-500 mt-1">
-                    Tanggal mulai mengikuti peminatan
-                  </Text>
-                </label>
-
-                {/* Tanggal Selesai */}
-                <label>
-                  <div className="flex items-center gap-1.5 mb-1">
-                    <Calendar className="h-3.5 w-3.5 text-red-500" />
-                    <Text as="div" size="2" weight="medium">
-                      Tanggal Selesai
-                    </Text>
-                  </div>
-                  <TextField.Root
-                    type="date"
-                    value={formData.tanggal_selesai}
-                    onChange={(e) => setFormData({ ...formData, tanggal_selesai: e.target.value })}
-                    style={{ borderRadius: 0 }}
-                  />
-                  <Text size="1" className="text-slate-500 mt-1">
-                    Kosongkan jika masih berlangsung
-                  </Text>
-                </label>
 
                 {/* Catatan */}
                 <label>
                   <div className="flex items-center gap-1.5 mb-1">
                     <FileText className="h-3.5 w-3.5 text-orange-500" />
                     <Text as="div" size="2" weight="medium">
-                      Catatan
+                      6. Catatan
                     </Text>
                   </div>
-                  <TextArea
+                  <TextField.Root
                     placeholder="Catatan tambahan (opsional)"
                     value={formData.catatan}
                     onChange={(e) => setFormData({ ...formData, catatan: e.target.value })}
-                    style={{ borderRadius: 0, minHeight: '120px' }}
+                    style={{ borderRadius: 0 }}
                   />
                   <Text size="1" className="text-slate-500 mt-1">
                     Catatan atau informasi tambahan
@@ -500,6 +480,25 @@ export function PeminatanSiswaFormDialog({
                 </label>
               </div>
             </div>
+
+            {/* Info Tanggal Otomatis - Full width below form (only in create mode) */}
+            {!isEdit && selectedTahunAjaran && formData.tanggal_mulai && (
+              <div className="border border-blue-200 bg-blue-50 px-3 py-3 mt-6">
+                <Text size="2" weight="medium" className="text-blue-800 mb-2 block">
+                  Tanggal Peminatan (Otomatis dari Tahun Ajaran)
+                </Text>
+                <div className="space-y-1">
+                  <Text size="1" className="text-blue-700 block">
+                    Mulai: {new Date(formData.tanggal_mulai).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}
+                  </Text>
+                  {formData.tanggal_selesai && (
+                    <Text size="1" className="text-blue-700 block">
+                      Selesai: {new Date(formData.tanggal_selesai).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}
+                    </Text>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Error Message */}
             {error && (

@@ -1,7 +1,18 @@
 import { Text, Select } from '@radix-ui/themes'
-import { School, Calendar, CheckCircle, User } from 'lucide-react'
+import { School, Calendar, CheckCircle, User, FileText } from 'lucide-react'
 import { SiswaAutocomplete } from '../../form/SiswaAutocomplete'
-import { useMemo } from 'react'
+import { useMemo, useCallback } from 'react'
+
+const formatDateForInput = (dateStr) => {
+  if (!dateStr) return ''
+  try {
+    const date = new Date(dateStr)
+    if (Number.isNaN(date.getTime())) return ''
+    return date.toISOString().split('T')[0]
+  } catch {
+    return ''
+  }
+}
 
 export function PrimaryInfoSection({
   formData,
@@ -14,6 +25,23 @@ export function PrimaryInfoSection({
     () => siswaList.find((s) => s.id === formData.id_siswa),
     [formData.id_siswa, siswaList]
   )
+
+  const handleTahunAjaranChange = useCallback((value) => {
+    const selectedTahun = tahunAjaranList.find((tahun) => tahun.id === value)
+    const tanggalMasuk = selectedTahun?.tanggal_mulai
+      ? formatDateForInput(selectedTahun.tanggal_mulai)
+      : ''
+    const tanggalKeluar = selectedTahun?.tanggal_selesai
+      ? formatDateForInput(selectedTahun.tanggal_selesai)
+      : ''
+
+    setFormData((prev) => ({
+      ...prev,
+      id_tahun_ajaran: value,
+      tanggal_masuk: tanggalMasuk || prev.tanggal_masuk,
+      tanggal_keluar: selectedTahun?.tanggal_selesai ? tanggalKeluar : '',
+    }))
+  }, [setFormData, tahunAjaranList])
 
   return (
     <div>
@@ -75,7 +103,7 @@ export function PrimaryInfoSection({
           </Text>
           <Select.Root
             value={formData.id_tahun_ajaran}
-            onValueChange={(value) => setFormData({ ...formData, id_tahun_ajaran: value })}
+            onValueChange={handleTahunAjaranChange}
             required
           >
             <Select.Trigger
@@ -155,7 +183,7 @@ export function PrimaryInfoSection({
             </Text>
             {selectedSiswa.nisn && (
               <>
-                <span className="text-slate-400">•</span>
+                <span className="text-slate-400">&bull;</span>
                 <Text size="1" className="text-slate-600 font-mono">
                   NISN: {selectedSiswa.nisn}
                 </Text>
@@ -171,6 +199,27 @@ export function PrimaryInfoSection({
           </div>
         )}
       </div>
+
+      {/* Catatan */}
+      <div className="mt-4">
+        <label>
+          <Text as="div" size="2" mb="2" weight="medium">
+            <div className="flex items-center gap-2">
+              <FileText className="h-4 w-4 text-slate-600" />
+              Catatan
+            </div>
+          </Text>
+          <input
+            type="text"
+            placeholder="Catatan tambahan (opsional)..."
+            value={formData.catatan}
+            onChange={(e) => setFormData((prev) => ({ ...prev, catatan: e.target.value }))}
+            className="w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            style={{ height: '40px' }}
+          />
+        </label>
+      </div>
     </div>
   )
 }
+

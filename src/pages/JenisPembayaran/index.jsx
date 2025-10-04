@@ -3,11 +3,11 @@ import { PageLayout } from '../../layout/PageLayout'
 import { Text } from '@radix-ui/themes'
 import { AlertCircle } from 'lucide-react'
 import { useJenisPembayaran } from './hooks/useJenisPembayaran'
-import { JenisPembayaranTable } from './components/JenisPembayaranTable'
+import { JenisPembayaranTable } from './components/table/JenisPembayaranTable'
 import { DeleteConfirmDialog } from '../../components/common/DeleteConfirmDialog'
-import { DetailPanel } from './components/DetailPanel'
-import { JenisPembayaranDetailModal } from './components/JenisPembayaranDetailModal'
-import { JenisPembayaranFormDialog } from './components/JenisPembayaranFormDialog'
+import { DetailPanel } from './components/detail/DetailPanel'
+import { JenisPembayaranDetailModal } from './components/detail/JenisPembayaranDetailModal'
+import { JenisPembayaranFormDialog } from './components/form/JenisPembayaranFormDialog'
 
 function JenisPembayaranContent() {
   const {

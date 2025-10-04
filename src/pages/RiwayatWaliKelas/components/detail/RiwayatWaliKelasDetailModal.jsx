@@ -9,7 +9,7 @@ export function RiwayatWaliKelasDetailModal({ open, onOpenChange, riwayat }) {
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Content
         style={{
-          maxWidth: '600px',
+          maxWidth: '900px',
           width: '95vw',
           maxHeight: '85vh',
           padding: 0,
@@ -44,8 +44,20 @@ export function RiwayatWaliKelasDetailModal({ open, onOpenChange, riwayat }) {
         </div>
 
         {/* Content */}
-        <div className="overflow-auto bg-white p-6" style={{ maxHeight: 'calc(85vh - 80px)' }}>
+        <div className="overflow-auto bg-white p-6" style={{ maxHeight: 'calc(85vh - 160px)' }}>
           <RiwayatWaliKelasDetailInfo riwayat={riwayat} />
+        </div>
+
+        {/* Footer */}
+        <div className="border-t-2 border-slate-300 bg-gradient-to-b from-slate-50 to-slate-100 px-5 py-3">
+          <div className="flex justify-end">
+            <button
+              onClick={() => onOpenChange(false)}
+              className="px-6 py-2 border border-slate-400 bg-white text-slate-700 hover:bg-slate-50 font-medium transition-colors"
+            >
+              Tutup
+            </button>
+          </div>
         </div>
       </Dialog.Content>
     </Dialog.Root>

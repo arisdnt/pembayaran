@@ -1,8 +1,8 @@
 import { Text } from '@radix-ui/themes'
-import { useJenisPembayaranFilters } from '../hooks/useJenisPembayaranFilters'
-import { JenisPembayaranFilters } from './JenisPembayaranFilters'
+import { useJenisPembayaranFilters } from '../../hooks/useJenisPembayaranFilters'
+import { JenisPembayaranFilters } from '../JenisPembayaranFilters'
 import { JenisPembayaranTableRow } from './JenisPembayaranTableRow'
-import { JenisPembayaranEmptyState } from './JenisPembayaranEmptyState'
+import { JenisPembayaranEmptyState } from '../JenisPembayaranEmptyState'
 import { JenisPembayaranTableSkeleton } from './JenisPembayaranTableSkeleton'
 
 export function JenisPembayaranTable({ data, isLoading, isRefreshing, onEdit, onDelete, onAdd, onViewDetail, selectedItem, onSelectItem }) {
