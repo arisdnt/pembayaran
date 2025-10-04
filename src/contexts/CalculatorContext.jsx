@@ -1,33 +1,40 @@
-import { createContext, useContext, useState } from 'react'
+import { createContext, useCallback, useContext, useMemo, useState } from 'react'
 
-const CalculatorContext = createContext({
-  isOpen: false,
-  toggleCalculator: () => {},
-  openCalculator: () => {},
-  closeCalculator: () => {},
-})
+const CalculatorContext = createContext(undefined)
 
 export function CalculatorProvider({ children }) {
   const [isOpen, setIsOpen] = useState(false)
 
-  const toggleCalculator = () => setIsOpen(prev => !prev)
-  const openCalculator = () => setIsOpen(true)
-  const closeCalculator = () => setIsOpen(false)
+  const toggleCalculator = useCallback(() => {
+    setIsOpen(prev => !prev)
+  }, [])
 
-  const value = {
+  const openCalculator = useCallback(() => {
+    setIsOpen(true)
+  }, [])
+
+  const closeCalculator = useCallback(() => {
+    setIsOpen(false)
+  }, [])
+
+  const value = useMemo(() => ({
     isOpen,
     toggleCalculator,
     openCalculator,
     closeCalculator,
-  }
+  }), [isOpen, toggleCalculator, openCalculator, closeCalculator])
 
-  return <CalculatorContext.Provider value={value}>{children}</CalculatorContext.Provider>
+  return (
+    <CalculatorContext.Provider value={value}>
+      {children}
+    </CalculatorContext.Provider>
+  )
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
 export function useCalculator() {
   const context = useContext(CalculatorContext)
-  if (!context) {
+  if (context === undefined) {
     throw new Error('useCalculator must be used within a CalculatorProvider')
   }
   return context

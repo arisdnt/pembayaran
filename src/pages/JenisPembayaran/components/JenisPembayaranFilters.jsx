@@ -24,7 +24,7 @@ export function JenisPembayaranFilters({
     <div className="border-b border-slate-300 bg-gradient-to-b from-slate-50 to-slate-100">
       <div className="flex flex-wrap items-center gap-3 px-4 py-2.5">
         {/* Search */}
-        <div className="flex-1 min-w-[240px] max-w-xs">
+        <div className="flex-1 min-w-[200px] max-w-xs">
           <TextField.Root
             placeholder="Cari kode atau nama..."
             value={searchQuery}
@@ -45,6 +45,7 @@ export function JenisPembayaranFilters({
                 <button
                   onClick={() => setSearchQuery('')}
                   className="cursor-pointer text-slate-400 hover:text-slate-700 transition-colors"
+                  type="button"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -54,71 +55,63 @@ export function JenisPembayaranFilters({
         </div>
 
         {/* Filter Tipe */}
-        <div className="w-[140px]">
-          <Select.Root value={filterTipe} onValueChange={setFilterTipe}>
-            <Select.Trigger
-              placeholder="Tipe"
-              style={{ borderRadius: 0, border: '1px solid #cbd5e1', backgroundColor: '#ffffff' }}
-            />
-            <Select.Content style={{ borderRadius: 0 }}>
-              <Select.Item value="all">Semua Tipe</Select.Item>
-              <Select.Item value="bulanan">Bulanan</Select.Item>
-              <Select.Item value="tahunan">Tahunan</Select.Item>
-              <Select.Item value="sekali">Sekali</Select.Item>
-            </Select.Content>
-          </Select.Root>
-        </div>
+        <Select.Root value={filterTipe} onValueChange={setFilterTipe}>
+          <Select.Trigger
+            placeholder="Tipe"
+            style={{ borderRadius: 0, border: '1px solid #cbd5e1', backgroundColor: '#ffffff', width: '140px' }}
+          />
+          <Select.Content style={{ borderRadius: 0 }}>
+            <Select.Item value="all">Semua Tipe</Select.Item>
+            <Select.Item value="bulanan">Bulanan</Select.Item>
+            <Select.Item value="tahunan">Tahunan</Select.Item>
+            <Select.Item value="sekali">Sekali</Select.Item>
+          </Select.Content>
+        </Select.Root>
 
         {/* Filter Status */}
-        <div className="w-[140px]">
-          <Select.Root value={filterStatus} onValueChange={setFilterStatus}>
-            <Select.Trigger
-              placeholder="Status"
-              style={{ borderRadius: 0, border: '1px solid #cbd5e1', backgroundColor: '#ffffff' }}
-            />
-            <Select.Content style={{ borderRadius: 0 }}>
-              <Select.Item value="all">Semua Status</Select.Item>
-              <Select.Item value="active">Aktif</Select.Item>
-              <Select.Item value="inactive">Nonaktif</Select.Item>
-            </Select.Content>
-          </Select.Root>
-        </div>
+        <Select.Root value={filterStatus} onValueChange={setFilterStatus}>
+          <Select.Trigger
+            placeholder="Status"
+            style={{ borderRadius: 0, border: '1px solid #cbd5e1', backgroundColor: '#ffffff', width: '130px' }}
+          />
+          <Select.Content style={{ borderRadius: 0 }}>
+            <Select.Item value="all">Semua Status</Select.Item>
+            <Select.Item value="active">Aktif</Select.Item>
+            <Select.Item value="inactive">Nonaktif</Select.Item>
+          </Select.Content>
+        </Select.Root>
 
         {/* Filter Tahun Ajaran */}
-        <div className="w-[140px]">
-          <Select.Root value={filterTahunId} onValueChange={setFilterTahunId}>
-            <Select.Trigger
-              placeholder="Tahun Ajaran"
-              style={{ borderRadius: 0, border: '1px solid #cbd5e1', backgroundColor: '#ffffff' }}
-            />
-            <Select.Content style={{ borderRadius: 0 }}>
-              <Select.Item value="all">Semua Tahun</Select.Item>
-              {tahunList.map((tahun) => (
-                <Select.Item key={tahun.id} value={tahun.id}>
-                  {tahun.nama}
-                </Select.Item>
-              ))}
-            </Select.Content>
-          </Select.Root>
-        </div>
+        <Select.Root value={filterTahunId} onValueChange={setFilterTahunId}>
+          <Select.Trigger
+            placeholder="Tahun Ajaran"
+            style={{ borderRadius: 0, border: '1px solid #cbd5e1', backgroundColor: '#ffffff', width: '150px' }}
+          />
+          <Select.Content style={{ borderRadius: 0 }}>
+            <Select.Item value="all">Semua Tahun</Select.Item>
+            {tahunList.map((tahun) => (
+              <Select.Item key={tahun.id} value={tahun.id}>
+                {tahun.nama}
+              </Select.Item>
+            ))}
+          </Select.Content>
+        </Select.Root>
 
         {/* Filter Tingkat */}
-        <div className="w-[120px]">
-          <Select.Root value={filterTingkat} onValueChange={setFilterTingkat}>
-            <Select.Trigger
-              placeholder="Tingkat"
-              style={{ borderRadius: 0, border: '1px solid #cbd5e1', backgroundColor: '#ffffff' }}
-            />
-            <Select.Content style={{ borderRadius: 0 }}>
-              <Select.Item value="all">Semua Tingkat</Select.Item>
-              {tingkatList.map((tingkat) => (
-                <Select.Item key={tingkat} value={tingkat}>
-                  Tingkat {tingkat}
-                </Select.Item>
-              ))}
-            </Select.Content>
-          </Select.Root>
-        </div>
+        <Select.Root value={filterTingkat} onValueChange={setFilterTingkat}>
+          <Select.Trigger
+            placeholder="Tingkat"
+            style={{ borderRadius: 0, border: '1px solid #cbd5e1', backgroundColor: '#ffffff', width: '140px' }}
+          />
+          <Select.Content style={{ borderRadius: 0 }}>
+            <Select.Item value="all">Semua Tingkat</Select.Item>
+            {tingkatList.map((tingkat) => (
+              <Select.Item key={tingkat} value={tingkat}>
+                Tingkat {tingkat}
+              </Select.Item>
+            ))}
+          </Select.Content>
+        </Select.Root>
 
         {/* Clear Filters Button */}
         {hasActiveFilters && (
@@ -128,37 +121,29 @@ export function JenisPembayaranFilters({
             color="gray"
             size="2"
             style={{ borderRadius: 0 }}
-            className="cursor-pointer"
+            className="cursor-pointer hover:bg-slate-200 transition-colors"
           >
             <X className="h-4 w-4" />
             Reset
           </Button>
         )}
 
-        <div className="flex-1"></div>
-
-        {/* Stats */}
-        <div className="flex items-center gap-2">
-          <Badge color="blue" style={{ borderRadius: 0 }}>
-            Total: {stats.total}
-          </Badge>
-          <Badge color="green" style={{ borderRadius: 0 }}>
-            Aktif: {stats.active}
-          </Badge>
-          <Badge color="gray" style={{ borderRadius: 0 }}>
-            Tampil: {stats.filtered}
-          </Badge>
-        </div>
+        {/* Spacer */}
+        <div className="flex-1 min-w-[20px]" />
 
         {/* Add Button */}
         <Button
           onClick={onAdd}
-          className="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white"
+          className="cursor-pointer text-white font-medium shadow-sm hover:shadow transition-all"
           size="2"
-          style={{ borderRadius: 0 }}
+          style={{
+            borderRadius: 0,
+            backgroundColor: '#0066cc',
+            border: '1px solid #0052a3'
+          }}
         >
           <Plus className="h-4 w-4" />
-          Tambah
+          Tambah Baru
         </Button>
       </div>
     </div>

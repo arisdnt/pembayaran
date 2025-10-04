@@ -75,6 +75,43 @@ function CreateTagihanContent() {
 
   const totalTagihan = rincianItems.reduce((sum, item) => sum + parseFloat(item.jumlah || 0), 0)
 
+  const generateNomorTagihan = async () => {
+    try {
+      const now = new Date()
+      const year = now.getFullYear()
+      const month = String(now.getMonth() + 1).padStart(2, '0')
+      
+      // Get all tagihan and filter in JavaScript (nomor_tagihan is not indexed)
+      const prefix = `TGH-${year}-${month}`
+      
+      const allTagihan = await db.tagihan.toArray()
+      const existingTagihan = allTagihan.filter(t => 
+        t.nomor_tagihan && t.nomor_tagihan.startsWith(prefix)
+      )
+      
+      // Find highest sequence number
+      let maxSequence = 0
+      existingTagihan.forEach(t => {
+        const parts = t.nomor_tagihan.split('-')
+        if (parts.length === 4) {
+          const seq = parseInt(parts[3], 10)
+          if (!isNaN(seq) && seq > maxSequence) {
+            maxSequence = seq
+          }
+        }
+      })
+      
+      const nextSequence = maxSequence + 1
+      const nomorBaru = `${prefix}-${String(nextSequence).padStart(3, '0')}`
+      
+      // Use functional update to avoid stale closure
+      setFormData(prev => ({...prev, nomor_tagihan: nomorBaru}))
+    } catch (err) {
+      console.error('Error generating nomor tagihan:', err)
+      setError('Gagal generate nomor tagihan: ' + err.message)
+    }
+  }
+
   const addJenisToCart = (jenis) => {
     const existingIndex = rincianItems.findIndex(item => item.id_jenis_pembayaran === jenis.id)
     if (existingIndex >= 0) {
@@ -229,6 +266,7 @@ function CreateTagihanContent() {
             <InformasiTagihanSection
               formData={formData}
               onChange={(field, value) => setFormData({...formData, [field]: value})}
+              onGenerateNomor={generateNomorTagihan}
             />
           </div>
 

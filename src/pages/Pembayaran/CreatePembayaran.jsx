@@ -10,6 +10,14 @@ import { TagihanSelectorSection } from './components/TagihanSelectorSection'
 import { InformasiPembayaranSection } from './components/InformasiPembayaranSection'
 import { RincianPembayaranFormSection } from './components/RincianPembayaranFormSection'
 
+function formatCurrency(amount) {
+  return new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    minimumFractionDigits: 0,
+  }).format(amount || 0)
+}
+
 function CreatePembayaranContent() {
   const navigate = useNavigate()
 
@@ -192,8 +200,22 @@ function CreatePembayaranContent() {
       return
     }
 
+    // Check if tagihan is already lunas
+    if (tagihanSummary && tagihanSummary.sisa <= 0) {
+      setError('Tagihan sudah lunas. Tidak bisa melakukan pembayaran lagi.')
+      setSubmitting(false)
+      return
+    }
+
     if (rincianItems.length === 0) {
       setError('Minimal harus ada 1 transaksi pembayaran')
+      setSubmitting(false)
+      return
+    }
+
+    // Check if total pembayaran melebihi sisa tagihan
+    if (tagihanSummary && totalPembayaran > tagihanSummary.sisa) {
+      setError(`Total pembayaran (${formatCurrency(totalPembayaran)}) melebihi sisa tagihan (${formatCurrency(tagihanSummary.sisa)})`)
       setSubmitting(false)
       return
     }
@@ -245,6 +267,7 @@ function CreatePembayaranContent() {
   }
 
   const tagihanSummary = selectedTagihan ? calculateTagihanSummary(selectedTagihan) : null
+  const isTagihanLunas = tagihanSummary && tagihanSummary.sisa <= 0
 
   return (
     <PageLayout>
@@ -253,7 +276,7 @@ function CreatePembayaranContent() {
           onBack={() => navigate('/pembayaran')}
           onSubmit={handleSubmit}
           submitting={submitting}
-          canSubmit={rincianItems.length > 0 && formData.id_tagihan}
+          canSubmit={rincianItems.length > 0 && formData.id_tagihan && !isTagihanLunas}
         />
 
         {/* Error Alert */}
@@ -319,6 +342,7 @@ function CreatePembayaranContent() {
                 totalPembayaran={totalPembayaran}
                 nextCicilanKe={getNextCicilanKe()}
                 tagihanSummary={tagihanSummary}
+                isTagihanLunas={isTagihanLunas}
               />
             </div>
           </div>

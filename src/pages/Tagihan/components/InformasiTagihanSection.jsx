@@ -1,7 +1,7 @@
-import { Text, TextField } from '@radix-ui/themes'
-import { Calendar } from 'lucide-react'
+import { Text, TextField, Button } from '@radix-ui/themes'
+import { Calendar, RefreshCw } from 'lucide-react'
 
-export function InformasiTagihanSection({ formData, onChange }) {
+export function InformasiTagihanSection({ formData, onChange, onGenerateNomor }) {
   return (
     <div className="border-2 border-slate-300 bg-white shadow-lg">
       <div className="border-b-2 border-slate-300 bg-gradient-to-b from-slate-100 to-slate-50 px-4 py-3">
@@ -21,13 +21,25 @@ export function InformasiTagihanSection({ formData, onChange }) {
                 Nomor Tagihan <span className="text-red-500">*</span>
               </Text>
             </label>
-            <TextField.Root
-              value={formData.nomor_tagihan}
-              onChange={(e) => onChange('nomor_tagihan', e.target.value)}
-              placeholder="TGH-2024-001"
-              style={{ borderRadius: 0 }}
-              className="border-slate-300"
-            />
+            <div className="flex gap-2">
+              <TextField.Root
+                value={formData.nomor_tagihan}
+                onChange={(e) => onChange('nomor_tagihan', e.target.value)}
+                placeholder="TGH-2025-01-001"
+                style={{ borderRadius: 0 }}
+                className="border-slate-300 flex-1"
+              />
+              <Button
+                onClick={onGenerateNomor}
+                variant="soft"
+                style={{ borderRadius: 0 }}
+                className="shrink-0"
+                type="button"
+              >
+                <RefreshCw className="h-4 w-4" />
+                Generate
+              </Button>
+            </div>
           </div>
           <div>
             <label className="flex items-center gap-1.5 mb-2">

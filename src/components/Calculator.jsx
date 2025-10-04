@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { X, Calculator as CalcIcon } from 'lucide-react'
 import { Text } from '@radix-ui/themes'
-import { useCalculator } from '../contexts/CalculatorContext'
+import { useCalculator } from '../contexts/CalculatorContext.jsx'
 
 export function Calculator() {
   const { isOpen, closeCalculator } = useCalculator()

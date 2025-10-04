@@ -19,13 +19,15 @@ export function RincianPembayaranFormSection({
   onChange,
   totalPembayaran,
   nextCicilanKe,
-  tagihanSummary
+  tagihanSummary,
+  isTagihanLunas
 }) {
   const [modalOpen, setModalOpen] = useState(false)
   const [editIndex, setEditIndex] = useState(null)
   const [modalInitialData, setModalInitialData] = useState(null)
 
   const handleAddClick = () => {
+    if (isTagihanLunas) return
     setEditIndex(null)
     setModalInitialData(null)
     setModalOpen(true)
@@ -65,6 +67,7 @@ export function RincianPembayaranFormSection({
               size="1"
               style={{ borderRadius: 0 }}
               className="cursor-pointer"
+              disabled={isTagihanLunas}
             >
               <Plus className="h-3.5 w-3.5" />
               Tambah Transaksi
@@ -72,7 +75,13 @@ export function RincianPembayaranFormSection({
           </div>
         </div>
 
-        {tagihanSummary && (
+        {isTagihanLunas ? (
+          <div className="shrink-0 px-4 py-3 bg-green-50 border-b-2 border-green-300">
+            <Text size="2" className="text-green-700 font-medium">
+              ✓ <strong>Tagihan sudah lunas.</strong> Tidak bisa menambahkan transaksi pembayaran baru.
+            </Text>
+          </div>
+        ) : tagihanSummary && (
           <div className="shrink-0 px-4 py-3 bg-blue-50 border-b-2 border-blue-200">
             <div className="flex items-center justify-between">
               <Text size="2" className="text-blue-700">
@@ -100,6 +109,7 @@ export function RincianPembayaranFormSection({
                 size="2"
                 style={{ borderRadius: 0 }}
                 className="cursor-pointer"
+                disabled={isTagihanLunas}
               >
                 <Plus className="h-4 w-4" />
                 Tambah Transaksi Pertama
@@ -127,9 +137,9 @@ export function RincianPembayaranFormSection({
               </Text>
             </div>
             {tagihanSummary && totalPembayaran > tagihanSummary.sisa && (
-              <div className="mt-2 px-3 py-2 bg-amber-50 border-2 border-amber-200">
-                <Text size="1" className="text-amber-700">
-                  ⚠️ Peringatan: Total pembayaran melebihi sisa tagihan ({formatCurrency(tagihanSummary.sisa)})
+              <div className="mt-2 px-3 py-2 bg-red-50 border-2 border-red-200">
+                <Text size="1" className="text-red-700 font-medium">
+                  ❌ Error: Total pembayaran melebihi sisa tagihan ({formatCurrency(tagihanSummary.sisa)}). Pembayaran tidak bisa diproses.
                 </Text>
               </div>
             )}
