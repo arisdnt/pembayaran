@@ -164,7 +164,24 @@ async function processOutboxOnce() {
       await applyOutboxItem(item)
       await db.outbox.update(item.id, { status: 'applied', updated_at: new Date().toISOString() })
     } catch (err) {
-      await db.outbox.update(item.id, { status: 'error', error_message: err.message, updated_at: new Date().toISOString() })
+      const errorMsg = err.message || String(err)
+      
+      // Rollback optimistic update for duplicate key errors
+      if (errorMsg.includes('duplicate key') || errorMsg.includes('unique constraint')) {
+        console.warn('[Outbox] Duplicate key detected, rolling back:', item.table, item.pk)
+        
+        // For INSERT operations, remove the optimistically added record
+        if (item.op === 'insert' && item.pk) {
+          try {
+            await db.table(item.table).delete(item.pk)
+            console.log('[Outbox] Rolled back optimistic insert for:', item.table, item.pk)
+          } catch (rollbackErr) {
+            console.error('[Outbox] Rollback failed:', rollbackErr)
+          }
+        }
+      }
+      
+      await db.outbox.update(item.id, { status: 'error', error_message: errorMsg, updated_at: new Date().toISOString() })
     }
   }
 }

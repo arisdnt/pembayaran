@@ -25,6 +25,23 @@ export function PeminatanFormDialog({
   const [error, setError] = useState('')
   const [tingkatOptions, setTingkatOptions] = useState([])
 
+  // Update form data when initialData changes
+  useEffect(() => {
+    if (initialData) {
+      setFormData(initialData)
+    } else {
+      setFormData({
+        id: '',
+        kode: '',
+        nama: '',
+        keterangan: '',
+        tingkat_min: '',
+        tingkat_max: '',
+        aktif: true,
+      })
+    }
+  }, [initialData])
+
   // Fetch tingkat dari kelas yang tersedia
   useEffect(() => {
     const fetchTingkat = async () => {
@@ -84,7 +101,7 @@ export function PeminatanFormDialog({
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Content
         style={{
-          maxWidth: '1100px',
+          maxWidth: '600px',
           width: '95vw',
           maxHeight: '90vh',
           padding: 0,

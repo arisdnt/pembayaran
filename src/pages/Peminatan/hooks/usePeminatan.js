@@ -17,9 +17,13 @@ export function usePeminatan() {
     if (withSpinner) setIsRefreshing(true)
     try {
       const [peminatan, peminatanSiswa] = await Promise.all([
-        db.peminatan.orderBy('nama').toArray(),
+        db.peminatan.toArray(),
         db.peminatan_siswa.toArray(),
       ])
+      
+      // Sort in JavaScript since 'nama' is not indexed
+      peminatan.sort((a, b) => (a.nama || '').localeCompare(b.nama || ''))
+      
       setPeminatanRows(peminatan)
       setPsRows(peminatanSiswa)
       setLoading(false)
@@ -57,6 +61,28 @@ export function usePeminatan() {
 
     if (payload.tingkat_min && payload.tingkat_max && payload.tingkat_min > payload.tingkat_max) {
       throw new Error('Tingkat minimum tidak boleh lebih besar dari tingkat maksimum')
+    }
+
+    // Check duplicate kode before insert
+    if (!isEdit) {
+      const existing = await db.peminatan
+        .where('kode')
+        .equalsIgnoreCase(payload.kode.trim())
+        .first()
+      
+      if (existing) {
+        throw new Error(`Kode "${payload.kode}" sudah digunakan. Silakan gunakan kode yang berbeda.`)
+      }
+    } else {
+      // Check duplicate kode for edit (exclude current item)
+      const existing = await db.peminatan
+        .where('kode')
+        .equalsIgnoreCase(payload.kode.trim())
+        .first()
+      
+      if (existing && existing.id !== formData.id) {
+        throw new Error(`Kode "${payload.kode}" sudah digunakan. Silakan gunakan kode yang berbeda.`)
+      }
     }
 
     try {

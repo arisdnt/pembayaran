@@ -10,6 +10,7 @@ export function PeminatanSiswaTable({
   onEdit,
   onDelete,
   onAdd,
+  onViewDetail,
   selectedItem,
   onSelectItem,
 }) {
@@ -224,14 +225,14 @@ export function PeminatanSiswaTable({
             ) : null}
             <table className="min-w-full table-fixed text-sm border-collapse">
               <colgroup>{[
-                <col key="col-1" style={{ width: '18%' }} />,
-                <col key="col-2" style={{ width: '12%' }} />,
-                <col key="col-3" style={{ width: '18%' }} />,
-                <col key="col-4" style={{ width: '12%' }} />,
-                <col key="col-5" style={{ width: '10%' }} />,
-                <col key="col-6" style={{ width: '12%' }} />,
-                <col key="col-7" style={{ width: '10%' }} />,
-                <col key="col-8" style={{ width: '8%' }} />,
+                <col key="col-1" style={{ width: '17%' }} />,
+                <col key="col-2" style={{ width: '11%' }} />,
+                <col key="col-3" style={{ width: '17%' }} />,
+                <col key="col-4" style={{ width: '11%' }} />,
+                <col key="col-5" style={{ width: '9%' }} />,
+                <col key="col-6" style={{ width: '11%' }} />,
+                <col key="col-7" style={{ width: '11%' }} />,
+                <col key="col-8" style={{ width: '13%' }} />,
               ]}</colgroup>
               <thead>
                 <tr className="bg-gradient-to-b from-slate-100 to-slate-50 sticky top-0 z-10 border-b border-slate-300 shadow-sm">
@@ -298,6 +299,7 @@ export function PeminatanSiswaTable({
                       onSelect={onSelectItem}
                       onEdit={onEdit}
                       onDelete={onDelete}
+                      onViewDetail={onViewDetail}
                       isEven={index % 2 === 0}
                     />
                   ))

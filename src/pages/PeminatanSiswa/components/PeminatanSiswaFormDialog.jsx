@@ -1,6 +1,8 @@
-import { useState } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { Dialog, TextField, TextArea, Select, Text, Button } from '@radix-ui/themes'
-import { AlertCircle, BookOpen, Edit3, Users, Calendar, Hash, FileText, X } from 'lucide-react'
+import { AlertCircle, BookOpen, Edit3, Users, Calendar, Hash, FileText, X, School } from 'lucide-react'
+import { useLiveQuery } from 'dexie-react-hooks'
+import { db } from '../../../offline/db'
 
 export function PeminatanSiswaFormDialog({ 
   open, 
@@ -26,6 +28,101 @@ export function PeminatanSiswaFormDialog({
   )
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
+  
+  // Nested selection state
+  const [selectedTahunAjaran, setSelectedTahunAjaran] = useState('')
+  const [selectedTingkat, setSelectedTingkat] = useState('')
+  const [selectedKelas, setSelectedKelas] = useState('')
+  
+  // Fetch data from IndexedDB
+  const riwayatKelasSiswa = useLiveQuery(() => db.riwayat_kelas_siswa.toArray(), [], [])
+  const kelasList = useLiveQuery(() => db.kelas.toArray(), [], [])
+  
+  // Get unique tingkat options based on selected tahun ajaran
+  const tingkatOptions = useMemo(() => {
+    if (!selectedTahunAjaran || !riwayatKelasSiswa.length || !kelasList.length) return []
+    
+    const kelasIds = riwayatKelasSiswa
+      .filter(rks => rks.id_tahun_ajaran === selectedTahunAjaran && rks.status === 'aktif')
+      .map(rks => rks.id_kelas)
+    
+    const tingkatSet = new Set()
+    kelasList.forEach(kelas => {
+      if (kelasIds.includes(kelas.id)) {
+        tingkatSet.add(kelas.tingkat)
+      }
+    })
+    
+    return Array.from(tingkatSet).sort((a, b) => String(a).localeCompare(String(b), undefined, { numeric: true }))
+  }, [selectedTahunAjaran, riwayatKelasSiswa, kelasList])
+  
+  // Get kelas options based on selected tahun ajaran and tingkat
+  const kelasOptions = useMemo(() => {
+    if (!selectedTahunAjaran || !selectedTingkat || !riwayatKelasSiswa.length || !kelasList.length) return []
+    
+    const kelasIds = riwayatKelasSiswa
+      .filter(rks => rks.id_tahun_ajaran === selectedTahunAjaran && rks.status === 'aktif')
+      .map(rks => rks.id_kelas)
+    
+    return kelasList
+      .filter(kelas => kelasIds.includes(kelas.id) && kelas.tingkat === selectedTingkat)
+      .sort((a, b) => a.nama_sub_kelas.localeCompare(b.nama_sub_kelas))
+  }, [selectedTahunAjaran, selectedTingkat, riwayatKelasSiswa, kelasList])
+  
+  // Get siswa options based on selected tahun ajaran, tingkat, and kelas
+  const filteredSiswaList = useMemo(() => {
+    if (!selectedTahunAjaran || !selectedTingkat || !selectedKelas || !riwayatKelasSiswa.length) return []
+    
+    const siswaIds = riwayatKelasSiswa
+      .filter(rks => 
+        rks.id_tahun_ajaran === selectedTahunAjaran && 
+        rks.id_kelas === selectedKelas &&
+        rks.status === 'aktif'
+      )
+      .map(rks => rks.id_siswa)
+    
+    return siswaList
+      .filter(siswa => siswaIds.includes(siswa.id))
+      .sort((a, b) => (a.nama_lengkap || '').localeCompare(b.nama_lengkap || ''))
+  }, [selectedTahunAjaran, selectedTingkat, selectedKelas, riwayatKelasSiswa, siswaList])
+  
+  // Update form when initialData changes (for edit mode)
+  useEffect(() => {
+    if (initialData) {
+      setFormData(initialData)
+
+      // Pre-fill selection state for edit mode
+      if (isEdit && initialData.id_tahun_ajaran) {
+        setSelectedTahunAjaran(initialData.id_tahun_ajaran)
+
+        if (initialData.tingkat) {
+          setSelectedTingkat(initialData.tingkat)
+        }
+
+        // Find the kelas for this siswa
+        if (initialData.id_siswa && riwayatKelasSiswa.length > 0) {
+          const riwayat = riwayatKelasSiswa.find(
+            rks => rks.id_siswa === initialData.id_siswa &&
+                   rks.id_tahun_ajaran === initialData.id_tahun_ajaran &&
+                   rks.status === 'aktif'
+          )
+          if (riwayat) {
+            setSelectedKelas(riwayat.id_kelas)
+          }
+        }
+      }
+    }
+  }, [initialData, isEdit, riwayatKelasSiswa])
+
+  // Reset nested selection state when dialog opens/closes or when creating new
+  useEffect(() => {
+    if (open && !isEdit) {
+      // Reset for new entry
+      setSelectedTahunAjaran('')
+      setSelectedTingkat('')
+      setSelectedKelas('')
+    }
+  }, [open, isEdit])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -100,8 +197,8 @@ export function PeminatanSiswaFormDialog({
               <Text size="3" weight="bold" className="text-slate-800 uppercase tracking-wider">
                 {isEdit ? 'Edit Peminatan Siswa' : 'Tambah Peminatan Siswa'}
               </Text>
-              <Text size="1" className="text-slate-600">
-                {isEdit ? 'Perbarui data peminatan siswa' : 'Tambahkan peminatan siswa baru'}
+              <Text size="1" className="text-slate-500 block mt-0.5">
+                {isEdit ? 'Perbarui informasi peminatan siswa' : 'Daftarkan siswa ke peminatan tertentu'}
               </Text>
             </div>
           </div>
@@ -121,29 +218,171 @@ export function PeminatanSiswaFormDialog({
             <div className="grid grid-cols-2 gap-6">
               {/* Left Column */}
               <div className="space-y-4">
-                {/* Siswa */}
+                {/* Step 1: Tahun Ajaran */}
                 <label>
                   <div className="flex items-center gap-1.5 mb-1">
-                    <Users className="h-3.5 w-3.5 text-blue-500" />
+                    <Calendar className="h-3.5 w-3.5 text-purple-500" />
                     <Text as="div" size="2" weight="medium">
-                      Siswa <span className="text-red-600">*</span>
+                      1. Tahun Ajaran <span className="text-red-600">*</span>
                     </Text>
                   </div>
                   <Select.Root 
-                    value={formData.id_siswa} 
-                    onValueChange={(value) => setFormData({ ...formData, id_siswa: value })}
+                    value={selectedTahunAjaran} 
+                    onValueChange={(value) => {
+                      setSelectedTahunAjaran(value)
+                      setFormData({ ...formData, id_tahun_ajaran: value })
+                      // Reset cascading selections
+                      setSelectedTingkat('')
+                      setSelectedKelas('')
+                      setFormData(prev => ({ ...prev, id_siswa: undefined }))
+                    }}
                     required
                   >
                     <Select.Trigger 
                       style={{ borderRadius: 0, width: '100%' }}
-                      placeholder="Pilih siswa..."
+                      placeholder="Pilih tahun ajaran..."
+                    />
+                    <Select.Content 
+                      position="popper"
+                      style={{ borderRadius: 0 }}
+                      className="border-2 border-slate-300 shadow-lg bg-white z-50"
+                    >
+                      {tahunAjaranList.map((ta) => (
+                        <Select.Item 
+                          key={ta.id} 
+                          value={ta.id}
+                          style={{ borderRadius: 0 }}
+                          className="hover:bg-blue-50 cursor-pointer px-3 py-2"
+                        >
+                          {ta.nama} {ta.status_aktif ? '🟢' : ''}
+                        </Select.Item>
+                      ))}
+                    </Select.Content>
+                  </Select.Root>
+                  <Text size="1" className="text-slate-500 mt-1">
+                    Pilih tahun ajaran siswa
+                  </Text>
+                </label>
+
+                {/* Step 2: Tingkat */}
+                <label>
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <Hash className="h-3.5 w-3.5 text-green-500" />
+                    <Text as="div" size="2" weight="medium">
+                      2. Tingkat <span className="text-red-600">*</span>
+                    </Text>
+                  </div>
+                  <Select.Root 
+                    value={selectedTingkat} 
+                    onValueChange={(value) => {
+                      setSelectedTingkat(value)
+                      setFormData({ ...formData, tingkat: value })
+                      // Reset cascading selections
+                      setSelectedKelas('')
+                      setFormData(prev => ({ ...prev, id_siswa: undefined }))
+                    }}
+                    disabled={!selectedTahunAjaran}
+                    required
+                  >
+                    <Select.Trigger 
+                      style={{ borderRadius: 0, width: '100%' }}
+                      placeholder={!selectedTahunAjaran ? "Pilih tahun ajaran dulu" : "Pilih tingkat..."}
+                    />
+                    <Select.Content 
+                      position="popper"
+                      style={{ borderRadius: 0 }}
+                      className="border-2 border-slate-300 shadow-lg bg-white z-50"
+                    >
+                      {tingkatOptions.map((tingkat) => (
+                        <Select.Item 
+                          key={tingkat} 
+                          value={String(tingkat)}
+                          style={{ borderRadius: 0 }}
+                          className="hover:bg-blue-50 cursor-pointer px-3 py-2"
+                        >
+                          Tingkat {tingkat}
+                        </Select.Item>
+                      ))}
+                    </Select.Content>
+                  </Select.Root>
+                  <Text size="1" className="text-slate-500 mt-1">
+                    {!selectedTahunAjaran ? '⚠️ Pilih tahun ajaran terlebih dahulu' : 'Pilih tingkat kelas siswa'}
+                  </Text>
+                </label>
+
+                {/* Step 3: Kelas */}
+                <label>
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <School className="h-3.5 w-3.5 text-blue-500" />
+                    <Text as="div" size="2" weight="medium">
+                      3. Kelas <span className="text-red-600">*</span>
+                    </Text>
+                  </div>
+                  <Select.Root 
+                    value={selectedKelas} 
+                    onValueChange={(value) => {
+                      setSelectedKelas(value)
+                      // Reset siswa selection
+                      setFormData(prev => ({ ...prev, id_siswa: undefined }))
+                    }}
+                    disabled={!selectedTingkat}
+                    required
+                  >
+                    <Select.Trigger 
+                      style={{ borderRadius: 0, width: '100%' }}
+                      placeholder={!selectedTingkat ? "Pilih tingkat dulu" : "Pilih kelas..."}
                     />
                     <Select.Content 
                       position="popper"
                       style={{ borderRadius: 0, maxHeight: '300px' }}
                       className="border-2 border-slate-300 shadow-lg bg-white z-50"
                     >
-                      {siswaList.map((siswa) => (
+                      {kelasOptions.map((kelas) => (
+                        <Select.Item 
+                          key={kelas.id} 
+                          value={kelas.id}
+                          style={{ borderRadius: 0 }}
+                          className="hover:bg-blue-50 cursor-pointer px-3 py-2"
+                        >
+                          Kelas {kelas.tingkat} {kelas.nama_sub_kelas}
+                        </Select.Item>
+                      ))}
+                    </Select.Content>
+                  </Select.Root>
+                  <Text size="1" className="text-slate-500 mt-1">
+                    {!selectedTingkat ? '⚠️ Pilih tingkat terlebih dahulu' : 'Pilih kelas spesifik'}
+                  </Text>
+                </label>
+
+                {/* Step 4: Siswa */}
+                <label>
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <Users className="h-3.5 w-3.5 text-indigo-500" />
+                    <Text as="div" size="2" weight="medium">
+                      4. Siswa <span className="text-red-600">*</span>
+                    </Text>
+                  </div>
+                  <Select.Root 
+                    value={formData.id_siswa} 
+                    onValueChange={(value) => setFormData({ ...formData, id_siswa: value })}
+                    disabled={!selectedKelas}
+                    required
+                  >
+                    <Select.Trigger 
+                      style={{ borderRadius: 0, width: '100%' }}
+                      placeholder={!selectedKelas ? "Pilih kelas dulu" : "Pilih siswa..."}
+                    />
+                    <Select.Content 
+                      position="popper"
+                      style={{ borderRadius: 0, maxHeight: '300px' }}
+                      className="border-2 border-slate-300 shadow-lg bg-white z-50"
+                    >
+                      {filteredSiswaList.length === 0 && selectedKelas && (
+                        <div className="px-3 py-4 text-center text-slate-500 text-sm">
+                          Tidak ada siswa di kelas ini
+                        </div>
+                      )}
+                      {filteredSiswaList.map((siswa) => (
                         <Select.Item 
                           key={siswa.id} 
                           value={siswa.id}
@@ -156,14 +395,18 @@ export function PeminatanSiswaFormDialog({
                     </Select.Content>
                   </Select.Root>
                   <Text size="1" className="text-slate-500 mt-1">
-                    Pilih siswa yang akan ditambahkan
+                    {!selectedKelas ? '⚠️ Pilih kelas terlebih dahulu' : `${filteredSiswaList.length} siswa tersedia`}
                   </Text>
                 </label>
 
+              </div>
+
+              {/* Right Column */}
+              <div className="space-y-4">
                 {/* Peminatan */}
                 <label>
                   <div className="flex items-center gap-1.5 mb-1">
-                    <BookOpen className="h-3.5 w-3.5 text-indigo-500" />
+                    <BookOpen className="h-3.5 w-3.5 text-orange-500" />
                     <Text as="div" size="2" weight="medium">
                       Peminatan <span className="text-red-600">*</span>
                     </Text>
@@ -198,69 +441,6 @@ export function PeminatanSiswaFormDialog({
                     Pilih peminatan untuk siswa
                   </Text>
                 </label>
-
-                {/* Tahun Ajaran */}
-                <label>
-                  <div className="flex items-center gap-1.5 mb-1">
-                    <Calendar className="h-3.5 w-3.5 text-purple-500" />
-                    <Text as="div" size="2" weight="medium">
-                      Tahun Ajaran <span className="text-red-600">*</span>
-                    </Text>
-                  </div>
-                  <Select.Root 
-                    value={formData.id_tahun_ajaran} 
-                    onValueChange={(value) => setFormData({ ...formData, id_tahun_ajaran: value })}
-                    required
-                  >
-                    <Select.Trigger 
-                      style={{ borderRadius: 0, width: '100%' }}
-                      placeholder="Pilih tahun ajaran..."
-                    />
-                    <Select.Content 
-                      position="popper"
-                      style={{ borderRadius: 0 }}
-                      className="border-2 border-slate-300 shadow-lg bg-white z-50"
-                    >
-                      {tahunAjaranList.map((ta) => (
-                        <Select.Item 
-                          key={ta.id} 
-                          value={ta.id}
-                          style={{ borderRadius: 0 }}
-                          className="hover:bg-blue-50 cursor-pointer px-3 py-2"
-                        >
-                          {ta.nama}
-                        </Select.Item>
-                      ))}
-                    </Select.Content>
-                  </Select.Root>
-                  <Text size="1" className="text-slate-500 mt-1">
-                    Pilih tahun ajaran
-                  </Text>
-                </label>
-
-                {/* Tingkat */}
-                <label>
-                  <div className="flex items-center gap-1.5 mb-1">
-                    <Hash className="h-3.5 w-3.5 text-green-500" />
-                    <Text as="div" size="2" weight="medium">
-                      Tingkat <span className="text-red-600">*</span>
-                    </Text>
-                  </div>
-                  <TextField.Root
-                    placeholder="Contoh: 10, 11, 12"
-                    value={formData.tingkat}
-                    onChange={(e) => setFormData({ ...formData, tingkat: e.target.value })}
-                    style={{ borderRadius: 0 }}
-                    required
-                  />
-                  <Text size="1" className="text-slate-500 mt-1">
-                    Tingkat siswa saat mengikuti peminatan
-                  </Text>
-                </label>
-              </div>
-
-              {/* Right Column */}
-              <div className="space-y-4">
                 {/* Tanggal Mulai */}
                 <label>
                   <div className="flex items-center gap-1.5 mb-1">

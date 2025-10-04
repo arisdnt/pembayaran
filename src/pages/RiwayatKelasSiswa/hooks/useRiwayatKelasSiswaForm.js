@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 export function useRiwayatKelasSiswaForm(initialData, isEdit, onSubmit, onOpenChange) {
   const [formData, setFormData] = useState(
@@ -15,6 +15,35 @@ export function useRiwayatKelasSiswaForm(initialData, isEdit, onSubmit, onOpenCh
   )
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
+
+  // Helper function to format date to YYYY-MM-DD
+  const formatDateForInput = (dateStr) => {
+    if (!dateStr) return ''
+    try {
+      const date = new Date(dateStr)
+      if (isNaN(date.getTime())) return ''
+      return date.toISOString().split('T')[0]
+    } catch {
+      return ''
+    }
+  }
+
+  // Update form data when initialData changes
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        id: initialData.id || '',
+        id_siswa: initialData.id_siswa || undefined,
+        id_kelas: initialData.id_kelas || undefined,
+        id_tahun_ajaran: initialData.id_tahun_ajaran || undefined,
+        tanggal_masuk: formatDateForInput(initialData.tanggal_masuk),
+        tanggal_keluar: formatDateForInput(initialData.tanggal_keluar),
+        status: initialData.status || 'aktif',
+        catatan: initialData.catatan || '',
+      })
+      setError('')
+    }
+  }, [initialData])
 
   const handleSubmit = async (e) => {
     e.preventDefault()

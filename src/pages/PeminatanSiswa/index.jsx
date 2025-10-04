@@ -5,6 +5,7 @@ import { AlertCircle } from 'lucide-react'
 import { usePeminatanSiswa } from './hooks/usePeminatanSiswa'
 import { PeminatanSiswaTable } from './components/PeminatanSiswaTable'
 import { PeminatanSiswaFormDialog } from './components/PeminatanSiswaFormDialog'
+import { PeminatanSiswaDetailModal } from './components/PeminatanSiswaDetailModal'
 import { DeleteConfirmDialog } from '../../components/common/DeleteConfirmDialog'
 import { DetailPanel } from './components/DetailPanel'
 
@@ -24,6 +25,7 @@ function PeminatanSiswaContent() {
 
   const [dialogOpen, setDialogOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [detailModalOpen, setDetailModalOpen] = useState(false)
   const [editMode, setEditMode] = useState(false)
   const [currentItem, setCurrentItem] = useState(null)
   const [selectedItem, setSelectedItem] = useState(null)
@@ -84,6 +86,11 @@ function PeminatanSiswaContent() {
     }
   }
 
+  const handleOpenDetail = (item) => {
+    setSelectedItem(item)
+    setDetailModalOpen(true)
+  }
+
   return (
     <PageLayout>
       <div className="flex flex-col h-full">
@@ -111,6 +118,7 @@ function PeminatanSiswaContent() {
               onEdit={handleOpenEdit}
               onDelete={handleOpenDelete}
               onAdd={handleOpenCreate}
+              onViewDetail={handleOpenDetail}
               selectedItem={selectedItem}
               onSelectItem={setSelectedItem}
             />
@@ -144,6 +152,12 @@ function PeminatanSiswaContent() {
         itemName={currentItem?.siswa?.nama_lengkap || currentItem?.id || ''}
         title="Hapus Peminatan Siswa"
         description="Apakah Anda yakin ingin menghapus data peminatan siswa"
+      />
+
+      <PeminatanSiswaDetailModal
+        open={detailModalOpen}
+        onOpenChange={setDetailModalOpen}
+        item={selectedItem}
       />
     </PageLayout>
   )

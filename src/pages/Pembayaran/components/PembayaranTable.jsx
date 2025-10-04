@@ -1,3 +1,4 @@
+import { Text } from '@radix-ui/themes'
 import { usePembayaranFilters } from '../hooks/usePembayaranFilters'
 import { PembayaranTableHeader } from './PembayaranTableHeader'
 import { PembayaranTableRow } from './PembayaranTableRow'
@@ -27,64 +28,68 @@ export function PembayaranTable({ data, isLoading, isRefreshing, onEdit, onDelet
           onAdd={onAdd}
         />
 
-        <div className="relative flex-1 min-h-0">
-          <div className="h-full overflow-auto">
-            <table className="min-w-full table-fixed text-sm">
-              <colgroup>{[
-                <col key="col-1" style={{ width: '12%' }} />,
-                <col key="col-2" style={{ width: '18%' }} />,
-                <col key="col-3" style={{ width: '15%' }} />,
-                <col key="col-4" style={{ width: '18%' }} />,
-                <col key="col-5" style={{ width: '12%' }} />,
-                <col key="col-6" style={{ width: '12%' }} />,
-                <col key="col-7" style={{ width: '13%' }} />,
-              ]}</colgroup>
-              <thead>
-                <tr className="bg-white/95 backdrop-blur sticky top-0 z-10 border-b border-slate-200">
-                  <th className="px-6 py-3 text-left text-[0.75rem] font-semibold uppercase tracking-[0.14em] text-slate-500">
+        <div className="flex-1 overflow-auto min-h-0">
+          <table className="w-full border-collapse">
+            <thead className="bg-gradient-to-b from-slate-100 to-slate-50 sticky top-0 z-10">
+              <tr className="border-b-2 border-slate-300">
+                <th className="px-4 py-3 text-left border-r border-slate-200">
+                  <Text size="1" weight="bold" className="text-slate-700 uppercase tracking-wider">
                     No. Pembayaran
-                  </th>
-                  <th className="px-6 py-3 text-left text-[0.75rem] font-semibold uppercase tracking-[0.14em] text-slate-500">
+                  </Text>
+                </th>
+                <th className="px-4 py-3 text-left border-r border-slate-200">
+                  <Text size="1" weight="bold" className="text-slate-700 uppercase tracking-wider">
                     Nama Tagihan
-                  </th>
-                  <th className="px-6 py-3 text-left text-[0.75rem] font-semibold uppercase tracking-[0.14em] text-slate-500">
+                  </Text>
+                </th>
+                <th className="px-4 py-3 text-left border-r border-slate-200">
+                  <Text size="1" weight="bold" className="text-slate-700 uppercase tracking-wider">
                     Siswa
-                  </th>
-                  <th className="px-6 py-3 text-left text-[0.75rem] font-semibold uppercase tracking-[0.14em] text-slate-500">
+                  </Text>
+                </th>
+                <th className="px-4 py-3 text-left border-r border-slate-200">
+                  <Text size="1" weight="bold" className="text-slate-700 uppercase tracking-wider">
                     Catatan
-                  </th>
-                  <th className="px-6 py-3 text-left text-[0.75rem] font-semibold uppercase tracking-[0.14em] text-slate-500">
+                  </Text>
+                </th>
+                <th className="px-4 py-3 text-left border-r border-slate-200">
+                  <Text size="1" weight="bold" className="text-slate-700 uppercase tracking-wider">
                     Dibuat
-                  </th>
-                  <th className="px-6 py-3 text-left text-[0.75rem] font-semibold uppercase tracking-[0.14em] text-slate-500">
+                  </Text>
+                </th>
+                <th className="px-4 py-3 text-left border-r border-slate-200">
+                  <Text size="1" weight="bold" className="text-slate-700 uppercase tracking-wider">
                     Nominal
-                  </th>
-                  <th className="px-6 py-3 text-right text-[0.75rem] font-semibold uppercase tracking-[0.14em] text-slate-500">
+                  </Text>
+                </th>
+                <th className="px-4 py-3 text-center">
+                  <Text size="1" weight="bold" className="text-slate-700 uppercase tracking-wider">
                     Aksi
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {filteredData.map((item) => (
-                  <PembayaranTableRow
-                    key={item.id}
-                    item={item}
-                    isSelected={selectedItem?.id === item.id}
-                    onSelect={onSelectItem}
-                    onEdit={onEdit}
-                    onDelete={onDelete}
-                    onViewDetail={onViewDetail}
-                  />
-                ))}
-                {isEmpty && (
-                  <PembayaranEmptyState
-                    hasActiveFilters={hasActiveFilters}
-                    onClearFilters={handleClearFilters}
-                  />
-                )}
-              </tbody>
-            </table>
-          </div>
+                  </Text>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredData.map((item, index) => (
+                <PembayaranTableRow
+                  key={item.id}
+                  item={item}
+                  index={index}
+                  isSelected={selectedItem?.id === item.id}
+                  onSelect={onSelectItem}
+                  onEdit={onEdit}
+                  onDelete={onDelete}
+                  onViewDetail={onViewDetail}
+                />
+              ))}
+              {isEmpty && (
+                <PembayaranEmptyState
+                  hasActiveFilters={hasActiveFilters}
+                  onClearFilters={handleClearFilters}
+                />
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

@@ -1,6 +1,6 @@
+import { Text } from '@radix-ui/themes'
 import { useJenisPembayaranFilters } from '../hooks/useJenisPembayaranFilters'
 import { JenisPembayaranFilters } from './JenisPembayaranFilters'
-import { JenisPembayaranTableHeader } from './JenisPembayaranTableHeader'
 import { JenisPembayaranTableRow } from './JenisPembayaranTableRow'
 import { JenisPembayaranEmptyState } from './JenisPembayaranEmptyState'
 import { JenisPembayaranTableSkeleton } from './JenisPembayaranTableSkeleton'
@@ -37,48 +37,84 @@ export function JenisPembayaranTable({ data, isLoading, isRefreshing, onEdit, on
           stats={stats}
         />
 
-        <div className="relative flex-1 min-h-0">
-          <div className="h-full overflow-auto">
-            <table className="min-w-full table-fixed text-sm">
-              <colgroup>{[
-                <col key="kode" style={{ width: '10%' }} />,
-                <col key="nama" style={{ width: '18%' }} />,
-                <col key="jumlah-default" style={{ width: '12%' }} />,
-                <col key="tipe" style={{ width: '10%' }} />,
-                <col key="tahun-ajaran" style={{ width: '14%' }} />,
-                <col key="kelas" style={{ width: '14%' }} />,
-                <col key="wajib" style={{ width: '8%' }} />,
-                <col key="status" style={{ width: '8%' }} />,
-                <col key="aksi" style={{ width: '6%' }} />,
-              ]}</colgroup>
-              <JenisPembayaranTableHeader />
-              <tbody className="divide-y divide-slate-100">
-                {isLoading ? (
-                  <JenisPembayaranTableSkeleton />
-                ) : (
-                  <>
-                    {filters.filteredData.map((item) => (
-                      <JenisPembayaranTableRow
-                        key={item.id}
-                        item={item}
-                        onEdit={onEdit}
-                        onDelete={onDelete}
-                        onViewDetail={onViewDetail}
-                        selectedItem={selectedItem}
-                        onSelectItem={onSelectItem}
-                      />
-                    ))}
-                    {isEmpty && (
-                      <JenisPembayaranEmptyState
-                        hasActiveFilters={filters.hasActiveFilters}
-                        onClearFilters={filters.handleClearFilters}
-                      />
-                    )}
-                  </>
-                )}
-              </tbody>
-            </table>
-          </div>
+        <div className="flex-1 overflow-auto min-h-0">
+          <table className="w-full border-collapse">
+            <thead className="bg-gradient-to-b from-slate-100 to-slate-50 sticky top-0 z-10">
+              <tr className="border-b-2 border-slate-300">
+                <th className="px-4 py-3 text-left border-r border-slate-200">
+                  <Text size="1" weight="bold" className="text-slate-700 uppercase tracking-wider">
+                    Kode
+                  </Text>
+                </th>
+                <th className="px-4 py-3 text-left border-r border-slate-200">
+                  <Text size="1" weight="bold" className="text-slate-700 uppercase tracking-wider">
+                    Nama
+                  </Text>
+                </th>
+                <th className="px-4 py-3 text-left border-r border-slate-200">
+                  <Text size="1" weight="bold" className="text-slate-700 uppercase tracking-wider">
+                    Jumlah Default
+                  </Text>
+                </th>
+                <th className="px-4 py-3 text-left border-r border-slate-200">
+                  <Text size="1" weight="bold" className="text-slate-700 uppercase tracking-wider">
+                    Tipe
+                  </Text>
+                </th>
+                <th className="px-4 py-3 text-left border-r border-slate-200">
+                  <Text size="1" weight="bold" className="text-slate-700 uppercase tracking-wider">
+                    Tahun Ajaran
+                  </Text>
+                </th>
+                <th className="px-4 py-3 text-left border-r border-slate-200">
+                  <Text size="1" weight="bold" className="text-slate-700 uppercase tracking-wider">
+                    Tingkat
+                  </Text>
+                </th>
+                <th className="px-4 py-3 text-left border-r border-slate-200">
+                  <Text size="1" weight="bold" className="text-slate-700 uppercase tracking-wider">
+                    Wajib
+                  </Text>
+                </th>
+                <th className="px-4 py-3 text-left border-r border-slate-200">
+                  <Text size="1" weight="bold" className="text-slate-700 uppercase tracking-wider">
+                    Status
+                  </Text>
+                </th>
+                <th className="px-4 py-3 text-center">
+                  <Text size="1" weight="bold" className="text-slate-700 uppercase tracking-wider">
+                    Aksi
+                  </Text>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {isLoading ? (
+                <JenisPembayaranTableSkeleton />
+              ) : (
+                <>
+                  {filters.filteredData.map((item, index) => (
+                    <JenisPembayaranTableRow
+                      key={item.id}
+                      item={item}
+                      index={index}
+                      onEdit={onEdit}
+                      onDelete={onDelete}
+                      onViewDetail={onViewDetail}
+                      selectedItem={selectedItem}
+                      onSelectItem={onSelectItem}
+                    />
+                  ))}
+                  {isEmpty && (
+                    <JenisPembayaranEmptyState
+                      hasActiveFilters={filters.hasActiveFilters}
+                      onClearFilters={filters.handleClearFilters}
+                    />
+                  )}
+                </>
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

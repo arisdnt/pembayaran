@@ -12,9 +12,12 @@ import {
   BarChart3,
   Server,
   Search,
+  RotateCcw,
+  Trash2,
 } from 'lucide-react'
 import { db, syncRegistry } from '../../offline/db'
 import { useOffline } from '../../contexts/OfflineContext'
+import { retryOutboxItem, retryAllErrorOutbox } from '../../offline/outbox'
 
 const STATUS_ORDER = ['pending', 'syncing', 'applied', 'error']
 
@@ -59,6 +62,8 @@ export function SyncStatus() {
   const [tableFilter, setTableFilter] = useState('all')
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedItem, setSelectedItem] = useState(null)
+  const [retrying, setRetrying] = useState(false)
+  const [deletingId, setDeletingId] = useState(null)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -242,6 +247,42 @@ export function SyncStatus() {
     )
   }
 
+  const handleRetryAll = async () => {
+    setRetrying(true)
+    try {
+      await retryAllErrorOutbox()
+      await load()
+    } catch (err) {
+      console.error('Error retrying all:', err)
+    } finally {
+      setRetrying(false)
+    }
+  }
+
+  const handleRetryItem = async (itemId) => {
+    setRetrying(true)
+    try {
+      await retryOutboxItem(itemId)
+      await load()
+    } catch (err) {
+      console.error('Error retrying item:', err)
+    } finally {
+      setRetrying(false)
+    }
+  }
+
+  const handleDeleteItem = async (itemId) => {
+    setDeletingId(itemId)
+    try {
+      await db.outbox.delete(itemId)
+      await load()
+    } catch (err) {
+      console.error('Error deleting item:', err)
+    } finally {
+      setDeletingId(null)
+    }
+  }
+
   return (
     <PageLayout>
       <div className="flex flex-col h-full gap-4">
@@ -339,6 +380,22 @@ export function SyncStatus() {
               </div>
 
               <button
+                onClick={handleRetryAll}
+                disabled={retrying || globalStats.error === 0}
+                className="flex items-center gap-2 px-3 text-white font-medium shadow-sm hover:shadow transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{
+                  borderRadius: 0,
+                  backgroundColor: '#dc2626',
+                  border: '1px solid #b91c1c',
+                  height: '35px',
+                }}
+                title={globalStats.error === 0 ? 'Tidak ada error untuk di-retry' : 'Retry semua item yang error'}
+              >
+                <RotateCcw className={`h-4 w-4 ${retrying ? 'animate-spin' : ''}`} />
+                <span className="text-sm">Retry All ({globalStats.error})</span>
+              </button>
+
+              <button
                 onClick={load}
                 disabled={loading}
                 className="flex items-center gap-2 px-3 text-white font-medium shadow-sm hover:shadow transition-all disabled:opacity-50 disabled:cursor-not-allowed"
@@ -358,15 +415,16 @@ export function SyncStatus() {
           <div className="flex-1 min-h-0 overflow-auto excel-scrollbar">
             <table className="min-w-full table-fixed text-sm border-collapse">
                 <colgroup>
-                  <col style={{ width: '10%' }} />
-                  <col style={{ width: '8%' }} />
-                  <col style={{ width: '8%' }} />
-                  <col style={{ width: '14%' }} />
-                  <col style={{ width: '10%' }} />
-                  <col style={{ width: '8%' }} />
+                  <col style={{ width: '9%' }} />
+                  <col style={{ width: '7%' }} />
+                  <col style={{ width: '7%' }} />
                   <col style={{ width: '12%' }} />
-                  <col style={{ width: '20%' }} />
-                  <col style={{ width: '10%' }} />
+                  <col style={{ width: '9%' }} />
+                  <col style={{ width: '7%' }} />
+                  <col style={{ width: '11%' }} />
+                  <col style={{ width: '17%' }} />
+                  <col style={{ width: '12%' }} />
+                  <col style={{ width: '9%' }} />
                 </colgroup>
                 <thead>
                   <tr className="bg-gradient-to-b from-slate-100 to-slate-50 sticky top-0 z-10 border-b border-slate-300 shadow-sm">
@@ -394,21 +452,24 @@ export function SyncStatus() {
                     <th className="px-4 py-3 text-left text-[0.7rem] font-bold uppercase tracking-wider text-slate-700 border-r border-slate-300">
                       Ringkasan Payload
                     </th>
-                    <th className="px-4 py-3 text-left text-[0.7rem] font-bold uppercase tracking-wider text-slate-700">
+                    <th className="px-4 py-3 text-left text-[0.7rem] font-bold uppercase tracking-wider text-slate-700 border-r border-slate-300">
                       Pesan Error
+                    </th>
+                    <th className="px-4 py-3 text-center text-[0.7rem] font-bold uppercase tracking-wider text-slate-700">
+                      Aksi
                     </th>
                   </tr>
                 </thead>
                 <tbody>
                   {loading && filteredItems.length === 0 ? (
                     <tr>
-                      <td colSpan="9" className="px-4 py-12 text-center text-slate-500">
+                      <td colSpan="10" className="px-4 py-12 text-center text-slate-500">
                         Memuat data...
                       </td>
                     </tr>
                   ) : filteredItems.length === 0 ? (
                     <tr>
-                      <td colSpan="9" className="px-4 py-12 text-center">
+                      <td colSpan="10" className="px-4 py-12 text-center">
                         <div className="flex flex-col items-center gap-3">
                           <Database className="h-12 w-12 text-slate-300" />
                           <div>
@@ -491,7 +552,7 @@ export function SyncStatus() {
                             </button>
                           </div>
                         </td>
-                        <td className="px-3 py-1.5">
+                        <td className="px-3 py-1.5 border-r border-slate-200">
                           {item.error_message ? (
                             <Text size="1" className="text-red-600 font-mono text-[0.7rem] truncate block" title={item.error_message}>
                               {item.error_message}
@@ -501,6 +562,37 @@ export function SyncStatus() {
                               —
                             </Text>
                           )}
+                        </td>
+                        <td className="px-3 py-1.5">
+                          <div className="flex items-center justify-center gap-1">
+                            {(item.status === 'error' || item.status === 'pending') && (
+                              <>
+                                <button
+                                  onClick={() => handleRetryItem(item.id)}
+                                  disabled={retrying}
+                                  className="p-1 text-blue-600 hover:bg-blue-50 border border-blue-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                  style={{ borderRadius: 0 }}
+                                  title="Retry item ini"
+                                >
+                                  <RotateCcw className={`h-3.5 w-3.5 ${retrying ? 'animate-spin' : ''}`} />
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteItem(item.id)}
+                                  disabled={deletingId === item.id}
+                                  className="p-1 text-red-600 hover:bg-red-50 border border-red-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                  style={{ borderRadius: 0 }}
+                                  title="Hapus item ini"
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </button>
+                              </>
+                            )}
+                            {(item.status === 'applied' || item.status === 'syncing') && (
+                              <Text size="1" className="text-slate-400 text-[0.65rem]">
+                                {item.status === 'syncing' ? 'Syncing...' : '—'}
+                              </Text>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     ))

@@ -17,7 +17,7 @@ export class ArtapayDB extends Dexie {
 
       // Relational/history
       riwayat_kelas_siswa: 'id, diperbarui_pada, id_siswa, id_kelas, id_tahun_ajaran, status, tanggal_masuk',
-      riwayat_wali_kelas: 'id, diperbarui_pada, id_wali_kelas, id_kelas, id_tahun_ajaran, status',
+      riwayat_wali_kelas: 'id, diperbarui_pada, id_wali_kelas, id_kelas, id_tahun_ajaran, status, tanggal_mulai',
 
       // Billing/payment
       jenis_pembayaran: 'id, diperbarui_pada, kode, status_aktif, tingkat',

@@ -12,7 +12,8 @@
       "Bash(npx tauri:*)",
       "Bash(mkdir:*)",
       "Bash(npx @tauri-apps/cli icon:*)",
-      "Bash(npm run dev:*)"
+      "Bash(npm run dev:*)",
+      "Bash(test:*)"
     ],
     "deny": [],
     "ask": []

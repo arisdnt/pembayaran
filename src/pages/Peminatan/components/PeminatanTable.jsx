@@ -13,6 +13,7 @@ export function PeminatanTable({
   onAdd,
   selectedItem,
   onSelectItem,
+  onViewDetail,
 }) {
   const {
     searchQuery,
@@ -236,6 +237,7 @@ export function PeminatanTable({
                       onEdit={onEdit}
                       onDelete={onDelete}
                       onToggleAktif={onToggleAktif}
+                      onViewDetail={onViewDetail}
                       isEven={index % 2 === 0}
                     />
                   ))

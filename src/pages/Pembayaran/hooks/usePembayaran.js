@@ -8,7 +8,16 @@ export function usePembayaran() {
   const { status } = useOffline()
   const [error, setError] = useState('')
 
-  const pembayaran = useLiveQuery(async () => db.pembayaran.orderBy('tanggal_dibuat').reverse().toArray(), [], undefined)
+  const pembayaran = useLiveQuery(async () => {
+    const data = await db.pembayaran.toArray()
+    // Sort in JavaScript since 'tanggal_dibuat' is not indexed
+    data.sort((a, b) => {
+      const dateA = new Date(a.tanggal_dibuat || 0)
+      const dateB = new Date(b.tanggal_dibuat || 0)
+      return dateB - dateA  // Descending order (newest first)
+    })
+    return data
+  }, [], undefined)
   const rincianPembayaran = useLiveQuery(async () => db.rincian_pembayaran.toArray(), [], undefined)
   const tagihan = useLiveQuery(async () => db.tagihan.toArray(), [], undefined)
   const rks = useLiveQuery(async () => db.riwayat_kelas_siswa.toArray(), [], undefined)

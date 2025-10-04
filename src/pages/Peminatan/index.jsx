@@ -7,6 +7,7 @@ import { PeminatanTable } from './components/PeminatanTable'
 import { PeminatanFormDialog } from './components/PeminatanFormDialog'
 import { DeleteConfirmDialog } from '../../components/common/DeleteConfirmDialog'
 import { DetailPanel } from './components/DetailPanel'
+import { PeminatanDetailModal } from './components/PeminatanDetailModal'
 
 function PeminatanContent() {
   const {
@@ -22,6 +23,7 @@ function PeminatanContent() {
 
   const [dialogOpen, setDialogOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [detailModalOpen, setDetailModalOpen] = useState(false)
   const [editMode, setEditMode] = useState(false)
   const [currentItem, setCurrentItem] = useState(null)
   const [selectedItem, setSelectedItem] = useState(null)
@@ -81,6 +83,11 @@ function PeminatanContent() {
     }
   }
 
+  const handleOpenDetail = (item) => {
+    setSelectedItem(item)
+    setDetailModalOpen(true)
+  }
+
   return (
     <PageLayout>
       <div className="flex flex-col h-full">
@@ -112,6 +119,7 @@ function PeminatanContent() {
               onAdd={handleOpenCreate}
               selectedItem={selectedItem}
               onSelectItem={setSelectedItem}
+              onViewDetail={handleOpenDetail}
             />
           </div>
 
@@ -141,6 +149,12 @@ function PeminatanContent() {
         itemName={currentItem?.nama || ''}
         title="Hapus Peminatan"
         description="Apakah Anda yakin ingin menghapus peminatan"
+      />
+
+      <PeminatanDetailModal
+        open={detailModalOpen}
+        onOpenChange={setDetailModalOpen}
+        peminatan={selectedItem}
       />
     </PageLayout>
   )
