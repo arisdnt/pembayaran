@@ -27,6 +27,7 @@ const EditPembayaran = lazy(() => import('./pages/Pembayaran/EditPembayaran').th
 const DetailPembayaran = lazy(() => import('./pages/Pembayaran/DetailPembayaran').then(m => ({ default: m.DetailPembayaran })))
 const UbahPassword = lazy(() => import('./pages/UbahPassword').then(m => ({ default: m.UbahPassword })))
 const SyncStatus = lazy(() => import('./pages/SyncStatus').then(m => ({ default: m.SyncStatus })))
+const PublicSiswaByNISN = lazy(() => import('./pages/PublicSiswa/PublicSiswaByNISN').then(m => ({ default: m.PublicSiswaByNISN })))
 
 const routes = [
   { path: 'dashboard', element: <Dashboard /> },
@@ -58,6 +59,8 @@ function App() {
         <BrowserRouter>
           <Suspense fallback={<Loader />}>
             <Routes>
+              {/* Public route: wali murid accesses detail by NISN without login */}
+              <Route path="/nisn/:nisn" element={<PublicSiswaByNISN />} />
               <Route path="/login" element={<Login />} />
               <Route element={<ProtectedShell />}>
                 <Route index element={<Navigate to="/dashboard" replace />} />
