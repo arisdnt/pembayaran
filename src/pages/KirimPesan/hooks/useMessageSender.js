@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { format } from 'date-fns'
-import { sendWhatsAppBatch, normalizePhone } from '../../../services/whatsappApi'
+import { sendWhatsAppBatch, normalizePhone } from '../api/whatsapp'
 import { updateKirimPesanStatusByContent, getPendingKirimPesan } from '../../../offline/actions/kirimPesan'
 
 export function useMessageSender(rateMs, forceRefresh) {

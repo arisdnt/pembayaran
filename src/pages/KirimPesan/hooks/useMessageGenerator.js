@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { db } from '../../../offline/db'
-import { normalizePhone } from '../../../services/whatsappApi'
+import { normalizePhone } from '../api/whatsapp'
 import { formatCurrencyIDR } from '../utils/formatters'
 
 export function useMessageGenerator(

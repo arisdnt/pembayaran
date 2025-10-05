@@ -1,5 +1,5 @@
 import { Button, Select, Text } from '@radix-ui/themes'
-import { Filter, BookOpen, GraduationCap, School, Clock } from 'lucide-react'
+import { Filter, BookOpen, GraduationCap, School, Settings } from 'lucide-react'
 
 export default function FilterControls({
   tahunAjaranList,
@@ -17,6 +17,7 @@ export default function FilterControls({
   onRateMsChange,
   onGenerate,
   onKirim,
+  onSettings,
   messageCount
 }) {
   return (
@@ -67,23 +68,18 @@ export default function FilterControls({
           </Select.Root>
         </div>
 
-        <div className="flex items-center gap-2">
-          <Clock className="h-3.5 w-3.5 text-amber-500" />
-          <input
-            type="number"
-            min={5}
-            max={60}
-            step={1}
-            className="border border-slate-300 px-2 py-1 w-20 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            style={{ borderRadius: 0, height: '28px' }}
-            value={rateMs / 1000}
-            onChange={e => onRateMsChange(Number(e.target.value || 10) * 1000)}
-            placeholder="detik"
-          />
-          <Text size="1" className="text-slate-600">detik/pesan</Text>
-        </div>
-
         <div className="flex items-center gap-2 ml-auto">
+          <Button
+            onClick={onSettings}
+            variant="soft"
+            color="gray"
+            className="cursor-pointer"
+            style={{ borderRadius: 0 }}
+            size="2"
+          >
+            <Settings className="h-4 w-4 mr-1" />
+            Pengaturan
+          </Button>
           <Button
             disabled={loading}
             onClick={onGenerate}

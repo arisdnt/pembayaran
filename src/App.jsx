@@ -56,7 +56,7 @@ const routes = [
 
 function App() {
   return (
-    <Theme accentColor="indigo" grayColor="slate">
+    <Theme accentColor="indigo" grayColor="slate" radius="none">
       <RefreshProvider>
         <BrowserRouter>
           <Suspense fallback={<Loader />}>

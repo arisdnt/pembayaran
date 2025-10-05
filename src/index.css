@@ -115,7 +115,7 @@ a {
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
   border: 1px solid rgb(226, 232, 240);
   transition: all 0.2s ease;
-  border-radius: 0.5rem;
+  border-radius: 0;
 }
 
 .rt-TextFieldRoot:hover {
@@ -137,7 +137,7 @@ a {
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
   border: 1px solid rgb(226, 232, 240);
   transition: all 0.2s ease;
-  border-radius: 0.5rem;
+  border-radius: 0;
 }
 
 .rt-TextAreaRoot:hover {
@@ -159,7 +159,7 @@ a {
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
   border: 1px solid rgb(226, 232, 240);
   transition: all 0.2s ease;
-  border-radius: 0.5rem;
+  border-radius: 0;
   font-size: 0.875rem;
   padding: 0.625rem 0.875rem;
 }
@@ -177,7 +177,7 @@ a {
 .rt-SelectContent {
   border: 1px solid rgb(226, 232, 240);
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  border-radius: 0.75rem;
+  border-radius: 0;
   overflow: hidden;
 }
 
@@ -222,7 +222,7 @@ a {
 .rt-DropdownMenuContent {
   border: 1px solid rgb(226, 232, 240);
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  border-radius: 0.75rem;
+  border-radius: 0;
   overflow: hidden;
 }
 
@@ -247,7 +247,7 @@ a {
 .rt-PopoverContent {
   border: 1px solid rgb(226, 232, 240);
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  border-radius: 0.75rem;
+  border-radius: 0;
 }
 
 /* Modern Context Menu Styles */

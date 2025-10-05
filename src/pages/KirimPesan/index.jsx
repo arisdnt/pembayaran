@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useState } from 'react'
 import { db } from '../../offline/db'
 import { bulkInsertKirimPesan, deleteKirimPesanByContent } from '../../offline/actions/kirimPesan'
-import { Card, Text } from '@radix-ui/themes'
+import { Card, Text as RadixText } from '@radix-ui/themes'
 import Notification from './components/Notification'
 import DeleteDialog from './components/DeleteDialog'
 import LogViewer from './components/LogViewer'
 import FilterControls from './components/FilterControls'
 import MessageTable from './components/MessageTable'
+import SettingsModal from './components/SettingsModal'
 import { useMessageData } from './hooks/useMessageData'
 import { useMessageGenerator } from './hooks/useMessageGenerator'
 import { useMessageSender } from './hooks/useMessageSender'
@@ -21,6 +22,17 @@ export default function KirimPesan() {
   const [rateMs, setRateMs] = useState(10000)
   const [notification, setNotification] = useState(null)
   const [deleteDialog, setDeleteDialog] = useState({ open: false, index: null })
+  const [settingsModalOpen, setSettingsModalOpen] = useState(false)
+
+  const handleOpenSettings = () => {
+    console.log('[KirimPesan] Opening settings modal')
+    setSettingsModalOpen(true)
+  }
+
+  const handleCloseSettings = (open) => {
+    console.log('[KirimPesan] Settings modal state changed:', open)
+    setSettingsModalOpen(open)
+  }
 
   const { kirimPesanData, kirimPesanLoading, forceRefresh } = useMessageData()
   
@@ -107,47 +119,57 @@ export default function KirimPesan() {
   }
 
   return (
-    <div className="h-screen flex flex-col p-6">
+    <div className="flex flex-col h-full w-full overflow-hidden">
       <Notification 
         notification={notification} 
         onClose={() => setNotification(null)} 
       />
 
-      <div className="grid grid-cols-12 gap-4 flex-1 overflow-hidden">
-        <div className="col-span-9 flex flex-col overflow-hidden">
-          <Card className="p-4 flex flex-col h-full overflow-hidden">
-            <FilterControls
-              tahunAjaranList={tahunAjaranList}
-              tingkatList={tingkatList}
-              filteredKelas={filteredKelas}
-              selectedTA={selectedTA}
-              selectedTingkat={selectedTingkat}
-              selectedKelas={selectedKelas}
-              rateMs={rateMs}
-              loading={loading}
-              sending={sending}
-              onTAChange={setSelectedTA}
-              onTingkatChange={setSelectedTingkat}
-              onKelasChange={setSelectedKelas}
-              onRateMsChange={setRateMs}
-              onGenerate={handleGenerate}
-              onKirim={handleSendMessages}
-              messageCount={kirimPesanData.length}
-            />
+      {/* Main Content Area - Fixed Height with Padding */}
+      <div className="flex-1 flex flex-col p-6 overflow-hidden min-h-0">
+        <div className="grid grid-cols-12 gap-4 flex-1 overflow-hidden min-h-0">
+          {/* Left Column - Message Table (75%) */}
+          <div className="col-span-9 flex flex-col overflow-hidden min-h-0">
+            <Card className="p-4 flex flex-col h-full overflow-hidden" style={{ borderRadius: 0 }}>
+              <FilterControls
+                tahunAjaranList={tahunAjaranList}
+                tingkatList={tingkatList}
+                filteredKelas={filteredKelas}
+                selectedTA={selectedTA}
+                selectedTingkat={selectedTingkat}
+                selectedKelas={selectedKelas}
+                rateMs={rateMs}
+                loading={loading}
+                sending={sending}
+                onTAChange={setSelectedTA}
+                onTingkatChange={setSelectedTingkat}
+                onKelasChange={setSelectedKelas}
+                onRateMsChange={setRateMs}
+                onGenerate={handleGenerate}
+                onKirim={handleSendMessages}
+                onSettings={handleOpenSettings}
+                messageCount={kirimPesanData.length}
+              />
 
-            <Text weight="bold" className="mb-2 block flex-shrink-0">
-              Preview ({kirimPesanData.length})
-            </Text>
-            <MessageTable 
-              data={kirimPesanData} 
-              loading={kirimPesanLoading}
-              onDelete={handleDeleteRow} 
-            />
-          </Card>
-        </div>
+              <RadixText weight="bold" className="mb-2 block flex-shrink-0">
+                Preview ({kirimPesanData.length})
+              </RadixText>
+              
+              {/* Table with flex-1 to fill remaining space */}
+              <div className="flex-1 min-h-0">
+                <MessageTable 
+                  data={kirimPesanData} 
+                  loading={kirimPesanLoading}
+                  onDelete={handleDeleteRow} 
+                />
+              </div>
+            </Card>
+          </div>
 
-        <div className="col-span-3 flex flex-col overflow-hidden">
-          <LogViewer logLines={logLines} />
+          {/* Right Column - Log Viewer (25%) */}
+          <div className="col-span-3 flex flex-col overflow-hidden min-h-0">
+            <LogViewer logLines={logLines} />
+          </div>
         </div>
       </div>
 
@@ -155,6 +177,11 @@ export default function KirimPesan() {
         open={deleteDialog.open}
         onOpenChange={(open) => setDeleteDialog({ open, index: null })}
         onConfirm={confirmDelete}
+      />
+
+      <SettingsModal
+        open={settingsModalOpen}
+        onOpenChange={handleCloseSettings}
       />
     </div>
   )
