@@ -28,9 +28,6 @@ src-tauri/Cargo.lock
 
 # Temporary and test files
 *.txt
-!BUILD.md
-!PERBAIKAN_X86.md
-!TAURI_BORDERLESS_SETUP.md
 !README.md
 
 # Binary and archive files

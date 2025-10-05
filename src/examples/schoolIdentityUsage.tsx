@@ -23,7 +23,7 @@ import {
   SCHOOL_IDENTITY,
   PRIMARY_COLOR,
   SECONDARY_COLOR
-} from '../config/schoolIdentity'
+} from '../config/appInfo'
 
 // Example 1: Login Page Header
 export const LoginPageHeader: React.FC = () => {

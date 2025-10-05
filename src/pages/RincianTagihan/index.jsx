@@ -1,13 +1,13 @@
 import { useState } from 'react'
  
 import { PageLayout } from '../../layout/PageLayout'
-import { Loader } from '../../components/Loader'
+import { Loader } from '../../components/ui/Loader'
 import { Text } from '@radix-ui/themes'
 import { AlertCircle } from 'lucide-react'
 import { useRincianTagihan } from './hooks/useRincianTagihan'
 import { RincianTagihanTable } from './components/RincianTagihanTable'
 import RincianTagihanFormDialog from './components/RincianTagihanFormDialog'
-import { DeleteConfirmDialog } from './components/DeleteConfirmDialog'
+import { DeleteConfirmDialog } from '../../components/common/DeleteConfirmDialog'
 import { DetailPanel } from './components/DetailPanel'
 
 function RincianTagihanContent() {

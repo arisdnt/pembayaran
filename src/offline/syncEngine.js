@@ -197,13 +197,44 @@ export async function startBackgroundSync() {
   status.syncing = true
   try {
     const tables = Object.keys(syncRegistry)
-    for (const table of tables) {
-      await hydrateTable(table)
+
+    // OPTIMIZED: Prioritize critical tables for faster initial render
+    const criticalTables = ['siswa', 'kelas', 'tahun_ajaran', 'riwayat_kelas_siswa']
+    const secondaryTables = tables.filter(t => !criticalTables.includes(t))
+
+    console.log('[SyncEngine] Phase 1: Syncing critical tables for initial render')
+    // Phase 1: Load critical tables sequentially to minimize blocking
+    for (const table of criticalTables) {
+      if (syncRegistry[table]) {
+        await hydrateTable(table)
+      }
     }
+
+    console.log('[SyncEngine] Phase 2: Syncing secondary tables in background')
+    // Phase 2: Load secondary tables in parallel (non-blocking)
+    const secondaryPromises = secondaryTables.map(table =>
+      hydrateTable(table).catch(err => {
+        console.error(`[SyncEngine] Error syncing ${table}:`, err)
+        return null // Don't fail the entire sync if one table fails
+      })
+    )
+
+    // Start realtime immediately after critical tables
     await startRealtime()
     scheduleOutboxProcessor()
     status.lastSyncAt = new Date().toISOString()
     status.lastError = null
+
+    // Wait for secondary tables to finish in background
+    Promise.all(secondaryPromises)
+      .then(() => {
+        console.log('[SyncEngine] All tables synced successfully')
+        status.lastSyncAt = new Date().toISOString()
+      })
+      .catch(err => {
+        console.error('[SyncEngine] Some secondary tables failed to sync:', err)
+      })
+
   } catch (err) {
     status.lastError = err.message
     console.error('[SyncEngine] init error', err)

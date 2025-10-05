@@ -1,27 +1,32 @@
+import { lazy, Suspense } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { Theme } from '@radix-ui/themes'
 import { RefreshProvider } from './contexts/RefreshContext'
-import { Login } from './pages/Login'
-import { Dashboard } from './pages/Dashboard'
-import { Siswa, DetailSiswa } from './pages/Siswa'
-import { Kelas } from './pages/Kelas'
-import { TahunAjaran } from './pages/TahunAjaran'
-import { RiwayatKelasSiswa } from './pages/RiwayatKelasSiswa/index'
-import { WaliKelas } from './pages/WaliKelas/index'
-import { RiwayatWaliKelas } from './pages/RiwayatWaliKelas/index'
-import { Peminatan } from './pages/Peminatan/index'
-import { PeminatanSiswa } from './pages/PeminatanSiswa/index'
-import { JenisPembayaran } from './pages/JenisPembayaran/index'
-import { Tagihan } from './pages/Tagihan/index'
-import { CreateTagihan } from './pages/Tagihan/CreateTagihan'
-import { EditTagihan } from './pages/Tagihan/EditTagihan'
-import { Pembayaran } from './pages/Pembayaran/index'
-import { CreatePembayaran } from './pages/Pembayaran/CreatePembayaran'
-import { EditPembayaran } from './pages/Pembayaran/EditPembayaran'
-import { DetailPembayaran } from './pages/Pembayaran/DetailPembayaran'
-import { UbahPassword } from './pages/UbahPassword'
-import { ProtectedShell } from './components/ProtectedShell'
-import { SyncStatus } from './pages/SyncStatus'
+import { ProtectedShell } from './components/layout/ProtectedShell'
+import { Loader } from './components/ui/Loader'
+
+// Lazy load all page components for optimal performance
+const Login = lazy(() => import('./pages/Login').then(m => ({ default: m.Login })))
+const Dashboard = lazy(() => import('./pages/Dashboard').then(m => ({ default: m.Dashboard })))
+const Siswa = lazy(() => import('./pages/Siswa').then(m => ({ default: m.Siswa })))
+const DetailSiswa = lazy(() => import('./pages/Siswa').then(m => ({ default: m.DetailSiswa })))
+const Kelas = lazy(() => import('./pages/Kelas').then(m => ({ default: m.Kelas })))
+const TahunAjaran = lazy(() => import('./pages/TahunAjaran').then(m => ({ default: m.TahunAjaran })))
+const RiwayatKelasSiswa = lazy(() => import('./pages/RiwayatKelasSiswa/index').then(m => ({ default: m.RiwayatKelasSiswa })))
+const WaliKelas = lazy(() => import('./pages/WaliKelas/index').then(m => ({ default: m.WaliKelas })))
+const RiwayatWaliKelas = lazy(() => import('./pages/RiwayatWaliKelas/index').then(m => ({ default: m.RiwayatWaliKelas })))
+const Peminatan = lazy(() => import('./pages/Peminatan/index').then(m => ({ default: m.Peminatan })))
+const PeminatanSiswa = lazy(() => import('./pages/PeminatanSiswa/index').then(m => ({ default: m.PeminatanSiswa })))
+const JenisPembayaran = lazy(() => import('./pages/JenisPembayaran/index').then(m => ({ default: m.JenisPembayaran })))
+const Tagihan = lazy(() => import('./pages/Tagihan/index').then(m => ({ default: m.Tagihan })))
+const CreateTagihan = lazy(() => import('./pages/Tagihan/CreateTagihan').then(m => ({ default: m.CreateTagihan })))
+const EditTagihan = lazy(() => import('./pages/Tagihan/EditTagihan').then(m => ({ default: m.EditTagihan })))
+const Pembayaran = lazy(() => import('./pages/Pembayaran/index').then(m => ({ default: m.Pembayaran })))
+const CreatePembayaran = lazy(() => import('./pages/Pembayaran/CreatePembayaran').then(m => ({ default: m.CreatePembayaran })))
+const EditPembayaran = lazy(() => import('./pages/Pembayaran/EditPembayaran').then(m => ({ default: m.EditPembayaran })))
+const DetailPembayaran = lazy(() => import('./pages/Pembayaran/DetailPembayaran').then(m => ({ default: m.DetailPembayaran })))
+const UbahPassword = lazy(() => import('./pages/UbahPassword').then(m => ({ default: m.UbahPassword })))
+const SyncStatus = lazy(() => import('./pages/SyncStatus').then(m => ({ default: m.SyncStatus })))
 
 const routes = [
   { path: 'dashboard', element: <Dashboard /> },
@@ -51,16 +56,18 @@ function App() {
     <Theme accentColor="indigo" grayColor="slate">
       <RefreshProvider>
         <BrowserRouter>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route element={<ProtectedShell />}>
-              <Route index element={<Navigate to="/dashboard" replace />} />
-              {routes.map(({ path, element }) => (
-                <Route key={path} path={path} element={element} />
-              ))}
-              <Route path="*" element={<Navigate to="/dashboard" replace />} />
-            </Route>
-          </Routes>
+          <Suspense fallback={<Loader />}>
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route element={<ProtectedShell />}>
+                <Route index element={<Navigate to="/dashboard" replace />} />
+                {routes.map(({ path, element }) => (
+                  <Route key={path} path={path} element={element} />
+                ))}
+                <Route path="*" element={<Navigate to="/dashboard" replace />} />
+              </Route>
+            </Routes>
+          </Suspense>
         </BrowserRouter>
       </RefreshProvider>
     </Theme>

@@ -71,44 +71,58 @@ export function useDashboardData(filters = {}) {
       // Determine tahun ajaran to use
       let tahunAjaranId = filters.tahunAjaran
       if (!tahunAjaranId) {
-        // Fetch all and filter in JavaScript (boolean cannot be indexed in IndexedDB)
+        // Load all tahun ajaran and filter in memory (status_aktif is boolean)
         const allTahunAjaran = await db.tahun_ajaran.toArray()
         const tahunAktif = allTahunAjaran.find(t => t.status_aktif === true)
         if (!tahunAktif) throw new Error('Tidak ada tahun ajaran aktif')
         tahunAjaranId = tahunAktif.id
       }
 
+      // Validate tahunAjaranId before querying
+      if (!tahunAjaranId) {
+        throw new Error('ID Tahun Ajaran tidak valid')
+      }
+
       // Get date range filter
       const startDate = getDateRange(filters.timeRange || 'all')
 
-      // Load data from IndexedDB
-      const [rks, kelas, siswa, tagihan, rincianTagihan, pembayaran, rincianPembayaran] = await Promise.all([
-        db.riwayat_kelas_siswa.toArray(),
+      // OPTIMIZED: Load only critical data first using indexed queries
+      const [allRks, kelas, siswa] = await Promise.all([
+        // Load all riwayat for the tahun ajaran (only if tahunAjaranId is valid)
+        db.riwayat_kelas_siswa
+          .where('id_tahun_ajaran')
+          .equals(tahunAjaranId)
+          .toArray(),
         db.kelas.toArray(),
         db.siswa.toArray(),
-        db.tagihan.toArray(),
+      ])
+
+      // Filter active status in memory (compound index needs string values)
+      const rksActive = allRks.filter(r => (r.status || '').toLowerCase() === 'aktif')
+
+      // Filter by kelas/tingkat if needed
+      const kelasMap = new Map(kelas.map(k => [k.id, k]))
+      const rksFiltered = rksActive
+        .filter(r => (filters.kelas ? r.id_kelas === filters.kelas : true))
+        .filter(r => (filters.tingkat ? (kelasMap.get(r.id_kelas)?.tingkat === filters.tingkat) : true))
+
+      const rksIdsFilter = new Set(rksFiltered.map(r => r.id))
+
+      // OPTIMIZED: Load secondary data only for filtered rks
+      const [tagihan, rincianTagihan, pembayaran, rincianPembayaran] = await Promise.all([
+        db.tagihan
+          .where('id_riwayat_kelas_siswa')
+          .anyOf(Array.from(rksIdsFilter))
+          .toArray(),
         db.rincian_tagihan.toArray(),
         db.pembayaran.toArray(),
         db.rincian_pembayaran.toArray(),
       ])
 
-      const kelasMap = new Map(kelas.map(k => [k.id, k]))
-      const rksActive = rks.filter(r => r.id_tahun_ajaran === tahunAjaranId && (r.status || '').toLowerCase() === 'aktif')
-      const rksFiltered = rksActive
-        .filter(r => (filters.kelas ? r.id_kelas === filters.kelas : true))
-        .filter(r => (filters.tingkat ? (kelasMap.get(r.id_kelas)?.tingkat === filters.tingkat) : true))
       const totalSiswa = rksFiltered.length
 
-      const rksIdsFilter = new Set(
-        rks
-          .filter(r => r.id_tahun_ajaran === tahunAjaranId)
-          .filter(r => (filters.kelas ? r.id_kelas === filters.kelas : true))
-          .filter(r => (filters.tingkat ? (kelasMap.get(r.id_kelas)?.tingkat === filters.tingkat) : true))
-          .map(r => r.id)
-      )
-
+      // Tagihan already filtered by rks from indexed query, just apply date filter
       const tagihanFiltered = tagihan
-        .filter(t => rksIdsFilter.has(t.id_riwayat_kelas_siswa))
         .filter(t => (startDate ? (new Date(t.tanggal_tagihan) >= new Date(startDate)) : true))
       const totalTagihan = tagihanFiltered.length
 
@@ -180,7 +194,7 @@ export function useDashboardData(filters = {}) {
           judul: t.judul,
           tanggal_tagihan: t.tanggal_tagihan,
           riwayat_kelas_siswa: (() => {
-            const rRow = rks.find(r => r.id === t.id_riwayat_kelas_siswa)
+            const rRow = rksActive.find(r => r.id === t.id_riwayat_kelas_siswa)
             const sRow = siswa.find(s => s.id === rRow?.id_siswa)
             const kRow = kelasMap.get(rRow?.id_kelas)
             return {
@@ -196,9 +210,8 @@ export function useDashboardData(filters = {}) {
         .filter(r => {
           const p = pembayaran.find(p => p.id === r.id_pembayaran)
           const t = p && tagihan.find(t => t.id === p.id_tagihan)
-          const rRow = t && rks.find(x => x.id === t.id_riwayat_kelas_siswa)
+          const rRow = t && rksActive.find(x => x.id === t.id_riwayat_kelas_siswa)
           if (!rRow) return false
-          if (rRow.id_tahun_ajaran !== tahunAjaranId) return false
           if (filters.kelas && rRow.id_kelas !== filters.kelas) return false
           if (filters.tingkat && kelasMap.get(rRow.id_kelas)?.tingkat !== filters.tingkat) return false
           if (startDate && new Date(r.tanggal_bayar) < new Date(startDate)) return false
@@ -209,7 +222,7 @@ export function useDashboardData(filters = {}) {
         .map(r => {
           const p = pembayaran.find(p => p.id === r.id_pembayaran)
           const t = p && tagihan.find(t => t.id === p.id_tagihan)
-          const rRow = t && rks.find(x => x.id === t.id_riwayat_kelas_siswa)
+          const rRow = t && rksActive.find(x => x.id === t.id_riwayat_kelas_siswa)
           const sRow = rRow && siswa.find(s => s.id === rRow.id_siswa)
           return {
             id: r.id,
