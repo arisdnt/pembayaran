@@ -28,6 +28,7 @@ const DetailPembayaran = lazy(() => import('./pages/Pembayaran/DetailPembayaran'
 const UbahPassword = lazy(() => import('./pages/UbahPassword').then(m => ({ default: m.UbahPassword })))
 const SyncStatus = lazy(() => import('./pages/SyncStatus').then(m => ({ default: m.SyncStatus })))
 const PublicSiswaByNISN = lazy(() => import('./pages/PublicSiswa/PublicSiswaByNISN').then(m => ({ default: m.PublicSiswaByNISN })))
+const KirimPesan = lazy(() => import('./pages/KirimPesan').then(m => ({ default: m.default || m.KirimPesan })))
 
 const routes = [
   { path: 'dashboard', element: <Dashboard /> },
@@ -50,6 +51,7 @@ const routes = [
   { path: 'pembayaran/detail/:id', element: <DetailPembayaran /> },
   { path: 'ubah-password', element: <UbahPassword /> },
   { path: 'sync', element: <SyncStatus /> },
+  { path: 'kirim-pesan', element: <KirimPesan /> },
 ]
 
 function App() {

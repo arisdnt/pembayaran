@@ -8,15 +8,24 @@
     <!-- Performance: DNS Preconnect to Supabase for faster API calls -->
     <link rel="preconnect" href="https://lbfsfabyannihnrttqbj.supabase.co" crossorigin />
     <link rel="dns-prefetch" href="https://lbfsfabyannihnrttqbj.supabase.co" />
+    <link rel="preconnect" href="https://lbfsfabyannihnrttqbj.functions.supabase.co" crossorigin />
+    <link rel="dns-prefetch" href="https://lbfsfabyannihnrttqbj.functions.supabase.co" />
 
-    <!-- Content Security Policy for Supabase and Tauri -->
+    <!-- Content Security Policy: allow Supabase + local dev backend/proxy -->
     <meta http-equiv="Content-Security-Policy" content="
       default-src 'self';
       script-src 'self' 'unsafe-inline' 'unsafe-eval';
       style-src 'self' 'unsafe-inline';
       img-src 'self' data: https:;
       font-src 'self' data:;
-      connect-src 'self' https://lbfsfabyannihnrttqbj.supabase.co wss://lbfsfabyannihnrttqbj.supabase.co;
+      connect-src 'self'
+        http://localhost:3001
+        http://localhost:5175
+        ws://localhost:5175
+        https://api.fonnte.com
+        https://lbfsfabyannihnrttqbj.functions.supabase.co
+        https://lbfsfabyannihnrttqbj.supabase.co
+        wss://lbfsfabyannihnrttqbj.supabase.co;
       worker-src 'self' blob:;
     ">
     <title>ArtaPay</title>

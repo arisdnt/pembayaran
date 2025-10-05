@@ -11,6 +11,7 @@ import {
   BadgeDollarSign,
   Receipt,
   Wallet,
+  Send,
   Info,
 } from 'lucide-react'
 
@@ -87,6 +88,11 @@ export const menuSections = [
         icon: Wallet,
         label: 'Pembayaran',
         href: '/pembayaran',
+      },
+      {
+        icon: Send,
+        label: 'Kirim Pesan',
+        href: '/kirim-pesan',
       },
     ],
   },
