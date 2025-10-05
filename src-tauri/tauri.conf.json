@@ -4,7 +4,7 @@
   "identifier": "com.artapay.app",
   "build": {
     "beforeDevCommand": "npm run dev:vite",
-    "beforeBuildCommand": "npm run build",
+    "beforeBuildCommand": "vite build",
     "devUrl": "http://localhost:5175",
     "frontendDist": "../dist"
   },

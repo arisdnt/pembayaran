@@ -28,14 +28,16 @@ export default defineConfig({
   envPrefix: ['VITE_', 'TAURI_ENV_*'],
 
   build: {
-    // Tauri uses Chromium on Windows and WebKit on macOS and Linux
-    target: process.env.TAURI_ENV_PLATFORM == 'windows'
-      ? 'chrome105'
-      : 'safari13',
-    // don't minify for debug builds
-    minify: !process.env.TAURI_ENV_DEBUG ? 'esbuild' : false,
-    // produce sourcemaps for debug builds
-    sourcemap: !!process.env.TAURI_ENV_DEBUG,
+    // Target modern browsers for web deployment, fallback to Tauri targets for desktop
+    target: process.env.TAURI_ENV_PLATFORM 
+      ? (process.env.TAURI_ENV_PLATFORM == 'windows' ? 'chrome105' : 'safari13')
+      : 'es2020',
+    
+    // Minify for production builds
+    minify: process.env.NODE_ENV === 'production' ? 'esbuild' : !process.env.TAURI_ENV_DEBUG ? 'esbuild' : false,
+    
+    // Sourcemaps for debug builds or development
+    sourcemap: !!process.env.TAURI_ENV_DEBUG || process.env.NODE_ENV === 'development',
 
     outDir: 'dist',
     assetsDir: 'assets',
@@ -46,7 +48,8 @@ export default defineConfig({
           // Split vendor chunks for better caching and loading
           'vendor-react': ['react', 'react-dom', 'react-router-dom'],
           'vendor-radix': ['@radix-ui/themes', '@radix-ui/react-icons'],
-          'vendor-supabase': ['@supabase/supabase-js']
+          'vendor-supabase': ['@supabase/supabase-js'],
+          'vendor-utils': ['date-fns', 'nanoid', 'lucide-react']
         }
       }
     },
