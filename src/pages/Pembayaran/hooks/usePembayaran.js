@@ -10,10 +10,10 @@ export function usePembayaran() {
 
   const pembayaran = useLiveQuery(async () => {
     const data = await db.pembayaran.toArray()
-    // Sort in JavaScript since 'tanggal_dibuat' is not indexed
+    // Sort in JavaScript since 'diperbarui_pada' is not indexed
     data.sort((a, b) => {
-      const dateA = new Date(a.tanggal_dibuat || 0)
-      const dateB = new Date(b.tanggal_dibuat || 0)
+      const dateA = new Date(a.diperbarui_pada || 0)
+      const dateB = new Date(b.diperbarui_pada || 0)
       return dateB - dateA  // Descending order (newest first)
     })
     return data

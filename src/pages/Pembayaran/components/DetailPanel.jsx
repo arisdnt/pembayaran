@@ -161,7 +161,7 @@ function PembayaranDetailInfo({ pembayaran }) {
       <div className="pt-3 mt-3 border-t-2 border-slate-300 space-y-3">
         <FieldItem label="Dibuat Pada" icon={Clock} className="border-b-0 pb-2">
           <Text size="1" className="text-slate-600 font-sans">
-            {formatDateTime(pembayaran.tanggal_dibuat)}
+            {formatDateTime(pembayaran.diperbarui_pada)}
           </Text>
         </FieldItem>
 

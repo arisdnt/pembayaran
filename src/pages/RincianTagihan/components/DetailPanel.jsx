@@ -115,7 +115,7 @@ export function DetailPanel({ selectedItem }) {
             </Text>
             <div className="flex items-center gap-2 text-slate-600">
               <Clock className="h-4 w-4 text-slate-400" />
-              <Text size="2">{formatDateTime(selectedItem.tanggal_dibuat)}</Text>
+              <Text size="2">{formatDateTime(selectedItem.diperbarui_pada)}</Text>
             </div>
           </div>
         </div>

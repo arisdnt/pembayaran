@@ -183,7 +183,7 @@ function DetailPembayaranContent() {
                       {pembayaran.nomor_pembayaran}
                     </Text>
                     <Text size="1" className="text-slate-500 mt-2 block">
-                      {formatDateTime(pembayaran.tanggal_dibuat)}
+                      {formatDateTime(pembayaran.diperbarui_pada)}
                     </Text>
                   </div>
                 </div>

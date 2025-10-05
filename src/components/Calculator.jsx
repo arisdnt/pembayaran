@@ -242,11 +242,13 @@ export function Calculator() {
       {/* Display */}
       <div className="bg-slate-800 px-4 py-6 border-b-2 border-slate-300">
         <div className="text-right">
-          {operation && (
-            <Text size="1" className="text-slate-400 mb-1 block font-mono">
-              {previousValue} {operation}
-            </Text>
-          )}
+          <div className="mb-1 min-h-[1.25rem] flex justify-end items-end">
+            {operation && (
+              <Text size="1" className="text-slate-400 block font-mono">
+                {previousValue} {operation}
+              </Text>
+            )}
+          </div>
           <Text size="6" weight="bold" className="text-white font-mono break-all">
             {display}
           </Text>

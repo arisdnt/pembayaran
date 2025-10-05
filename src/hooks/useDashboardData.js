@@ -132,7 +132,7 @@ export function useDashboardData(filters = {}) {
 
       const pembayaranFiltered = pembayaran
         .filter(p => rksIdsFilter.has(tagihan.find(t => t.id === p.id_tagihan)?.id_riwayat_kelas_siswa))
-        .filter(p => (startDate ? (new Date(p.tanggal_dibuat) >= new Date(startDate)) : true))
+        .filter(p => (startDate ? (new Date(p.diperbarui_pada) >= new Date(startDate)) : true))
       const totalPembayaran = pembayaranFiltered.reduce(
         (sum, p) => sum + (rpByPembayaran.get(p.id) || []).reduce((s, r) => s + Number(r.jumlah_dibayar || 0), 0),
         0

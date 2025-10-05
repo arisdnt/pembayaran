@@ -1,8 +1,8 @@
 import { Heading, Text } from '@radix-ui/themes'
 
-export function PageLayout({ title, description, children }) {
+export function PageLayout({ title, description, children, naturalHeight = false }) {
   return (
-    <div className="px-3 py-3 h-full flex flex-col">
+    <div className={`px-3 py-3 ${naturalHeight ? 'min-h-full' : 'h-full'} flex flex-col`}>
       {(title || description) && (
         <div className="mb-3 shrink-0">
           {title ? (
@@ -17,7 +17,7 @@ export function PageLayout({ title, description, children }) {
           ) : null}
         </div>
       )}
-      <div className="flex-1 min-h-0">
+      <div className={naturalHeight ? '' : 'flex-1 min-h-0'}>
         {children}
       </div>
     </div>

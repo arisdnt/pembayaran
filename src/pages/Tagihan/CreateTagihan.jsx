@@ -31,8 +31,6 @@ function CreateTagihanContent() {
   })
 
   const [rincianItems, setRincianItems] = useState([])
-  const [searchTerm, setSearchTerm] = useState('')
-  const [showDropdown, setShowDropdown] = useState(false)
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
@@ -68,10 +66,6 @@ function CreateTagihanContent() {
     return true
   }) || []
 
-  const filteredJenisPembayaran = jenisPembayaranList.filter(jenis =>
-    jenis.nama.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    jenis.kode.toLowerCase().includes(searchTerm.toLowerCase())
-  )
 
   const totalTagihan = rincianItems.reduce((sum, item) => sum + parseFloat(item.jumlah || 0), 0)
 
@@ -112,22 +106,14 @@ function CreateTagihanContent() {
     }
   }
 
-  const addJenisToCart = (jenis) => {
-    const existingIndex = rincianItems.findIndex(item => item.id_jenis_pembayaran === jenis.id)
-    if (existingIndex >= 0) {
-      const updated = [...rincianItems]
-      updated[existingIndex].jumlah = (parseFloat(updated[existingIndex].jumlah || 0) + parseFloat(jenis.jumlah_default || 0)).toString()
-      setRincianItems(updated)
-    } else {
-      setRincianItems([...rincianItems, {
-        id_jenis_pembayaran: jenis.id,
-        deskripsi: jenis.nama,
-        jumlah: jenis.jumlah_default || '',
-        urutan: rincianItems.length + 1,
-      }])
-    }
-    setSearchTerm('')
-    setShowDropdown(false)
+  const addItemToCart = (newItem) => {
+    setRincianItems([...rincianItems, newItem])
+  }
+
+  const updateCartItem = (index, updatedItem) => {
+    const updated = [...rincianItems]
+    updated[index] = updatedItem
+    setRincianItems(updated)
   }
 
   const handleSubmit = async () => {
@@ -224,8 +210,8 @@ function CreateTagihanContent() {
   )
 
   return (
-    <PageLayout>
-      <div className="flex flex-col h-full">
+    <PageLayout naturalHeight>
+      <div className="flex flex-col">
         <CreateTagihanHeader
           onBack={() => navigate('/tagihan')}
           onSubmit={handleSubmit}
@@ -234,7 +220,7 @@ function CreateTagihanContent() {
         />
 
         {error && (
-          <div className="shrink-0 mx-6 mb-3 flex items-start gap-3 bg-red-50 border border-red-200 px-4 py-3">
+          <div className="mx-6 mb-3 flex items-start gap-3 bg-red-50 border border-red-200 px-4 py-3">
             <AlertCircle className="h-5 w-5 text-red-500 mt-0.5 shrink-0" />
             <div>
               <Text size="2" weight="medium" className="text-red-700">Terjadi kesalahan</Text>
@@ -243,7 +229,7 @@ function CreateTagihanContent() {
           </div>
         )}
 
-        <div className="flex-1 overflow-hidden px-6 pb-6 flex flex-col gap-4">
+        <div className="px-6 pb-6 flex flex-col gap-4">
           <div className="grid grid-cols-2 gap-4 shrink-0">
             <TargetSiswaSection
               targetType={targetType}
@@ -273,19 +259,9 @@ function CreateTagihanContent() {
           <RincianTagihanSection
             rincianItems={rincianItems}
             jenisPembayaranList={jenisPembayaranList}
-            searchTerm={searchTerm}
-            onSearchChange={setSearchTerm}
-            showDropdown={showDropdown}
-            onSearchFocus={() => setShowDropdown(true)}
-            onSearchBlur={() => setTimeout(() => setShowDropdown(false), 200)}
-            onAddJenis={addJenisToCart}
+            onAddItem={addItemToCart}
             onRemoveRincian={(idx) => setRincianItems(rincianItems.filter((_, i) => i !== idx))}
-            onRincianChange={(idx, field, value) => {
-              const updated = [...rincianItems]
-              updated[idx][field] = value
-              setRincianItems(updated)
-            }}
-            filteredJenisPembayaran={filteredJenisPembayaran}
+            onEditItem={updateCartItem}
             filterInfo={filterInfo}
             totalTagihan={totalTagihan}
           />

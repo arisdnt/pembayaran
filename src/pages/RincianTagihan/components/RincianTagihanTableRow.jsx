@@ -44,7 +44,7 @@ export function RincianTagihanTableRow({ item, isSelected, onSelect, onEdit, onD
       </td>
       <td className="px-6 py-4 align-middle">
         <Text size="1" className="text-slate-600">
-          {formatDateTime(item.tanggal_dibuat)}
+          {formatDateTime(item.diperbarui_pada)}
         </Text>
       </td>
       <td className="px-6 py-4 align-middle">

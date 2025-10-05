@@ -59,7 +59,7 @@ export function PembayaranTableRow({ item, index, isSelected, onSelect, onEdit, 
       </td>
       <td className="px-4 py-3 border-r border-slate-200">
         <Text size="2" className="text-slate-700">
-          {formatDateTime(item.tanggal_dibuat)}
+          {formatDateTime(item.diperbarui_pada)}
         </Text>
       </td>
       <td className="px-4 py-3 border-r border-slate-200">

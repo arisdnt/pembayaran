@@ -17,7 +17,7 @@ export function useRincianTagihan() {
     const tagihanMap = new Map((tg || []).map(t => [t.id, t]))
     const jpMap = new Map((jp || []).map(x => [x.id, x]))
     return [...rows]
-      .sort((a, b) => new Date(b.tanggal_dibuat || 0) - new Date(a.tanggal_dibuat || 0))
+      .sort((a, b) => new Date(b.diperbarui_pada || 0) - new Date(a.diperbarui_pada || 0))
       .map(r => ({
         ...r,
         tagihan: tagihanMap.get(r.id_tagihan) ? { id: r.id_tagihan, nomor_tagihan: tagihanMap.get(r.id_tagihan).nomor_tagihan, judul: tagihanMap.get(r.id_tagihan).judul } : null,

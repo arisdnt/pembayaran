@@ -5,8 +5,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "tauri dev",
-    "dev:vite": "vite",
+    "dev": "vite",
+    "dev:tauri": "tauri dev",
     "build": "vite build && tauri build",
     "build:windows": "vite build && tauri build --no-bundle --target x86_64-pc-windows-gnu",
     "prepare:portable": "mkdir -p dist-windows && cp src-tauri/target/x86_64-pc-windows-gnu/release/app.exe dist-windows/artapay.exe && cp src-tauri/target/x86_64-pc-windows-gnu/release/WebView2Loader.dll dist-windows/",
