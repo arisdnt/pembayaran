@@ -22,7 +22,9 @@
       "mcp__chrome-devtools__performance_start_trace",
       "mcp__chrome-devtools__performance_analyze_insight",
       "Bash(cat:*)",
-      "Bash(taskkill:*)"
+      "Bash(taskkill:*)",
+      "mcp__supabase__list_tables",
+      "mcp__supabase__execute_sql"
     ],
     "deny": [],
     "ask": []

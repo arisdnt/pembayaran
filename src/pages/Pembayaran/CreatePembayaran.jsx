@@ -1,283 +1,89 @@
-import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState } from 'react'
 import { PageLayout } from '../../layout/PageLayout'
 import { Text } from '@radix-ui/themes'
-import { AlertCircle } from 'lucide-react'
-import { db } from '../../offline/db'
-import { createPembayaranWithRincian } from '../../offline/actions/pembayaran'
-import { CreatePembayaranHeader } from './components/CreatePembayaranHeader'
-import { TagihanSelectorSection } from './components/TagihanSelectorSection'
-import { InformasiPembayaranSection } from './components/InformasiPembayaranSection'
-import { RincianPembayaranFormSection } from './components/RincianPembayaranFormSection'
+import { AlertCircle, ArrowLeft, Save } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { usePaymentFlow } from './hooks/usePaymentFlow'
+import { SiswaSearchSection } from './components/SiswaSearchSection'
+import { UnpaidTagihanList } from './components/UnpaidTagihanList'
+import { PaymentInputModal } from './components/PaymentInputModal'
+import { SelectedPaymentList } from './components/SelectedPaymentList'
+import { PaymentConfirmationModal } from './components/PaymentConfirmationModal'
 
-function formatCurrency(amount) {
-  return new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    minimumFractionDigits: 0,
-  }).format(amount || 0)
-}
-
-function CreatePembayaranContent() {
+export function CreatePembayaran() {
   const navigate = useNavigate()
+  const [confirmModalOpen, setConfirmModalOpen] = useState(false)
 
-  // State untuk filter tagihan
-  const [tahunAjaranList, setTahunAjaranList] = useState([])
-  const [tingkatList, setTingkatList] = useState([])
-  const [kelasList, setKelasList] = useState([])
-  const [siswaList, setSiswaList] = useState([])
-  const [tagihanList, setTagihanList] = useState([])
+  const {
+    siswaList,
+    selectedSiswa,
+    setSelectedSiswa,
+    unpaidTagihan,
+    selectedPayments,
+    modalOpen,
+    setModalOpen,
+    currentTagihan,
+    currentSummary,
+    handlePayClick,
+    handleAddPayment,
+    handleRemovePayment,
+    handleEditPayment,
+    handleSubmit,
+    totalAmount,
+    selectedTagihanIds,
+    submitting,
+    error,
+  } = usePaymentFlow()
 
-  const [selectedTahunAjaran, setSelectedTahunAjaran] = useState('')
-  const [selectedTingkat, setSelectedTingkat] = useState('')
-  const [selectedKelas, setSelectedKelas] = useState('')
-  const [selectedSiswa, setSelectedSiswa] = useState('')
-
-  // State untuk form pembayaran header
-  const [formData, setFormData] = useState({
-    id_tagihan: '',
-    nomor_pembayaran: '',
-    catatan: '',
-  })
-
-  // State untuk rincian pembayaran (transaksi)
-  const [rincianItems, setRincianItems] = useState([])
-
-  const [error, setError] = useState('')
-  const [submitting, setSubmitting] = useState(false)
-  const [selectedTagihan, setSelectedTagihan] = useState(null)
-
-  // Fetch master data
-  useEffect(() => {
-    fetchMasterData()
-  }, [])
-
-  const fetchMasterData = async () => {
-    try {
-      const tahunData = await db.tahun_ajaran.orderBy('tanggal_mulai').reverse().toArray()
-      setTahunAjaranList(tahunData || [])
-
-      const kelasData = await db.kelas.orderBy('tingkat').toArray()
-      setKelasList(kelasData || [])
-      
-      // Extract unique tingkat
-      const uniqueTingkat = [...new Set(kelasData?.map(k => k.tingkat) || [])].sort()
-      setTingkatList(uniqueTingkat)
-
-    } catch (err) {
-      console.error('Error fetching master data:', err)
+  const handleSaveClick = () => {
+    if (selectedPayments.length > 0) {
+      setConfirmModalOpen(true)
     }
   }
 
-  // Fetch siswa based on filters
-  useEffect(() => {
-    const fetchSiswa = async () => {
-      if (!selectedTahunAjaran) {
-        setSiswaList([])
-        return
-      }
-
-      try {
-        const rks = await db.riwayat_kelas_siswa.where('id_tahun_ajaran').equals(selectedTahunAjaran).toArray()
-        const siswaMap = new Map((await db.siswa.toArray()).map(s => [s.id, s]))
-        const kelasMap = new Map((await db.kelas.toArray()).map(k => [k.id, k]))
-        const tahunMap = new Map((await db.tahun_ajaran.toArray()).map(t => [t.id, t]))
-        let filteredData = rks.map(r => ({
-          id: r.id,
-          siswa: siswaMap.get(r.id_siswa) ? { id: r.id_siswa, nama_lengkap: siswaMap.get(r.id_siswa).nama_lengkap, nisn: siswaMap.get(r.id_siswa).nisn } : null,
-          kelas: kelasMap.get(r.id_kelas) ? { id: r.id_kelas, tingkat: kelasMap.get(r.id_kelas).tingkat, nama_sub_kelas: kelasMap.get(r.id_kelas).nama_sub_kelas } : null,
-          tahun_ajaran: tahunMap.get(r.id_tahun_ajaran) ? { id: r.id_tahun_ajaran, nama: tahunMap.get(r.id_tahun_ajaran).nama } : null,
-        }))
-        
-        if (selectedTingkat) {
-          filteredData = filteredData.filter(s => s.kelas?.tingkat === selectedTingkat)
-        }
-        
-        if (selectedKelas) {
-          filteredData = filteredData.filter(s => s.kelas?.id === selectedKelas)
-        }
-
-        setSiswaList(filteredData)
-      } catch (err) {
-        console.error('Error fetching siswa:', err)
-      }
-    }
-
-    fetchSiswa()
-  }, [selectedTahunAjaran, selectedTingkat, selectedKelas])
-
-  // Fetch tagihan for selected siswa
-  useEffect(() => {
-    const fetchTagihan = async () => {
-      if (!selectedSiswa) {
-        setTagihanList([])
-        return
-      }
-
-      try {
-        const tAll = await db.tagihan.where('id_riwayat_kelas_siswa').equals(selectedSiswa).toArray()
-        const t = tAll.sort((a, b) => {
-          const dateA = new Date(a.tanggal_tagihan || 0)
-          const dateB = new Date(b.tanggal_tagihan || 0)
-          return dateB - dateA // descending (newest first)
-        })
-        const rincianByTagihan = new Map((await db.rincian_tagihan.toArray()).reduce((acc, r) => {
-          const arr = acc.get(r.id_tagihan) || []
-          arr.push(r)
-          acc.set(r.id_tagihan, arr)
-          return acc
-        }, new Map()))
-        const pembayaranByTagihan = new Map((await db.pembayaran.toArray()).reduce((acc, p) => {
-          const arr = acc.get(p.id_tagihan) || []
-          arr.push(p)
-          acc.set(p.id_tagihan, arr)
-          return acc
-        }, new Map()))
-        const rpByPembayaran = new Map((await db.rincian_pembayaran.toArray()).reduce((acc, rp) => {
-          const arr = acc.get(rp.id_pembayaran) || []
-          arr.push(rp)
-          acc.set(rp.id_pembayaran, arr)
-          return acc
-        }, new Map()))
-        const enriched = t.map(x => ({
-          ...x,
-          riwayat_kelas_siswa: { id: selectedSiswa },
-          rincian_tagihan: rincianByTagihan.get(x.id) || [],
-          pembayaran: (pembayaranByTagihan.get(x.id) || []).map(p => ({ ...p, rincian_pembayaran: rpByPembayaran.get(p.id) || [] })),
-        }))
-        setTagihanList(enriched)
-      } catch (err) {
-        console.error('Error fetching tagihan:', err)
-      }
-    }
-
-    fetchTagihan()
-  }, [selectedSiswa])
-
-  // Calculate total tagihan dan sudah dibayar
-  const calculateTagihanSummary = (tagihan) => {
-    if (!tagihan) return { total: 0, sudahDibayar: 0, sisa: 0 }
-
-    const total = tagihan.rincian_tagihan?.reduce((sum, r) => sum + parseFloat(r.jumlah || 0), 0) || 0
-    
-    const sudahDibayar = tagihan.pembayaran?.reduce((sum, p) => {
-      return sum + (p.rincian_pembayaran?.reduce((s, r) => s + parseFloat(r.jumlah_dibayar || 0), 0) || 0)
-    }, 0) || 0
-
-    return {
-      total,
-      sudahDibayar,
-      sisa: total - sudahDibayar
-    }
+  const handleConfirmSubmit = async () => {
+    await handleSubmit()
+    setConfirmModalOpen(false)
   }
-
-  // Handle tagihan selection
-  const handleTagihanSelect = (tagihanId) => {
-    const tagihan = tagihanList.find(t => t.id === tagihanId)
-    setSelectedTagihan(tagihan)
-    setFormData({ ...formData, id_tagihan: tagihanId })
-  }
-
-  // Calculate next cicilan_ke
-  const getNextCicilanKe = () => {
-    if (!selectedTagihan || !selectedTagihan.pembayaran) return 1
-    
-    const allRincian = selectedTagihan.pembayaran.flatMap(p => p.rincian_pembayaran || [])
-    const maxCicilan = Math.max(0, ...allRincian.map(r => r.cicilan_ke || 0))
-    return maxCicilan + 1
-  }
-
-  const totalPembayaran = rincianItems.reduce((sum, item) => sum + parseFloat(item.jumlah_dibayar || 0), 0)
-
-  const handleSubmit = async () => {
-    setSubmitting(true)
-    setError('')
-
-    // Validation
-    if (!formData.id_tagihan || !formData.nomor_pembayaran) {
-      setError('Tagihan dan Nomor Pembayaran wajib diisi')
-      setSubmitting(false)
-      return
-    }
-
-    // Check if tagihan is already lunas
-    if (tagihanSummary && tagihanSummary.sisa <= 0) {
-      setError('Tagihan sudah lunas. Tidak bisa melakukan pembayaran lagi.')
-      setSubmitting(false)
-      return
-    }
-
-    if (rincianItems.length === 0) {
-      setError('Minimal harus ada 1 transaksi pembayaran')
-      setSubmitting(false)
-      return
-    }
-
-    // Check if total pembayaran melebihi sisa tagihan
-    if (tagihanSummary && totalPembayaran > tagihanSummary.sisa) {
-      setError(`Total pembayaran (${formatCurrency(totalPembayaran)}) melebihi sisa tagihan (${formatCurrency(tagihanSummary.sisa)})`)
-      setSubmitting(false)
-      return
-    }
-
-    for (let i = 0; i < rincianItems.length; i++) {
-      if (!rincianItems[i].jumlah_dibayar || !rincianItems[i].metode_pembayaran || !rincianItems[i].tanggal_bayar) {
-        setError(`Transaksi ${i + 1}: Jumlah, metode, dan tanggal wajib diisi`)
-        setSubmitting(false)
-        return
-      }
-    }
-
-    try {
-      const nextCicilan = getNextCicilanKe()
-      const header = {
-        id_tagihan: formData.id_tagihan,
-        nomor_pembayaran: formData.nomor_pembayaran,
-        catatan: formData.catatan || null,
-      }
-      const items = rincianItems.map((item, index) => ({
-        nomor_transaksi: item.nomor_transaksi,
-        jumlah_dibayar: item.jumlah_dibayar,
-        tanggal_bayar: item.tanggal_bayar,
-        metode_pembayaran: item.metode_pembayaran,
-        referensi_pembayaran: item.referensi_pembayaran || null,
-        catatan: item.catatan || null,
-        cicilan_ke: nextCicilan + index,
-      }))
-      await createPembayaranWithRincian(header, items)
-      navigate('/pembayaran')
-    } catch (err) {
-      setError(err.message)
-      setSubmitting(false)
-    }
-  }
-
-  const addRincianItem = (formData) => {
-    setRincianItems([...rincianItems, formData])
-  }
-
-  const removeRincianItem = (index) => {
-    setRincianItems(rincianItems.filter((_, i) => i !== index))
-  }
-
-  const updateRincianItem = (index, field, value) => {
-    const updated = [...rincianItems]
-    updated[index][field] = value
-    setRincianItems(updated)
-  }
-
-  const tagihanSummary = selectedTagihan ? calculateTagihanSummary(selectedTagihan) : null
-  const isTagihanLunas = tagihanSummary && tagihanSummary.sisa <= 0
 
   return (
     <PageLayout>
       <div className="flex flex-col h-full">
-        <CreatePembayaranHeader
-          onBack={() => navigate('/pembayaran')}
-          onSubmit={handleSubmit}
-          submitting={submitting}
-          canSubmit={rincianItems.length > 0 && formData.id_tagihan && !isTagihanLunas}
-        />
+        {/* Header */}
+        <div className="shrink-0 border-b-2 border-slate-300 bg-gradient-to-b from-slate-100 to-slate-50 px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => navigate('/pembayaran')}
+                className="flex h-9 w-9 items-center justify-center border-2 border-slate-300 hover:bg-slate-200 transition-colors"
+                type="button"
+              >
+                <ArrowLeft className="h-4 w-4 text-slate-700" />
+              </button>
+              <div>
+                <Text size="4" weight="bold" className="text-slate-800 uppercase tracking-wider">
+                  Buat Pembayaran Baru
+                </Text>
+                <Text size="2" className="text-slate-600">
+                  Pilih siswa, pilih tagihan, dan lakukan pembayaran
+                </Text>
+              </div>
+            </div>
+            <button
+              onClick={handleSaveClick}
+              disabled={submitting || selectedPayments.length === 0}
+              className={`flex items-center gap-2 px-5 py-2.5 border-2 font-medium uppercase tracking-wider transition-all ${
+                submitting || selectedPayments.length === 0
+                  ? 'bg-slate-300 border-slate-400 text-slate-500 cursor-not-allowed'
+                  : 'bg-green-600 border-green-700 text-white hover:bg-green-700 cursor-pointer'
+              }`}
+              type="button"
+            >
+              <Save className="h-4 w-4" />
+              Simpan Pembayaran
+            </button>
+          </div>
+        </div>
 
         {/* Error Alert */}
         {error && (
@@ -296,62 +102,91 @@ function CreatePembayaranContent() {
 
         {/* Content */}
         <div className="flex-1 overflow-hidden px-6 pb-6 pt-4">
-          <div className="grid grid-cols-3 gap-4 h-full">
-            {/* Left Column */}
-            <div className="flex flex-col h-full overflow-hidden">
-              <TagihanSelectorSection
-                tahunAjaranList={tahunAjaranList}
-                tingkatList={tingkatList}
-                kelasList={kelasList}
-                siswaList={siswaList}
-                tagihanList={tagihanList}
-                selectedTahunAjaran={selectedTahunAjaran}
-                onTahunAjaranChange={(val) => {
-                  setSelectedTahunAjaran(val)
-                  setSelectedTingkat('')
-                  setSelectedKelas('')
-                  setSelectedSiswa('')
-                }}
-                selectedTingkat={selectedTingkat}
-                onTingkatChange={(val) => {
-                  setSelectedTingkat(val)
-                  setSelectedKelas('')
-                }}
-                selectedKelas={selectedKelas}
-                onKelasChange={setSelectedKelas}
-                selectedSiswa={selectedSiswa}
-                onSiswaChange={setSelectedSiswa}
-                selectedTagihan={formData.id_tagihan}
-                onTagihanChange={handleTagihanSelect}
-                tagihanSummary={tagihanSummary}
-              />
+          <div className="grid grid-cols-4 gap-4 h-full">
+            {/* Left Column (75%) - Siswa & Tagihan */}
+            <div className="col-span-3 flex flex-col h-full overflow-hidden">
+              <div className="border-2 border-slate-300 bg-white shadow-lg flex flex-col h-full overflow-hidden">
+                {/* Header */}
+                <div className="border-b-2 border-slate-300 bg-gradient-to-b from-blue-600 to-blue-700 px-4 py-3 shrink-0">
+                  <Text size="2" weight="bold" className="text-white uppercase tracking-wider">
+                    Pilih Siswa & Tagihan
+                  </Text>
+                </div>
+
+                {/* Content */}
+                <div className="flex-1 overflow-auto p-4">
+                  <SiswaSearchSection
+                    siswaList={siswaList}
+                    selectedSiswa={selectedSiswa}
+                    onSelect={setSelectedSiswa}
+                  />
+
+                  {selectedSiswa && (
+                    <div className="mt-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <Text size="2" weight="bold" className="text-slate-700 uppercase tracking-wider">
+                          Tagihan Belum Lunas
+                        </Text>
+                        <Text size="1" className="text-slate-500">
+                          {unpaidTagihan.length} tagihan ditemukan
+                        </Text>
+                      </div>
+
+                      <div className="border-2 border-slate-300 overflow-hidden">
+                        <UnpaidTagihanList
+                          tagihanList={unpaidTagihan}
+                          onPayClick={handlePayClick}
+                          selectedIds={selectedTagihanIds}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
 
-            {/* Right Column */}
-            <div className="col-span-2 flex flex-col gap-4 h-full overflow-hidden">
-              <InformasiPembayaranSection
-                formData={formData}
-                onChange={(field, value) => setFormData({ ...formData, [field]: value })}
-              />
+            {/* Right Column (25%) - Daftar Pembayaran */}
+            <div className="col-span-1 flex flex-col h-full overflow-hidden">
+              <div className="border-2 border-slate-300 bg-white shadow-lg flex flex-col h-full overflow-hidden">
+                {/* Header */}
+                <div className="border-b-2 border-slate-300 bg-gradient-to-b from-green-600 to-green-700 px-4 py-3 shrink-0">
+                  <Text size="2" weight="bold" className="text-white uppercase tracking-wider">
+                    Daftar Pembayaran
+                  </Text>
+                </div>
 
-              <RincianPembayaranFormSection
-                rincianItems={rincianItems}
-                onAdd={addRincianItem}
-                onRemove={removeRincianItem}
-                onChange={updateRincianItem}
-                totalPembayaran={totalPembayaran}
-                nextCicilanKe={getNextCicilanKe()}
-                tagihanSummary={tagihanSummary}
-                isTagihanLunas={isTagihanLunas}
-              />
+                {/* Content */}
+                <SelectedPaymentList
+                  payments={selectedPayments}
+                  onRemove={handleRemovePayment}
+                  onEdit={handleEditPayment}
+                  totalAmount={totalAmount}
+                />
+              </div>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Modal Input Pembayaran */}
+      <PaymentInputModal
+        open={modalOpen}
+        onOpenChange={setModalOpen}
+        onSubmit={handleAddPayment}
+        tagihan={currentTagihan}
+        summary={currentSummary}
+      />
+
+      {/* Modal Konfirmasi Pembayaran */}
+      <PaymentConfirmationModal
+        open={confirmModalOpen}
+        onOpenChange={setConfirmModalOpen}
+        onConfirm={handleConfirmSubmit}
+        payments={selectedPayments}
+        totalAmount={totalAmount}
+        siswaInfo={selectedSiswa}
+        submitting={submitting}
+      />
     </PageLayout>
   )
-}
-
-export function CreatePembayaran() {
-  return <CreatePembayaranContent />
 }
