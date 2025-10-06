@@ -150,7 +150,22 @@ export function Navbar({ realtimeStatus = 'disconnected' }) {
   }, [])
 
   async function handleLogout() {
-    await supabase.auth.signOut()
+    try {
+      const { error } = await supabase.auth.signOut()
+      if (error) {
+        throw error
+      }
+    } catch (error) {
+      console.error('Gagal logout:', error)
+    } finally {
+      try {
+        await Promise.all(db.tables.map((table) => table.clear()))
+      } catch (dexieError) {
+        console.warn('Tidak dapat menghapus cache lokal Dexie:', dexieError)
+      }
+
+      navigate('/login', { replace: true })
+    }
   }
 
   const handleMinimize = async () => {
