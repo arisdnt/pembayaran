@@ -91,6 +91,7 @@ export function usePeminatan() {
       } else {
         await enqueueInsert('peminatan', payload)
       }
+      await refreshData({ withSpinner: false })
     } catch (err) {
       setError(err.message)
       throw err
@@ -100,6 +101,7 @@ export function usePeminatan() {
   const deleteItem = async (id) => {
     try {
       await enqueueDelete('peminatan', id)
+      await refreshData({ withSpinner: false })
     } catch (err) {
       setError(err.message)
       throw err
@@ -109,6 +111,7 @@ export function usePeminatan() {
   const toggleAktif = async (item) => {
     try {
       await enqueueUpdate('peminatan', item.id, { aktif: !item.aktif })
+      await refreshData({ withSpinner: false })
     } catch (err) {
       setError(err.message)
       throw err

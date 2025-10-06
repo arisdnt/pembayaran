@@ -166,13 +166,13 @@ export function PeminatanTable({
           <div className="h-full overflow-auto excel-scrollbar">
             <table className="w-full table-fixed text-sm border-collapse">
               <colgroup>
-                <col style={{ width: '14.2857%' }} />
-                <col style={{ width: '14.2857%' }} />
-                <col style={{ width: '14.2857%' }} />
-                <col style={{ width: '14.2857%' }} />
-                <col style={{ width: '14.2857%' }} />
-                <col style={{ width: '14.2857%' }} />
-                <col style={{ width: '14.2857%' }} />
+                <col style={{ width: '10%' }} />
+                <col style={{ width: '22%' }} />
+                <col style={{ width: '22%' }} />
+                <col style={{ width: '11.5%' }} />
+                <col style={{ width: '11.5%' }} />
+                <col style={{ width: '11.5%' }} />
+                <col style={{ width: '11.5%' }} />
               </colgroup>
               <thead>
                 <tr className="bg-gradient-to-b from-slate-100 to-slate-50 sticky top-0 z-10 border-b border-slate-300 shadow-sm">

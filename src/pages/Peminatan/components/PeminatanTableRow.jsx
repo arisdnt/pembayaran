@@ -1,5 +1,5 @@
 import { Edit2, Trash2, Power, PowerOff, Eye } from 'lucide-react'
-import { Badge, IconButton } from '@radix-ui/themes'
+import { Badge, IconButton, Switch } from '@radix-ui/themes'
 import { Pencil1Icon, TrashIcon } from '@radix-ui/react-icons'
 
 export function PeminatanTableRow({
@@ -53,30 +53,25 @@ export function PeminatanTableRow({
         )}
       </td>
       <td className="px-4 py-3 text-center border-r border-slate-200 min-w-0">
-        <button
-          onClick={(e) => {
-            e.stopPropagation()
-            onToggleAktif(item)
-          }}
-          className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold transition-colors hover:opacity-80"
-          style={{
-            borderRadius: 0,
-            backgroundColor: item.aktif ? '#22c55e' : '#ef4444',
-            color: 'white',
-          }}
-        >
-          {item.aktif ? (
-            <>
-              <Power className="h-3 w-3" />
-              Aktif
-            </>
-          ) : (
-            <>
-              <PowerOff className="h-3 w-3" />
-              Non-Aktif
-            </>
-          )}
-        </button>
+        <div className="flex justify-center items-center gap-2">
+          <Switch
+            checked={item.aktif}
+            onCheckedChange={(checked) => {
+              onToggleAktif(item)
+            }}
+            onClick={(e) => e.stopPropagation()}
+            size="2"
+            className="cursor-pointer"
+          />
+          <Badge 
+            color={item.aktif ? 'green' : 'red'} 
+            variant="solid" 
+            style={{ borderRadius: 0 }}
+            className="text-xs"
+          >
+            {item.aktif ? 'Aktif' : 'Non-Aktif'}
+          </Badge>
+        </div>
       </td>
       <td className="px-4 py-3 text-center min-w-0">
         <div className="flex justify-center gap-1 flex-wrap">

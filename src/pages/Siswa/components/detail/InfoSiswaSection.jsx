@@ -23,41 +23,59 @@ export function InfoSiswaSection({ siswa }) {
         </div>
       </div>
 
-      <div className="p-4 grid grid-cols-2 gap-x-8">
-        {/* Kolom Kiri */}
+      <div className="p-4 grid grid-cols-3 gap-x-6">
+        {/* Kolom 1 */}
         <table className="w-full text-sm">
           <tbody>
-            <tr className="border-b border-slate-200">
-              <td className="py-2 pr-4 text-slate-600 font-medium w-40">Nama Lengkap</td>
-              <td className="py-2 text-slate-900 font-bold">{siswa.nama_lengkap}</td>
+            <tr className="border-b border-slate-200 h-9">
+              <td className="py-1.5 pr-4 text-slate-600 font-medium w-32">Nama Lengkap</td>
+              <td className="py-1.5 text-slate-900 font-bold">{siswa.nama_lengkap}</td>
             </tr>
-            <tr className="border-b border-slate-200">
-              <td className="py-2 pr-4 text-slate-600 font-medium">NISN</td>
-              <td className="py-2 text-slate-900 font-mono">{siswa.nisn || '-'}</td>
+            <tr className="border-b border-slate-200 h-9">
+              <td className="py-1.5 pr-4 text-slate-600 font-medium">NISN</td>
+              <td className="py-1.5 text-slate-900 font-mono">{siswa.nisn || '-'}</td>
             </tr>
-            <tr>
-              <td className="py-2 pr-4 text-slate-600 font-medium">Jenis Kelamin</td>
-              <td className="py-2 text-slate-900">
+            <tr className="h-9">
+              <td className="py-1.5 pr-4 text-slate-600 font-medium">Jenis Kelamin</td>
+              <td className="py-1.5 text-slate-900">
                 {siswa.jenis_kelamin === 'L' ? 'Laki-laki' : siswa.jenis_kelamin === 'P' ? 'Perempuan' : '-'}
               </td>
             </tr>
           </tbody>
         </table>
 
-        {/* Kolom Kanan */}
+        {/* Kolom 2 */}
         <table className="w-full text-sm">
           <tbody>
-            <tr className="border-b border-slate-200">
-              <td className="py-2 pr-4 text-slate-600 font-medium w-40">Tanggal Lahir</td>
-              <td className="py-2 text-slate-900">{formatDate(siswa.tanggal_lahir)}</td>
+            <tr className="border-b border-slate-200 h-9">
+              <td className="py-1.5 pr-4 text-slate-600 font-medium w-32">Tanggal Lahir</td>
+              <td className="py-1.5 text-slate-900">{formatDate(siswa.tanggal_lahir)}</td>
             </tr>
-            <tr className="border-b border-slate-200">
-              <td className="py-2 pr-4 text-slate-600 font-medium">Alamat</td>
-              <td className="py-2 text-slate-900">{siswa.alamat || '-'}</td>
+            <tr className="border-b border-slate-200 h-9">
+              <td className="py-1.5 pr-4 text-slate-600 font-medium">Alamat</td>
+              <td className="py-1.5 text-slate-900">{siswa.alamat || '-'}</td>
             </tr>
-            <tr>
-              <td className="py-2 pr-4 text-slate-600 font-medium">No. WhatsApp Wali</td>
-              <td className="py-2 text-slate-900 font-mono">{siswa.nomor_whatsapp_wali || '-'}</td>
+            <tr className="h-9">
+              <td className="py-1.5 pr-4 text-slate-600 font-medium"></td>
+              <td className="py-1.5 text-slate-900"></td>
+            </tr>
+          </tbody>
+        </table>
+
+        {/* Kolom 3 */}
+        <table className="w-full text-sm">
+          <tbody>
+            <tr className="border-b border-slate-200 h-9">
+              <td className="py-1.5 pr-4 text-slate-600 font-medium w-32">Nama Wali</td>
+              <td className="py-1.5 text-slate-900">{siswa.nama_wali_siswa || '-'}</td>
+            </tr>
+            <tr className="border-b border-slate-200 h-9">
+              <td className="py-1.5 pr-4 text-slate-600 font-medium">No. WhatsApp</td>
+              <td className="py-1.5 text-slate-900 font-mono">{siswa.nomor_whatsapp_wali || '-'}</td>
+            </tr>
+            <tr className="h-9">
+              <td className="py-1.5 pr-4 text-slate-600 font-medium"></td>
+              <td className="py-1.5 text-slate-900"></td>
             </tr>
           </tbody>
         </table>
