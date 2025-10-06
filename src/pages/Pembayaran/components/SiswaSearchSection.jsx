@@ -25,11 +25,11 @@ export function SiswaSearchSection({ siswaList, selectedSiswa, onSelect }) {
   }
 
   return (
-    <div className="mb-4">
+    <div>
       <label className="flex items-center gap-1.5 mb-2">
-        <User className="h-3.5 w-3.5 text-blue-600" />
+        <User className="h-3.5 w-3.5 text-slate-600" />
         <Text size="2" weight="medium" className="text-slate-700">
-          Cari Siswa <span className="text-red-600">*</span>
+          Cari Siswa <span className="text-red-500">*</span>
         </Text>
       </label>
 

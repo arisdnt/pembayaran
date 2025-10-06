@@ -126,18 +126,15 @@ export function SelectedPaymentList({ payments, onRemove, onEdit, totalAmount })
       </div>
 
       {/* Footer Total */}
-      <div className="shrink-0 border-t-2 border-slate-300 bg-gradient-to-b from-slate-50 to-white px-3 py-3">
-        <div className="flex items-center justify-between mb-1">
-          <Text size="2" weight="bold" className="text-slate-700 uppercase tracking-wider">
-            Total:
+      <div className="shrink-0 border-t-2 border-slate-300 bg-emerald-50 px-4 py-3">
+        <div className="flex items-center justify-between">
+          <Text size="3" weight="bold" className="text-emerald-900 uppercase tracking-wider">
+            Total Pembayaran
           </Text>
-          <Text size="4" weight="bold" className="text-green-600 font-mono">
+          <Text size="4" weight="bold" className="text-emerald-700 font-mono">
             {formatCurrency(totalAmount)}
           </Text>
         </div>
-        <Text size="1" className="text-slate-500">
-          {payments.length} tagihan
-        </Text>
       </div>
     </div>
   )
