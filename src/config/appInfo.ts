@@ -28,7 +28,7 @@ export const SCHOOL_CONFIG = {
     },
     phone: '081 231 274 828',
     email: 'smkn1sidowayah@gmail.com',
-    website: 'https://alhidayat.netlify.app/'
+    website: 'https://alhidayat.my.id/'
   }
 }
 
