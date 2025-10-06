@@ -152,6 +152,7 @@ export function useSiswa() {
           tanggal_lahir: formData.tanggal_lahir || null,
           jenis_kelamin: formData.jenis_kelamin || null,
           alamat: formData.alamat || null,
+          nama_wali_siswa: formData.nama_wali_siswa || null,
           nomor_whatsapp_wali: formData.nomor_whatsapp_wali || null,
           status_aktif: formData.status_aktif,
         })
@@ -162,6 +163,7 @@ export function useSiswa() {
           tanggal_lahir: formData.tanggal_lahir || null,
           jenis_kelamin: formData.jenis_kelamin || null,
           alamat: formData.alamat || null,
+          nama_wali_siswa: formData.nama_wali_siswa || null,
           nomor_whatsapp_wali: formData.nomor_whatsapp_wali || null,
           token_akses_unik,
           status_aktif: formData.status_aktif,
@@ -186,4 +188,3 @@ export function useSiswa() {
     refreshData,
   }
 }
-

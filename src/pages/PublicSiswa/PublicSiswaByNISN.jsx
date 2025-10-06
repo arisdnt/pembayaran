@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { usePublicDetailByNISN } from './hooks/usePublicDetailByNISN'
 import { ReceiptLayout } from './components/ReceiptLayout'
@@ -92,6 +93,23 @@ export function PublicSiswaByNISN() {
     error,
   } = usePublicDetailByNISN(nisn)
 
+  useEffect(() => {
+    const schoolName = getSchoolName()
+    const baseTitle = `${schoolName} | Portal Tagihan Siswa`
+    const newTitle = siswa ? `${siswa.nama_lengkap} · ${baseTitle}` : baseTitle
+
+    document.title = newTitle
+
+    const descriptionContent = siswa
+      ? `Rincian tagihan dan pembayaran ${siswa.nama_lengkap} (${siswa.nisn || 'NISN tidak tersedia'}) - ${schoolName}`
+      : `Portal tagihan dan pembayaran siswa ${schoolName}. Akses informasi tagihan dengan memasukkan NISN.`
+
+    const metaDescription = document.querySelector('meta[name="description"]')
+    if (metaDescription) {
+      metaDescription.setAttribute('content', descriptionContent)
+    }
+  }, [nisn, siswa])
+
   if (loading) return <LoadingState />
   if (error) return <ErrorState error={error} />
   if (!siswa) return <NotFoundState />
@@ -104,4 +122,3 @@ export function PublicSiswaByNISN() {
     />
   )
 }
-

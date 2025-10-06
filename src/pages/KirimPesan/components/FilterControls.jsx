@@ -17,6 +17,7 @@ export default function FilterControls({
   onRateMsChange,
   onGenerate,
   onKirim,
+  onCancel,
   onSettings,
   messageCount
 }) {
@@ -98,6 +99,17 @@ export default function FilterControls({
             size="2"
           >
             {sending ? 'Mengirim...' : 'Kirim Pesan'}
+          </Button>
+          <Button
+            disabled={!sending}
+            onClick={onCancel}
+            color="red"
+            variant="soft"
+            className="cursor-pointer"
+            style={{ borderRadius: 0 }}
+            size="2"
+          >
+            Hentikan
           </Button>
         </div>
       </div>

@@ -27,24 +27,6 @@ export function LoginFormActions({ loading, email, error, onMagicLink }) {
       >
         {loading ? 'Memproses…' : 'Masuk'}
       </Button>
-
-      <Separator size="2" />
-
-      <Flex direction="column" gap="3">
-        <Text size="2" className="text-center text-slate-600">
-          Atau kirim tautan login ke email Anda
-        </Text>
-        <Button
-          variant="soft"
-          color="gray"
-          className="w-full cursor-pointer"
-          onClick={onMagicLink}
-          disabled={loading || !email}
-          style={{ borderRadius: 0 }}
-        >
-          Kirim Magic Link
-        </Button>
-      </Flex>
     </>
   )
 }

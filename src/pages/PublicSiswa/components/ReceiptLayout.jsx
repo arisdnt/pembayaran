@@ -1,7 +1,14 @@
 import { format } from 'date-fns'
 import { id } from 'date-fns/locale'
 import { Receipt, CheckCircle2 } from 'lucide-react'
-import { getSchoolName, getSchoolAddress, getMakerTrademark, getCopyrightNotice } from '../../../config/appInfo'
+import {
+  getSchoolName,
+  getSchoolAddress,
+  getSchoolPhone,
+  getSchoolEmail,
+  getAppPublisher,
+  getAppLegalNotice,
+} from '../../../config/appInfo'
 
 function formatCurrency(value) {
   return new Intl.NumberFormat('id-ID', {
@@ -43,7 +50,7 @@ export function ReceiptLayout({ siswa, riwayatKelas, tagihanData }) {
               <div className="sm:text-right text-xs leading-relaxed">
                 {currentRiwayat && (
                   <p className="text-white/90">
-                    Kelas: <span className="font-semibold">{currentRiwayat.kelas?.tingkat} {currentRiwayat.kelas?.nama_sub_kelas}</span> • TA: <span className="font-semibold">{currentRiwayat.tahun_ajaran?.nama}</span>
+                    Kelas: <span className="font-semibold">{currentRiwayat.kelas?.tingkat} {currentRiwayat.kelas?.nama_sub_kelas}</span> | TA: <span className="font-semibold">{currentRiwayat.tahun_ajaran?.nama}</span>
                   </p>
                 )}
                 <p className="text-white/90">
@@ -172,7 +179,7 @@ export function ReceiptLayout({ siswa, riwayatKelas, tagihanData }) {
                                             <span className="text-green-800 font-medium">
                                               {rp.nomor_transaksi || pembayaran.nomor_pembayaran || `Cicilan ${rp.cicilan_ke || '-'}`}
                                             </span>
-                                            <span className="text-xs text-green-600">• {tglBayar}</span>
+                                            <span className="text-xs text-green-600">| {tglBayar}</span>
                                           </div>
                                           <span className="font-semibold text-green-800">
                                             {formatCurrency(rp.jumlah_dibayar)}
@@ -224,8 +231,8 @@ export function ReceiptLayout({ siswa, riwayatKelas, tagihanData }) {
           <div className="text-white p-4 text-xs" style={{ backgroundColor: '#476EAE' }}>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="leading-tight">
-                <p className="font-semibold text-white">{getMakerTrademark()}</p>
-                <p className="text-white/70">{getCopyrightNotice()}</p>
+                <p className="font-semibold text-white">{getAppPublisher()}</p>
+                <p className="text-white/70">{getAppLegalNotice()}</p>
                 <p className="text-white/60">
                   Digenerate: {format(new Date(), 'dd/MM/yyyy HH:mm', { locale: id })}
                 </p>

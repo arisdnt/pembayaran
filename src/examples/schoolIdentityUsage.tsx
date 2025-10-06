@@ -7,7 +7,6 @@
 import React from 'react'
 import {
   getSchoolName,
-  getSchoolShortName,
   getSchoolAddress,
   getSchoolPhone,
   getSchoolEmail,
@@ -58,7 +57,7 @@ export const NavbarSchoolInfo: React.FC = () => {
       />
       <div className="hidden md:block">
         <div className="text-sm font-semibold text-gray-900">
-          {getSchoolShortName()}
+          {getSchoolName()}
         </div>
         <div className="text-xs text-gray-600">
           {getCurrentAcademicYear()}
@@ -124,7 +123,7 @@ export const SchoolProfileCard: React.FC = () => {
             {getSchoolMotto()}
           </p>
           <div className="mt-3 space-y-1 text-sm text-gray-700">
-            <p>NPSN: {SCHOOL_IDENTITY.basic.npsn}</p>
+            <p>NPSN: {SCHOOL_IDENTITY.profile.npsn}</p>
             <p>Kepala Sekolah: {getHeadmasterName()}</p>
             <p>{getAccreditationInfo()}</p>
           </div>
@@ -155,7 +154,7 @@ export const PrintDocumentHeader: React.FC = () => {
           </div>
         </div>
         <div className="text-right text-sm text-gray-600">
-          <p>NPSN: {SCHOOL_IDENTITY.basic.npsn}</p>
+          <p>NPSN: {SCHOOL_IDENTITY.profile.npsn}</p>
           <p>{getCurrentAcademicYear()}</p>
         </div>
       </div>
@@ -245,7 +244,7 @@ export const AboutSchoolSection: React.FC = () => {
             </div>
             <div>
               <span className="font-medium">NPSN:</span>
-              <span className="text-gray-700 ml-2">{SCHOOL_IDENTITY.basic.npsn}</span>
+              <span className="text-gray-700 ml-2">{SCHOOL_IDENTITY.profile.npsn}</span>
             </div>
             <div>
               <span className="font-medium">Kepala Sekolah:</span>

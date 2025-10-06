@@ -12,30 +12,23 @@
 // ============================================================================
 
 export const SCHOOL_CONFIG = {
-  // ---------- DATA DASAR SEKOLAH ----------
-  basic: {
-    name: 'SMK Negeri 1 Bandung',                    // Nama lengkap sekolah
-    shortName: 'SMKN 1 Bandung',                     // Nama singkat sekolah
+  // ---------- PROFIL SEKOLAH (DATA DASAR + KONTAK) ----------
+  profile: {
+    name: 'SMAN 1 SIDOWAYAH',                    // Nama lengkap sekolah
     level: 'SMK' as const,                           // Jenjang: 'SD' | 'SMP' | 'SMA' | 'SMK' | 'UNIVERSITAS' | 'PESANTREN'
-    npsn: '20219445',                                // Nomor Pokok Sekolah Nasional
-    nss: '321026002001'                              // Nomor Statistik Sekolah
-  },
-
-  // ---------- KONTAK SEKOLAH ----------
-  contact: {
+    npsn: '00010001001',                                // Nomor Pokok Sekolah Nasional
+    nss: '3211252223145',                             // Nomor Statistik Sekolah
     address: {
-      street: 'Jl. Wastukancana No. 3',
-      village: 'Babakan Ciamis',
-      district: 'Sumur Bandung',
-      city: 'Bandung',
-      province: 'Jawa Barat',
-      postalCode: '40117',
-      fullAddress: 'Jl. Wastukancana No. 3, Babakan Ciamis, Sumur Bandung, Bandung, Jawa Barat 40117'
+      street: 'JL Sidowayah - magetan',
+      village: 'Sidowayah',
+      district: 'Panekan',
+      city: 'Magetan',
+      province: 'Jawa Timur',
+      postalCode: '40117'
     },
-    phone: '(022) 4207026',
-    fax: '(022) 4207026',
-    email: 'info@smkn1bandung.sch.id',
-    website: 'https://smkn1bandung.sch.id'
+    phone: '081 231 274 828',
+    email: 'smkn1sidowayah@gmail.com',
+    website: 'https://alhidayat.netlify.app/'
   }
 }
 
@@ -44,27 +37,14 @@ export const SCHOOL_CONFIG = {
 // ============================================================================
 
 export const APP_CONFIG = {
-  name: 'Sistem Informasi Akademik',
+  name: 'Sistem Informasi Akademik - ArtaPay',
   version: '1.0.0',
   description: 'Sistem Manajemen Sekolah Digital',
-  
-  maker: {
-    company: 'Digital Innovation Labs',
-    website: 'https://digitalinnovationlabs.com',
-    email: 'info@digitalinnovationlabs.com',
-    trademark: 'Digital Innovation Labs™'
-  },
-  
-  copyright: {
-    year: '2024',
-    holder: 'Digital Innovation Labs',
-    notice: '© 2024 Digital Innovation Labs. All rights reserved.'
-  },
-  
-  build: {
-    version: '1.0.0-stable',
-    date: new Date().toISOString().split('T')[0]
-  }
+  publisher: 'Aksiomatika VibeCod',
+  supportEmail: 'arisidanto.mdn@gmail.com',
+  website: 'https://aksiomatik.com',
+  legalNotice: 'Copyright 2024 aksiomatik. All rights reserved.',
+  releaseDate: new Date().toISOString().split('T')[0]
 }
 
 // ============================================================================
@@ -72,14 +52,11 @@ export const APP_CONFIG = {
 // ============================================================================
 
 export interface SchoolIdentity {
-  basic: {
+  profile: {
     name: string
-    shortName: string
     level: 'SD' | 'SMP' | 'SMA' | 'SMK' | 'UNIVERSITAS' | 'PESANTREN'
     npsn: string
     nss: string
-  }
-  contact: {
     address: {
       street: string
       village: string
@@ -87,10 +64,8 @@ export interface SchoolIdentity {
       city: string
       province: string
       postalCode: string
-      fullAddress: string
     }
     phone: string
-    fax?: string
     email: string
     website?: string
   }
@@ -100,21 +75,11 @@ export interface AppInfo {
   name: string
   version: string
   description: string
-  maker: {
-    company: string
-    website: string
-    email: string
-    trademark: string
-  }
-  copyright: {
-    year: string
-    holder: string
-    notice: string
-  }
-  build: {
-    version: string
-    date: string
-  }
+  publisher: string
+  supportEmail: string
+  website?: string
+  legalNotice: string
+  releaseDate: string
 }
 
 // ============================================================================
@@ -129,23 +94,26 @@ export const APP_INFO: AppInfo = APP_CONFIG
 // ============================================================================
 
 // Fungsi dasar untuk mendapatkan informasi sekolah
-export const getSchoolName = (): string => SCHOOL_IDENTITY.basic.name
-export const getSchoolShortName = (): string => SCHOOL_IDENTITY.basic.shortName
-export const getSchoolLevel = (): string => SCHOOL_IDENTITY.basic.level
-export const getSchoolNPSN = (): string => SCHOOL_IDENTITY.basic.npsn
-export const getSchoolNSS = (): string => SCHOOL_IDENTITY.basic.nss
+export const getSchoolName = (): string => SCHOOL_IDENTITY.profile.name
+export const getSchoolLevel = (): string => SCHOOL_IDENTITY.profile.level
+export const getSchoolNPSN = (): string => SCHOOL_IDENTITY.profile.npsn
+export const getSchoolNSS = (): string => SCHOOL_IDENTITY.profile.nss
 
-export const getSchoolAddress = (): string => SCHOOL_IDENTITY.contact.address.fullAddress
-export const getSchoolPhone = (): string => SCHOOL_IDENTITY.contact.phone
-export const getSchoolFax = (): string => SCHOOL_IDENTITY.contact.fax || ''
-export const getSchoolEmail = (): string => SCHOOL_IDENTITY.contact.email
-export const getSchoolWebsite = (): string => SCHOOL_IDENTITY.contact.website || ''
+const formatSchoolAddress = (address: SchoolIdentity['profile']['address']): string => {
+  const { street, village, district, city, province, postalCode } = address
+  return [street, village, district, city, province, postalCode].filter(Boolean).join(', ')
+}
+
+export const getSchoolAddress = (): string => formatSchoolAddress(SCHOOL_IDENTITY.profile.address)
+export const getSchoolPhone = (): string => SCHOOL_IDENTITY.profile.phone
+export const getSchoolEmail = (): string => SCHOOL_IDENTITY.profile.email
+export const getSchoolWebsite = (): string => SCHOOL_IDENTITY.profile.website || ''
 
 // Fungsi format untuk informasi sekolah
-export const getSchoolFullTitle = (): string => `${SCHOOL_IDENTITY.basic.name} (${SCHOOL_IDENTITY.basic.level})`
+export const getSchoolFullTitle = (): string => `${SCHOOL_IDENTITY.profile.name} (${SCHOOL_IDENTITY.profile.level})`
 export const getSchoolContactInfo = (): string => {
-  const { address, phone, email } = SCHOOL_IDENTITY.contact
-  return `${address.fullAddress} | Tel: ${phone} | Email: ${email}`
+  const { address, phone, email } = SCHOOL_IDENTITY.profile
+  return `${formatSchoolAddress(address)} | Tel: ${phone} | Email: ${email}`
 }
 
 // Fungsi untuk mendapatkan konfigurasi dari environment variables
@@ -158,18 +126,15 @@ export const getSchoolIdentityForEnv = (): SchoolIdentity => {
   if (envName || envAddress || envPhone || envEmail) {
     return {
       ...SCHOOL_IDENTITY,
-      basic: {
-        ...SCHOOL_IDENTITY.basic,
-        name: envName || SCHOOL_IDENTITY.basic.name,
-      },
-      contact: {
-        ...SCHOOL_IDENTITY.contact,
+      profile: {
+        ...SCHOOL_IDENTITY.profile,
+        name: envName || SCHOOL_IDENTITY.profile.name,
         address: {
-          ...SCHOOL_IDENTITY.contact.address,
-          fullAddress: envAddress || SCHOOL_IDENTITY.contact.address.fullAddress,
+          ...SCHOOL_IDENTITY.profile.address,
+          street: envAddress || SCHOOL_IDENTITY.profile.address.street,
         },
-        phone: envPhone || SCHOOL_IDENTITY.contact.phone,
-        email: envEmail || SCHOOL_IDENTITY.contact.email,
+        phone: envPhone || SCHOOL_IDENTITY.profile.phone,
+        email: envEmail || SCHOOL_IDENTITY.profile.email,
       }
     }
   }
@@ -183,50 +148,38 @@ export const getSchoolIdentityForEnv = (): SchoolIdentity => {
 export const getAppName = (): string => APP_INFO.name
 export const getAppVersion = (): string => APP_INFO.version
 export const getAppDescription = (): string => APP_INFO.description
-export const getMakerCompany = (): string => APP_INFO.maker.company
-export const getMakerWebsite = (): string => APP_INFO.maker.website
-export const getMakerEmail = (): string => APP_INFO.maker.email
-export const getMakerTrademark = (): string => APP_INFO.maker.trademark
-export const getCopyrightNotice = (): string => APP_INFO.copyright.notice
+export const getAppPublisher = (): string => APP_INFO.publisher
+export const getAppSupportEmail = (): string => APP_INFO.supportEmail
+export const getAppWebsite = (): string => APP_INFO.website || ''
+export const getAppLegalNotice = (): string => APP_INFO.legalNotice
+export const getAppReleaseDate = (): string => APP_INFO.releaseDate
 export const getFullAppInfo = (): string => `${APP_INFO.name} v${APP_INFO.version}`
 
 // ============================================================================
 // BAGIAN 7: CONSTANTS EXPORTS (JANGAN UBAH BAGIAN INI)
 // ============================================================================
 
-// School constants - Basic
+// School constants - Profile
 export const {
   name: SCHOOL_NAME,
-  shortName: SCHOOL_SHORT_NAME,
   level: SCHOOL_LEVEL,
   npsn: SCHOOL_NPSN,
-  nss: SCHOOL_NSS
-} = SCHOOL_IDENTITY.basic
-
-// School constants - Contact
-export const {
+  nss: SCHOOL_NSS,
+  address: SCHOOL_ADDRESS,
   phone: SCHOOL_PHONE,
-  fax: SCHOOL_FAX,
   email: SCHOOL_EMAIL,
   website: SCHOOL_WEBSITE
-} = SCHOOL_IDENTITY.contact
+} = SCHOOL_IDENTITY.profile
 
 // App constants
 export const {
   name: APP_NAME,
   version: APP_VERSION,
-  description: APP_DESCRIPTION
+  description: APP_DESCRIPTION,
+  publisher: APP_PUBLISHER,
+  supportEmail: APP_SUPPORT_EMAIL,
+  website: APP_WEBSITE,
+  legalNotice: APP_LEGAL_NOTICE,
+  releaseDate: APP_RELEASE_DATE
 } = APP_INFO
 
-export const {
-  company: MAKER_COMPANY,
-  trademark: MAKER_TRADEMARK,
-  website: MAKER_WEBSITE,
-  email: MAKER_EMAIL
-} = APP_INFO.maker
-
-export const {
-  year: COPYRIGHT_YEAR,
-  holder: COPYRIGHT_HOLDER,
-  notice: COPYRIGHT_NOTICE
-} = APP_INFO.copyright

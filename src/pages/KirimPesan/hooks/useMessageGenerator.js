@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { db } from '../../../offline/db'
 import { normalizePhone } from '../api/whatsapp'
 import { formatCurrencyIDR } from '../utils/formatters'
+import { getSchoolWebsite, getSchoolName } from '../../../config/appInfo'
 
 export function useMessageGenerator(
   selectedTA,
@@ -67,7 +68,20 @@ export function useMessageGenerator(
         rincianBayarByPembayaran.set(rp.id_pembayaran, arr)
       })
 
-      const baseUrl = import.meta.env.VITE_PUBLIC_BASE_URL || 'http://namadomain'
+      const buildBaseUrl = () => {
+        const websiteFromConfig = (getSchoolWebsite?.() || '').trim()
+        const envBaseUrl = (import.meta.env.VITE_PUBLIC_BASE_URL || '').trim()
+        const raw = websiteFromConfig || envBaseUrl
+        if (!raw) {
+          return 'https://namadomain.com'
+        }
+
+        const withProtocol = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`
+        return withProtocol.replace(/\/+$/, '')
+      }
+
+      const baseUrl = buildBaseUrl()
+      const schoolName = (getSchoolName?.() || 'Manajemen Sekolah').trim()
       const taName = (tahunAjaranList.find(x => x.id === selectedTA)?.nama) || ''
 
       const rows = []
@@ -110,20 +124,36 @@ export function useMessageGenerator(
         }, 0)
         const tunggakan = Math.max(0, totalTagihan - totalPembayaran)
 
-        const link = `${baseUrl}/nisn/${s.nisn}`
+        const link = baseUrl ? `${baseUrl}/nisn/${s.nisn}` : ''
+        const waliName = (s.nama_wali_siswa || '').trim()
+        const salamPembuka = waliName
+          ? `Yth. Wali Murid Ibu/Bapak ${waliName},`
+          : 'Yth. Wali Murid,'
+        const nisnValue = s.nisn || '-'
+        const kelasLabel = `${k.tingkat} - ${k.nama_sub_kelas}`
+
+        const taDisplay = taName || '-'
+
         const pesan = [
-          `Yth. ${s.nama_wali_siswa || 'Wali Murid'},`,
-          `Informasi Tagihan Siswa:`,
-          `Nama: ${s.nama_lengkap}`,
-          `NISN: ${s.nisn}`,
-          `Tahun Ajaran: ${taName}`,
-          `Kelas: ${k.tingkat} - ${k.nama_sub_kelas}`,
-          `Total Tagihan: ${formatCurrencyIDR(totalTagihan)}`,
-          `Total Pembayaran: ${formatCurrencyIDR(totalPembayaran)}`,
-          `Total Tunggakan: ${formatCurrencyIDR(tunggakan)}`,
-          `Rincian lengkap: ${link}`,
+          `*${salamPembuka}*`,
           '',
-          'Terima kasih.'
+          'Mohon izin menyampaikan informasi tagihan berikut:',
+          '',
+          `Nama: *${s.nama_lengkap}*`,
+          `NISN: *${nisnValue}*`,
+          `Tahun Ajaran: *${taDisplay}*`,
+          `Kelas: *${kelasLabel}*`,
+          '',
+          'Ringkasan Pembayaran:',
+          `• Total Tagihan : *${formatCurrencyIDR(totalTagihan)}*`,
+          `• Total Pembayaran : *${formatCurrencyIDR(totalPembayaran)}*`,
+          `• Total Tunggakan : *${formatCurrencyIDR(tunggakan)}*`,
+          '',
+          `Rincian lengkap: ${link || '-'}`,
+          '',
+          'Terima kasih atas perhatian Ibu/Bapak.',
+          'Hormat kami,',
+          `*${schoolName}*`
         ].join('\n')
 
         rows.push({

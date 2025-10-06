@@ -50,7 +50,7 @@ export default function KirimPesan() {
     filteredKelas
   )
   
-  const { sending, logLines, handleKirim } = useMessageSender(rateMs, forceRefresh)
+  const { sending, logLines, handleKirim, cancelSending } = useMessageSender(rateMs, forceRefresh)
 
   useEffect(() => {
     ;(async () => {
@@ -109,7 +109,14 @@ export default function KirimPesan() {
   const handleSendMessages = async () => {
     try {
       const results = await handleKirim()
-      if (results) {
+      if (!results) return
+
+      if (results.cancelled) {
+        showNotification('error', 'Pengiriman pesan dihentikan oleh pengguna.')
+        return
+      }
+
+      if (typeof results.success === 'number') {
         showNotification('success', `Berhasil: ${results.success}, Gagal: ${results.failed} dari ${results.total} pesan`)
       }
     } catch (e) {
@@ -147,6 +154,7 @@ export default function KirimPesan() {
                 onRateMsChange={setRateMs}
                 onGenerate={handleGenerate}
                 onKirim={handleSendMessages}
+                onCancel={cancelSending}
                 onSettings={handleOpenSettings}
                 messageCount={kirimPesanData.length}
               />

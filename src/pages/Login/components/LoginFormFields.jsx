@@ -18,7 +18,7 @@ export function LoginFormFields({ email, setEmail, password, setPassword }) {
           style={{ borderRadius: 0, border: '1px solid #cbd5e1' }}
         >
           <TextField.Slot>
-            <EnvelopeClosedIcon />
+            <EnvelopeClosedIcon className="text-blue-600" />
           </TextField.Slot>
         </TextField.Root>
       </label>
@@ -37,7 +37,7 @@ export function LoginFormFields({ email, setEmail, password, setPassword }) {
           style={{ borderRadius: 0, border: '1px solid #cbd5e1' }}
         >
           <TextField.Slot>
-            <LockClosedIcon />
+            <LockClosedIcon className="text-blue-600" />
           </TextField.Slot>
         </TextField.Root>
       </label>

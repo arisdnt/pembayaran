@@ -1,63 +1,99 @@
 import { Heading, Text } from '@radix-ui/themes'
+import {
+  getSchoolName,
+  getSchoolAddress,
+  getSchoolPhone,
+  getSchoolEmail,
+  getSchoolWebsite,
+  getAppPublisher,
+  getAppSupportEmail,
+  getAppLegalNotice,
+} from '../../../config/appInfo'
 
 export function SchoolIdentity() {
-  return (
-    <div
-      className="w-3/4 bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 flex items-end justify-start p-12 relative"
-      style={{
-        backgroundImage: 'url(/login.jpg)',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat'
-      }}
-    >
-      {/* Overlay untuk membuat text lebih terbaca */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-900/40 via-slate-900/30 to-blue-900/50"></div>
+  const schoolName = getSchoolName()
+  const schoolAddress = getSchoolAddress()
+  const schoolPhone = getSchoolPhone()
+  const schoolEmail = getSchoolEmail()
+  const schoolWebsite = getSchoolWebsite()
+  const appPublisher = getAppPublisher()
+  const appSupportEmail = getAppSupportEmail()
+  const appLegalNotice = getAppLegalNotice()
 
-      {/* Info Card - Kiri Bawah - Glassmorphism */}
-      <div className="relative z-10 bg-white/20 border border-white/30 p-8 max-w-md backdrop-blur-xl shadow-2xl">
-        {/* Header dengan Icon */}
-        <div className="flex items-center gap-3 mb-6 pb-6 border-b border-white/40">
-          <div className="w-16 h-16 bg-white/20 border border-white/40 flex items-center justify-center backdrop-blur-md">
-            <svg
-              className="w-8 h-8 text-white"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z"/>
-            </svg>
+  return (
+    <div className="w-3/4 bg-gradient-to-br from-blue-700 via-blue-800 to-slate-900 flex items-end justify-start p-10 relative overflow-hidden">
+      <style>{`
+        @keyframes gradientShift {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+        .animate-gradient {
+          background-size: 200% 200%;
+          animation: gradientShift 8s ease infinite;
+        }
+      `}</style>
+      <div className="absolute inset-0 opacity-70" style={{ backgroundImage: 'url(/login.jpg)', backgroundSize: 'cover', backgroundPosition: 'center' }} />
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-800/25 via-slate-800/15 to-blue-900/30" />
+
+      <div className="relative z-10 w-full max-w-md bg-white/10 border border-white/20 backdrop-blur-md shadow-2xl p-8 text-white flex flex-col space-y-6">
+        <div className="flex items-center gap-5">
+          <div className="w-20 h-20 flex items-center justify-center border border-white/30 bg-white/5" style={{ borderRadius: 0 }}>
+            <img
+              src="/logo.svg"
+              alt={`Logo ${schoolName}`}
+              className="w-16 h-16 object-contain drop-shadow-[0_6px_12px_rgba(15,23,42,0.45)]"
+              loading="lazy"
+            />
           </div>
           <div>
-            <Heading size="6" className="text-white font-bold uppercase tracking-wider drop-shadow-lg">
-              ArtaPay
+            <Heading
+              size="6"
+              className="text-transparent bg-clip-text bg-gradient-to-r from-blue-100 via-cyan-200 to-blue-200 animate-gradient font-bold tracking-wide mb-1"
+            >
+              {schoolName}
             </Heading>
-            <Text size="2" className="text-white/90 font-medium tracking-wide">
-              Manajemen Keuangan Digital
-            </Text>
+            {schoolWebsite ? (
+              <Text className="text-blue-100/90 text-sm">{schoolWebsite.replace(/^https?:\/\//, "")}</Text>
+            ) : null}
           </div>
         </div>
 
-        {/* Description */}
-        <div className="mb-6">
-          <Text size="2" className="text-white/90 leading-relaxed">
-            Platform manajemen keuangan sekolah yang memudahkan pengelolaan pembayaran,
-            tagihan, dan administrasi kas secara efisien dan transparan.
-          </Text>
+        <div className="space-y-2 text-sm">
+          <div className="grid grid-cols-[100px_auto_1fr] gap-2 items-start">
+            <Text className="text-blue-200 font-medium">Alamat</Text>
+            <Text className="text-white/90">:</Text>
+            <Text className="text-white/90">{schoolAddress || 'Alamat belum dikonfigurasi'}</Text>
+          </div>
+
+          <div className="grid grid-cols-[100px_auto_1fr] gap-2 items-start">
+            <Text className="text-blue-200 font-medium">Telepon</Text>
+            <Text className="text-white/90">:</Text>
+            <Text className="text-white/90">{schoolPhone || '-'}</Text>
+          </div>
+
+          <div className="grid grid-cols-[100px_auto_1fr] gap-2 items-start">
+            <Text className="text-blue-200 font-medium">Email</Text>
+            <Text className="text-white/90">:</Text>
+            <Text className="text-white/90">{schoolEmail || '-'}</Text>
+          </div>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-3 gap-3 pt-6 border-t border-white/40">
-          <div className="text-center border border-white/30 bg-white/10 p-3 backdrop-blur-md">
-            <div className="text-lg font-bold text-white mb-1 drop-shadow-md">Real-time</div>
-            <div className="text-white/80 text-xs uppercase tracking-wider">Monitoring</div>
+        <div className="border-t border-white/20 pt-4 space-y-2">
+          <div className="grid grid-cols-[100px_auto_1fr] gap-2 items-start text-xs">
+            <Text className="text-blue-200 font-medium">Pengembang</Text>
+            <Text className="text-white/80">:</Text>
+            <Text className="text-white/80">{appPublisher}</Text>
           </div>
-          <div className="text-center border border-white/30 bg-white/10 p-3 backdrop-blur-md">
-            <div className="text-lg font-bold text-white mb-1 drop-shadow-md">100%</div>
-            <div className="text-white/80 text-xs uppercase tracking-wider">Transparan</div>
+          <div className="grid grid-cols-[100px_auto_1fr] gap-2 items-start text-xs">
+            <Text className="text-blue-200 font-medium">Dukungan</Text>
+            <Text className="text-white/80">:</Text>
+            <Text className="text-white/80">{appSupportEmail}</Text>
           </div>
-          <div className="text-center border border-white/30 bg-white/10 p-3 backdrop-blur-md">
-            <div className="text-lg font-bold text-white mb-1 drop-shadow-md">Aman</div>
-            <div className="text-white/80 text-xs uppercase tracking-wider">Terpercaya</div>
+          <div className="grid grid-cols-[100px_auto_1fr] gap-2 items-start text-xs">
+            <Text className="text-blue-200 font-medium">Copyright</Text>
+            <Text className="text-white/80">:</Text>
+            <Text className="text-white/80">{appLegalNotice.replace(/^Copyright\s*/i, '')}</Text>
           </div>
         </div>
       </div>

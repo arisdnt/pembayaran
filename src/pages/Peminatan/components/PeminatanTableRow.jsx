@@ -23,16 +23,18 @@ export function PeminatanTableRow({
       onClick={() => onSelect(item)}
       className={`${rowBgClass} border-b border-slate-200 transition-colors cursor-pointer`}
     >
-      <td className="px-4 py-3 text-slate-700 font-medium border-r border-slate-200">
+      <td className="px-4 py-3 text-slate-700 font-medium border-r border-slate-200 min-w-0 whitespace-normal break-words">
         {item.kode}
       </td>
-      <td className="px-4 py-3 text-slate-900 font-semibold border-r border-slate-200">
+      <td className="px-4 py-3 text-slate-900 font-semibold border-r border-slate-200 min-w-0 whitespace-normal break-words">
         {item.nama}
       </td>
-      <td className="px-4 py-3 text-slate-600 border-r border-slate-200 truncate" title={item.keterangan || '-'}>
-        {item.keterangan || '-'}
+      <td className="px-4 py-3 text-slate-600 border-r border-slate-200 min-w-0">
+        <span className="block truncate" title={item.keterangan || '-'}>
+          {item.keterangan || '-'}
+        </span>
       </td>
-      <td className="px-4 py-3 text-center text-slate-700 border-r border-slate-200">
+      <td className="px-4 py-3 text-center text-slate-700 border-r border-slate-200 min-w-0">
         {item.tingkat_min ? (
           <Badge color="blue" variant="soft" style={{ borderRadius: 0 }}>
             Tingkat {item.tingkat_min}
@@ -41,7 +43,7 @@ export function PeminatanTableRow({
           <span className="text-slate-400">-</span>
         )}
       </td>
-      <td className="px-4 py-3 text-center text-slate-700 border-r border-slate-200">
+      <td className="px-4 py-3 text-center text-slate-700 border-r border-slate-200 min-w-0">
         {item.tingkat_max ? (
           <Badge color="purple" variant="soft" style={{ borderRadius: 0 }}>
             Tingkat {item.tingkat_max}
@@ -50,7 +52,7 @@ export function PeminatanTableRow({
           <span className="text-slate-400">-</span>
         )}
       </td>
-      <td className="px-4 py-3 text-center border-r border-slate-200">
+      <td className="px-4 py-3 text-center border-r border-slate-200 min-w-0">
         <button
           onClick={(e) => {
             e.stopPropagation()
@@ -76,8 +78,8 @@ export function PeminatanTableRow({
           )}
         </button>
       </td>
-      <td className="px-4 py-3 text-center">
-        <div className="flex justify-center gap-1">
+      <td className="px-4 py-3 text-center min-w-0">
+        <div className="flex justify-center gap-1 flex-wrap">
           <IconButton
             size="1"
             variant="soft"

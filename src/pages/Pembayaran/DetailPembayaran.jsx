@@ -4,6 +4,13 @@ import { PageLayout } from '../../layout/PageLayout'
 import { Text, Badge, Button } from '@radix-ui/themes'
 import { ArrowLeft, Wallet, Hash, Receipt, FileText, Calendar, CreditCard, Clock, CheckCircle, XCircle } from 'lucide-react'
 import { db } from '../../offline/db'
+import {
+  getSchoolName,
+  getSchoolAddress,
+  getSchoolPhone,
+  getSchoolEmail,
+  getSchoolWebsite,
+} from '../../config/appInfo'
 
 function formatCurrency(amount) {
   return new Intl.NumberFormat('id-ID', {
@@ -32,11 +39,11 @@ function DetailPembayaranContent() {
   const [pembayaran, setPembayaran] = useState(null)
   const [error, setError] = useState('')
 
-  const schoolName = import.meta.env.VITE_SCHOOL_NAME || 'NAMA SEKOLAH'
-  const schoolAddress = import.meta.env.VITE_SCHOOL_ADDRESS || ''
-  const schoolPhone = import.meta.env.VITE_SCHOOL_PHONE || ''
-  const schoolEmail = import.meta.env.VITE_SCHOOL_EMAIL || ''
-  const schoolWebsite = import.meta.env.VITE_SCHOOL_WEBSITE || ''
+  const schoolName = getSchoolName() || 'NAMA SEKOLAH'
+  const schoolAddress = getSchoolAddress() || ''
+  const schoolPhone = getSchoolPhone() || ''
+  const schoolEmail = getSchoolEmail() || ''
+  const schoolWebsite = getSchoolWebsite() || ''
 
   useEffect(() => {
     const fetchPembayaran = async () => {
@@ -142,20 +149,23 @@ function DetailPembayaranContent() {
         </div>
 
         {/* Invoice Container */}
-        <div className="flex-1 overflow-auto px-6 py-8">
+        <div className="flex-1 overflow-auto px-5 py-6">
           <div className="w-full flex justify-center">
             {/* Paper-like Invoice - A4 Size */}
-            <div className="bg-white shadow-xl border border-slate-200 print:shadow-none print:border-0 w-full max-w-[210mm]" style={{minHeight: '297mm'}}>
+            <div
+              className="bg-white shadow-xl border border-slate-200 print:shadow-none print:border-0 w-full max-w-[210mm]"
+              style={{ minHeight: 'auto' }}
+            >
 
               {/* Invoice Header */}
-              <div className="px-12 pt-8 pb-6">
-                <div className="flex items-start justify-between mb-6">
+              <div className="px-8 pt-6 pb-4">
+                <div className="flex items-start justify-between mb-4 gap-6">
                   <div>
-                    <Text size="5" weight="bold" className="text-slate-900 block mb-1">
+                    <Text size="4" weight="bold" className="text-slate-900 block mb-1">
                       {schoolName}
                     </Text>
                     {schoolAddress && (
-                      <Text size="1" className="text-slate-600 block mb-1 max-w-sm">
+                      <Text size="1" className="text-slate-600 block mb-1 max-w-xs leading-relaxed">
                         {schoolAddress}
                       </Text>
                     )}
@@ -179,7 +189,7 @@ function DetailPembayaranContent() {
                     <Text size="1" className="text-slate-500 uppercase tracking-wider block mb-1">
                       Invoice Number
                     </Text>
-                    <Text size="4" weight="bold" className="text-slate-900 font-mono block pb-2 border-b border-slate-300">
+                    <Text size="3" weight="bold" className="text-slate-900 font-mono block pb-1 border-b border-slate-300">
                       {pembayaran.nomor_pembayaran}
                     </Text>
                     <Text size="1" className="text-slate-500 mt-2 block">
@@ -190,7 +200,7 @@ function DetailPembayaranContent() {
 
                 {/* Bill To Section */}
                 {pembayaran.tagihan?.riwayat_kelas_siswa && (
-                  <div className="grid grid-cols-2 gap-8">
+                  <div className="grid grid-cols-2 gap-6">
                     <div>
                       <Text size="1" className="text-slate-500 uppercase tracking-wider mb-2 block font-semibold">
                         Tagihan Untuk
@@ -230,8 +240,8 @@ function DetailPembayaranContent() {
               </div>
 
               {/* Invoice Items Table */}
-              <div className="px-12 py-8">
-                <Text size="2" weight="bold" className="text-slate-900 uppercase tracking-wider mb-4 block">
+              <div className="px-8 py-6">
+                <Text size="2" weight="bold" className="text-slate-900 uppercase tracking-wider mb-3 block">
                   Rincian Transaksi Pembayaran
                 </Text>
 
@@ -353,9 +363,9 @@ function DetailPembayaranContent() {
               </div>
 
               {/* Invoice Summary */}
-              <div className="px-12 pb-8">
+              <div className="px-8 pb-6">
                 <div className="flex justify-end">
-                  <div className="w-80 space-y-1">
+                  <div className="w-72 space-y-1">
                     <div className="flex justify-between items-center pb-1">
                       <Text size="2" className="text-slate-600">
                         Total Tagihan:
@@ -406,7 +416,7 @@ function DetailPembayaranContent() {
 
               {/* Notes & Footer */}
               {pembayaran.catatan && (
-                <div className="px-12 pb-8 border-t border-slate-200 pt-8">
+                <div className="px-8 pb-6 border-t border-slate-200 pt-6">
                   <Text size="1" className="text-slate-500 uppercase tracking-wider mb-2 block font-semibold">
                     Catatan Pembayaran
                   </Text>
@@ -417,33 +427,33 @@ function DetailPembayaranContent() {
               )}
 
               {/* Invoice Footer */}
-              <div className="px-12 py-6 bg-white border-t border-slate-200">
-                <div className="grid grid-cols-3 gap-8 mb-6">
+              <div className="px-8 py-5 bg-white border-t border-slate-200">
+                <div className="grid grid-cols-3 gap-6 mb-4">
                   <div className="text-center">
-                    <Text size="1" className="text-slate-500 uppercase tracking-wider mb-12 block">
+                    <Text size="1" className="text-slate-500 uppercase tracking-wider mb-8 block">
                       Diserahkan Oleh
                     </Text>
-                    <div className="border-t border-slate-900 pt-2 mt-8">
+                    <div className="border-t border-slate-900 pt-2 mt-6">
                       <Text size="2" className="text-slate-700">
                         (..................................)
                       </Text>
                     </div>
                   </div>
                   <div className="text-center">
-                    <Text size="1" className="text-slate-500 uppercase tracking-wider mb-12 block">
+                    <Text size="1" className="text-slate-500 uppercase tracking-wider mb-8 block">
                       Diterima Oleh
                     </Text>
-                    <div className="border-t border-slate-900 pt-2 mt-8">
+                    <div className="border-t border-slate-900 pt-2 mt-6">
                       <Text size="2" className="text-slate-700">
                         (..................................)
                       </Text>
                     </div>
                   </div>
                   <div className="text-center">
-                    <Text size="1" className="text-slate-500 uppercase tracking-wider mb-12 block">
+                    <Text size="1" className="text-slate-500 uppercase tracking-wider mb-8 block">
                       Mengetahui
                     </Text>
-                    <div className="border-t border-slate-900 pt-2 mt-8">
+                    <div className="border-t border-slate-900 pt-2 mt-6">
                       <Text size="2" className="text-slate-700">
                         (..................................)
                       </Text>
@@ -451,7 +461,7 @@ function DetailPembayaranContent() {
                   </div>
                 </div>
 
-                <div className="text-center border-t border-slate-200 pt-4">
+                <div className="text-center border-t border-slate-200 pt-3">
                   <Text size="1" className="text-slate-500">
                     Invoice ID: {pembayaran.id}
                   </Text>
@@ -468,6 +478,10 @@ function DetailPembayaranContent() {
 
       {/* Print Styles */}
       <style>{`
+        @page {
+          size: A4 portrait;
+          margin: 15mm;
+        }
         @media print {
           body * {
             visibility: hidden;
