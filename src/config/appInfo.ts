@@ -14,20 +14,20 @@
 export const SCHOOL_CONFIG = {
   // ---------- PROFIL SEKOLAH (DATA DASAR + KONTAK) ----------
   profile: {
-    name: 'SMAN 1 SIDOWAYAH',                    // Nama lengkap sekolah
-    level: 'SMK' as const,                           // Jenjang: 'SD' | 'SMP' | 'SMA' | 'SMK' | 'UNIVERSITAS' | 'PESANTREN'
-    npsn: '00010001001',                                // Nomor Pokok Sekolah Nasional
-    nss: '3211252223145',                             // Nomor Statistik Sekolah
+    name: 'MAS AL-HIDAYAT GINUK',                    // Nama lengkap sekolah
+    level: 'SMP' as const,                           // Jenjang: 'SD' | 'SMP' | 'SMA' | 'SMK' | 'UNIVERSITAS' | 'PESANTREN'
+    npsn: '205820859',                                // Nomor Pokok Sekolah Nasional
+    nss: '13123520012',                             // Nomor Statistik Sekolah
     address: {
-      street: 'JL Sidowayah - magetan',
-      village: 'Sidowayah',
-      district: 'Panekan',
+      street: 'RT 02 - RW 02',
+      village: 'Ginuk',
+      district: 'Karas',
       city: 'Magetan',
       province: 'Jawa Timur',
-      postalCode: '40117'
+      postalCode: '63393'
     },
-    phone: '081 231 274 828',
-    email: 'smkn1sidowayah@gmail.com',
+    phone: '0888 xxx xxxx',
+    email: 'masalhidayatginuk@gmail.com',
     website: 'https://alhidayat.my.id/'
   }
 }
