@@ -12,6 +12,7 @@ import { PembayaranPendingTable } from './components/PembayaranPendingTable'
 import { PageLayout } from '../../layout/PageLayout'
 
 function DashboardContent() {
+  const [masterDataReady, setMasterDataReady] = useState(false)
   const [filters, setFilters] = useState({
     tahunAjaran: '',
     tingkat: '',
@@ -25,7 +26,8 @@ function DashboardContent() {
     tingkatList: []
   })
 
-  const { data, loading, error, refresh } = useDashboardData(filters)
+  // Wait for master data to be ready before fetching dashboard data
+  const { data, loading, error, refresh } = useDashboardData(masterDataReady ? filters : null)
 
   useEffect(() => {
     fetchMasterData()
@@ -51,9 +53,23 @@ function DashboardContent() {
       })
       
       const uniqueTingkat = [...new Set(kelas.map(k => k.tingkat).filter(Boolean))].sort()
+      
+      // Find active tahun ajaran and set as default filter
+      const tahunAktif = tahun.find(t => t.status_aktif === true)
+      
       setMasterData({ tahunAjaranList: tahun, kelasList: kelas, tingkatList: uniqueTingkat })
+      
+      // Set default tahun ajaran filter to active one
+      if (tahunAktif) {
+        setFilters(prev => ({ ...prev, tahunAjaran: tahunAktif.id }))
+      }
+      
+      // Mark master data as ready to trigger dashboard data fetch
+      setMasterDataReady(true)
     } catch (err) {
       console.error('Error fetching master data:', err)
+      // Even if error, mark as ready to show the error state
+      setMasterDataReady(true)
     }
   }
 

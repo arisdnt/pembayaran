@@ -60,6 +60,11 @@ export function useDashboardData(filters = {}) {
 
   const fetchDashboardData = useCallback(async (isBackgroundRefresh = false) => {
     try {
+      // Skip if filters is null (waiting for master data)
+      if (!filters) {
+        return
+      }
+
       // Hanya set loading true jika bukan background refresh
       if (!isBackgroundRefresh) {
         setLoading(true)
@@ -74,7 +79,9 @@ export function useDashboardData(filters = {}) {
         // Load all tahun ajaran and filter in memory (status_aktif is boolean)
         const allTahunAjaran = await db.tahun_ajaran.toArray()
         const tahunAktif = allTahunAjaran.find(t => t.status_aktif === true)
-        if (!tahunAktif) throw new Error('Tidak ada tahun ajaran aktif')
+        if (!tahunAktif) {
+          throw new Error('Tidak ada tahun ajaran aktif. Silakan buat tahun ajaran terlebih dahulu.')
+        }
         tahunAjaranId = tahunAktif.id
       }
 

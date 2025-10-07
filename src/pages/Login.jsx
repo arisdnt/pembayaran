@@ -19,9 +19,18 @@ export function Login() {
   const handleClose = async () => {
     try {
       const appWindow = getCurrentWindow()
-      await appWindow.close()
+      // Use destroy() to force close without confirmation dialog
+      // This bypasses the onCloseRequested listener from Navbar
+      await appWindow.destroy()
     } catch (error) {
       console.error('Error closing window:', error)
+      // Fallback to close() if destroy() fails
+      try {
+        const appWindow = getCurrentWindow()
+        await appWindow.close()
+      } catch (fallbackError) {
+        console.error('Fallback close also failed:', fallbackError)
+      }
     }
   }
 
