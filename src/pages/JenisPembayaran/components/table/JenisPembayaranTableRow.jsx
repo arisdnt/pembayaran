@@ -1,4 +1,4 @@
-import { Badge, Text, Switch } from '@radix-ui/themes'
+import { Badge, Text, Switch, IconButton } from '@radix-ui/themes'
 import { Pencil1Icon, TrashIcon } from '@radix-ui/react-icons'
 import { Eye } from 'lucide-react'
 import { formatCurrency } from '../../utils/currencyFormatter'
@@ -89,40 +89,46 @@ export function JenisPembayaranTableRow({ item, index, onEdit, onDelete, onViewD
         </div>
       </td>
       <td className="px-4 py-3">
-        <div className="flex items-center justify-center gap-1">
-          <button
+        <div className="flex justify-center gap-1">
+          <IconButton
+            size="1"
+            variant="soft"
             onClick={(e) => {
               e.stopPropagation()
               onViewDetail(item)
             }}
-            className="h-7 w-7 flex items-center justify-center border border-slate-300 bg-white hover:bg-blue-50 hover:border-blue-400 transition-colors"
-            title="Lihat Detail"
-            type="button"
+            className="cursor-pointer hover:bg-slate-100 text-slate-700 border border-slate-200"
+            style={{ borderRadius: 0 }}
+            aria-label={`Detail ${item.nama}`}
           >
-            <Eye className="h-3.5 w-3.5 text-slate-600" />
-          </button>
-          <button
+            <Eye className="h-3.5 w-3.5" />
+          </IconButton>
+          <IconButton
+            size="1"
+            variant="soft"
             onClick={(e) => {
               e.stopPropagation()
               onEdit(item)
             }}
-            className="h-7 w-7 flex items-center justify-center border border-slate-300 bg-white hover:bg-amber-50 hover:border-amber-400 transition-colors"
-            title="Edit"
-            type="button"
+            className="cursor-pointer hover:bg-blue-100 text-blue-700 border border-blue-200"
+            style={{ borderRadius: 0 }}
+            aria-label={`Edit ${item.nama}`}
           >
-            <Pencil1Icon className="h-3.5 w-3.5 text-slate-600" />
-          </button>
-          <button
+            <Pencil1Icon />
+          </IconButton>
+          <IconButton
+            size="1"
+            variant="soft"
             onClick={(e) => {
               e.stopPropagation()
               onDelete(item)
             }}
-            className="h-7 w-7 flex items-center justify-center border border-slate-300 bg-white hover:bg-red-50 hover:border-red-400 transition-colors"
-            title="Hapus"
-            type="button"
+            className="cursor-pointer hover:bg-red-100 text-red-700 border border-red-200"
+            style={{ borderRadius: 0 }}
+            aria-label={`Hapus ${item.nama}`}
           >
-            <TrashIcon className="h-3.5 w-3.5 text-slate-600" />
-          </button>
+            <TrashIcon />
+          </IconButton>
         </div>
       </td>
     </tr>

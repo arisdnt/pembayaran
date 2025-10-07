@@ -13,13 +13,16 @@ export function usePeminatan() {
 
   const [peminatanRows, setPeminatanRows] = useState([])
   const [psRows, setPsRows] = useState([])
+  const [tahunAjaranRows, setTahunAjaranRows] = useState([])
+  const [selectedYearId, setSelectedYearId] = useState(null)
 
   const refreshData = useCallback(async ({ withSpinner = true } = {}) => {
     if (withSpinner) setIsRefreshing(true)
     try {
-      const [peminatan, peminatanSiswa] = await Promise.all([
+      const [peminatan, peminatanSiswa, tahunAjaran] = await Promise.all([
         db.peminatan.toArray(),
         db.peminatan_siswa.toArray(),
+        db.tahun_ajaran.orderBy('tanggal_mulai').reverse().toArray(),
       ])
       
       // Sort in JavaScript since 'nama' is not indexed
@@ -27,6 +30,7 @@ export function usePeminatan() {
       
       setPeminatanRows(peminatan)
       setPsRows(peminatanSiswa)
+      setTahunAjaranRows(tahunAjaran)
       setLoading(false)
       return peminatan
     } finally {
@@ -39,16 +43,53 @@ export function usePeminatan() {
 
   useEffect(() => { refreshData({ withSpinner: false }) }, [refreshData])
 
+  useEffect(() => {
+    if (!tahunAjaranRows || tahunAjaranRows.length === 0) {
+      setSelectedYearId(null)
+      return
+    }
+
+    if (selectedYearId === 'all') {
+      return
+    }
+
+    if (selectedYearId && selectedYearId !== 'all') {
+      const stillExists = tahunAjaranRows.some((item) => item.id === selectedYearId)
+      if (stillExists) return
+    }
+
+    const aktif = tahunAjaranRows.find((item) => item.status_aktif)
+    setSelectedYearId(aktif ? aktif.id : tahunAjaranRows[0].id)
+  }, [tahunAjaranRows, selectedYearId])
+
+  const tahunAjaranOptions = useMemo(() => {
+    if (!tahunAjaranRows || tahunAjaranRows.length === 0) {
+      return []
+    }
+    return tahunAjaranRows.map((item) => ({
+      id: item.id,
+      nama: item.nama,
+      status_aktif: item.status_aktif,
+    }))
+  }, [tahunAjaranRows])
+
   const data = useMemo(() => {
     const countMap = new Map()
-    psRows.forEach(ps => {
+
+    const filteredPsRows = psRows.filter((ps) => {
+      if (!selectedYearId || selectedYearId === 'all') return true
+      return ps.id_tahun_ajaran === selectedYearId
+    })
+
+    filteredPsRows.forEach(ps => {
       countMap.set(ps.id_peminatan, (countMap.get(ps.id_peminatan) || 0) + 1)
     })
+
     return (peminatanRows || []).map(item => ({
       ...item,
       total_siswa: countMap.get(item.id) || 0,
     }))
-  }, [peminatanRows, psRows])
+  }, [peminatanRows, psRows, selectedYearId])
 
   const saveItem = async (formData, isEdit) => {
     // Validasi tingkat min dan max
@@ -120,5 +161,8 @@ export function usePeminatan() {
     deleteItem,
     toggleAktif,
     realtimeStatus: status.realtime,
+    tahunAjaranOptions,
+    selectedYearId,
+    setSelectedYearId,
   }
 }

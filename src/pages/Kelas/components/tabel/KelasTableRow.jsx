@@ -32,6 +32,18 @@ export function KelasTableRow({ item, isSelected, onSelect, onEdit, onDelete, on
         </Text>
       </td>
       <td className="px-4 py-3 border-r border-slate-200">
+        {typeof item.total_siswa === 'number' ? (
+          <Badge
+            variant="soft"
+            color={item.total_siswa > 0 ? 'green' : 'gray'}
+            size="2"
+            style={{ borderRadius: 0 }}
+          >
+            {item.total_siswa} siswa
+          </Badge>
+        ) : null}
+      </td>
+      <td className="px-4 py-3 border-r border-slate-200">
         <Text size="1" className="text-slate-500 uppercase tracking-wider font-mono">
           {item.id?.slice(0, 8) ?? '—'}
         </Text>

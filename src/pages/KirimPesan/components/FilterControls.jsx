@@ -91,25 +91,15 @@ export default function FilterControls({
             {loading ? 'Memproses...' : 'Generate'}
           </Button>
           <Button
-            disabled={sending || messageCount === 0}
-            onClick={onKirim}
-            color="green"
+            disabled={!sending && messageCount === 0}
+            onClick={sending ? onCancel : onKirim}
+            color={sending ? 'red' : 'green'}
             className="cursor-pointer"
             style={{ borderRadius: 0 }}
             size="2"
+            variant={sending ? 'soft' : 'solid'}
           >
-            {sending ? 'Mengirim...' : 'Kirim Pesan'}
-          </Button>
-          <Button
-            disabled={!sending}
-            onClick={onCancel}
-            color="red"
-            variant="soft"
-            className="cursor-pointer"
-            style={{ borderRadius: 0 }}
-            size="2"
-          >
-            Hentikan
+            {sending ? 'Hentikan' : 'Kirim Pesan'}
           </Button>
         </div>
       </div>

@@ -33,8 +33,25 @@ export function PeminatanSiswaTable({
 
   const isEmpty = !isLoading && filteredData.length === 0
 
-  const peminatanOptions = [...new Set(data.map(item => item.peminatan).filter(Boolean))]
-  const tahunAjaranOptions = [...new Set(data.map(item => item.tahun_ajaran).filter(Boolean))]
+  // Use Map to deduplicate objects by their id property
+  const peminatanMap = new Map()
+  const tahunAjaranMap = new Map()
+  
+  data.forEach(item => {
+    if (item.peminatan?.id) {
+      peminatanMap.set(item.peminatan.id, item.peminatan)
+    }
+    if (item.tahun_ajaran?.id) {
+      tahunAjaranMap.set(item.tahun_ajaran.id, item.tahun_ajaran)
+    }
+  })
+  
+  const peminatanOptions = Array.from(peminatanMap.values()).sort((a, b) => 
+    (a.kode || '').localeCompare(b.kode || '')
+  )
+  const tahunAjaranOptions = Array.from(tahunAjaranMap.values()).sort((a, b) => 
+    (a.nama || '').localeCompare(b.nama || '')
+  )
   const tingkatOptions = [...new Set(data.map(item => item.tingkat).filter(Boolean))].sort()
 
   return (

@@ -2,13 +2,13 @@ import { Text, TextField, TextArea } from '@radix-ui/themes'
 
 export function InformasiPembayaranSection({ formData, onChange, errors = {}, disabled = false }) {
   return (
-    <div className="border-2 border-slate-300 bg-white shadow-lg shrink-0">
-      <div className="border-b-2 border-slate-300 bg-gradient-to-b from-slate-100 to-slate-50 px-4 py-3">
+    <div className="border-2 border-slate-300 bg-white shadow-lg h-full flex flex-col">
+      <div className="border-b-2 border-slate-300 bg-gradient-to-b from-slate-100 to-slate-50 px-4 py-3 shrink-0">
         <Text size="2" weight="bold" className="text-slate-700 uppercase tracking-wider">
           Informasi Pembayaran
         </Text>
       </div>
-      <div className="p-4 space-y-4">
+      <div className="p-4 space-y-4 flex-1">
         <div>
           <Text size="2" mb="1" weight="medium">Nomor Pembayaran</Text>
           <TextField.Root

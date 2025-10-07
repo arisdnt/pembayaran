@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { PageLayout } from '../../layout/PageLayout'
 import { Text } from '@radix-ui/themes'
 import { AlertCircle } from 'lucide-react'
@@ -19,6 +19,9 @@ function PeminatanContent() {
     deleteItem,
     saveItem,
     toggleAktif,
+    tahunAjaranOptions,
+    selectedYearId,
+    setSelectedYearId,
   } = usePeminatan()
 
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -88,6 +91,23 @@ function PeminatanContent() {
     setDetailModalOpen(true)
   }
 
+  const combinedYearOptions = useMemo(() => {
+    if (!tahunAjaranOptions || tahunAjaranOptions.length === 0) return []
+    return tahunAjaranOptions
+  }, [tahunAjaranOptions])
+
+  const selectedYearLabel = useMemo(() => {
+    if (!selectedYearId || selectedYearId === 'all') {
+      return 'Semua Tahun Ajaran'
+    }
+    const found = combinedYearOptions.find((item) => item.id === selectedYearId)
+    return found ? found.nama : 'Tahun ajaran tidak tersedia'
+  }, [combinedYearOptions, selectedYearId])
+
+  const handleSelectYear = (value) => {
+    setSelectedYearId(value)
+  }
+
   return (
     <PageLayout>
       <div className="flex flex-col h-full">
@@ -120,6 +140,10 @@ function PeminatanContent() {
               selectedItem={selectedItem}
               onSelectItem={setSelectedItem}
               onViewDetail={handleOpenDetail}
+              tahunAjaranOptions={combinedYearOptions}
+              selectedYearId={selectedYearId}
+              selectedYearLabel={selectedYearLabel}
+              onSelectYear={handleSelectYear}
             />
           </div>
 
@@ -129,6 +153,7 @@ function PeminatanContent() {
               selectedItem={selectedItem}
               isLoading={loading}
               isRefreshing={isRefreshing}
+              selectedYearLabel={selectedYearLabel}
             />
           </div>
         </div>
@@ -155,6 +180,7 @@ function PeminatanContent() {
         open={detailModalOpen}
         onOpenChange={setDetailModalOpen}
         peminatan={selectedItem}
+        selectedYearLabel={selectedYearLabel}
       />
     </PageLayout>
   )

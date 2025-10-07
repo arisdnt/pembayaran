@@ -2,7 +2,7 @@ import { useKelasFilters } from '../../hooks/useKelasFilters'
 import { KelasTableRow } from './KelasTableRow'
 import { KelasEmptyState } from './KelasEmptyState'
 import { Plus, Search, X } from 'lucide-react'
-import { TextField, Button, Select, Badge } from '@radix-ui/themes'
+import { TextField, Button, Select } from '@radix-ui/themes'
 
 export function KelasTable({
   data,
@@ -14,6 +14,9 @@ export function KelasTable({
   onAdd,
   selectedItem,
   onSelectItem,
+  tahunAjaranOptions = [],
+  selectedYearId,
+  onSelectYear,
 }) {
   const {
     searchQuery,
@@ -21,12 +24,12 @@ export function KelasTable({
     filterTingkat,
     setFilterTingkat,
     filteredData,
-    stats,
     hasActiveFilters,
     handleClearFilters,
   } = useKelasFilters(data)
 
   const isEmpty = !isLoading && filteredData.length === 0
+  const yearValue = selectedYearId ?? undefined
 
   return (
     <div className="h-full flex flex-col">
@@ -102,6 +105,55 @@ export function KelasTable({
               </Select.Root>
             </div>
 
+            {/* Filter Tahun Ajaran */}
+            <div className="flex items-center gap-2">
+              <Select.Root
+                value={yearValue}
+                onValueChange={(value) => {
+                  if (value === '__no_year__') return
+                  onSelectYear?.(value)
+                }}
+                disabled={tahunAjaranOptions.length === 0}
+              >
+                <Select.Trigger
+                  placeholder="Tahun ajaran"
+                  style={{
+                    borderRadius: 0,
+                    minWidth: '180px',
+                    border: '1px solid #cbd5e1',
+                    backgroundColor: '#ffffff'
+                  }}
+                  className="cursor-pointer font-sans"
+                />
+                <Select.Content
+                  position="popper"
+                  side="bottom"
+                  align="start"
+                  sideOffset={4}
+                  style={{ borderRadius: 0 }}
+                  className="border-2 border-slate-300 shadow-lg bg-white z-50"
+                >
+                  {tahunAjaranOptions.length === 0 ? (
+                    <Select.Item value="__no_year__" disabled className="px-3 py-2 text-slate-500">
+                      Tidak ada data tahun ajaran
+                    </Select.Item>
+                  ) : (
+                    tahunAjaranOptions.map((option) => (
+                      <Select.Item
+                        key={option.id}
+                        value={option.id}
+                        style={{ borderRadius: 0 }}
+                        className="hover:bg-blue-50 cursor-pointer px-3 py-2"
+                      >
+                        {option.nama}
+                        {option.status_aktif ? ' • Aktif' : ''}
+                      </Select.Item>
+                    ))
+                  )}
+                </Select.Content>
+              </Select.Root>
+            </div>
+
             {/* Reset Filter */}
             {hasActiveFilters && (
               <Button
@@ -117,43 +169,8 @@ export function KelasTable({
               </Button>
             )}
 
-            {/* Stats - Excel-style status bar */}
-            <div className="ml-auto flex items-center gap-1.5 text-xs font-medium">
-              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-300 shadow-sm">
-                <span className="text-slate-600">Total:</span>
-                <span className="font-bold text-slate-900">{stats.total}</span>
-              </div>
-              {stats.tingkat10 > 0 && (
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 border border-blue-300 shadow-sm">
-                  <span className="inline-flex h-2 w-2 rounded-full bg-blue-600" />
-                  <span className="text-blue-700">Tingkat 10:</span>
-                  <span className="font-bold text-blue-900">{stats.tingkat10}</span>
-                </div>
-              )}
-              {stats.tingkat11 > 0 && (
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 border border-indigo-300 shadow-sm">
-                  <span className="inline-flex h-2 w-2 rounded-full bg-indigo-600" />
-                  <span className="text-indigo-700">Tingkat 11:</span>
-                  <span className="font-bold text-indigo-900">{stats.tingkat11}</span>
-                </div>
-              )}
-              {stats.tingkat12 > 0 && (
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-50 border border-purple-300 shadow-sm">
-                  <span className="inline-flex h-2 w-2 rounded-full bg-purple-600" />
-                  <span className="text-purple-700">Tingkat 12:</span>
-                  <span className="font-bold text-purple-900">{stats.tingkat12}</span>
-                </div>
-              )}
-              {hasActiveFilters && (
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 border border-emerald-300 shadow-sm">
-                  <span className="text-emerald-700">Tampil:</span>
-                  <span className="font-bold text-emerald-900">{filteredData.length}</span>
-                </div>
-              )}
-            </div>
-
             {/* Button Tambah Baru - Excel-style button */}
-            <div>
+            <div className="ml-auto">
               <Button
                 onClick={onAdd}
                 className="cursor-pointer text-white font-medium shadow-sm hover:shadow transition-all"
@@ -181,10 +198,11 @@ export function KelasTable({
               <colgroup>{[
                 <col key="col-1" style={{ width: '15%' }} />,
                 <col key="col-2" style={{ width: '20%' }} />,
-                <col key="col-3" style={{ width: '15%' }} />,
-                <col key="col-4" style={{ width: '25%' }} />,
-                <col key="col-5" style={{ width: '17%' }} />,
-                <col key="col-6" style={{ width: '8%' }} />,
+                <col key="col-3" style={{ width: '12%' }} />,
+                <col key="col-4" style={{ width: '12%' }} />,
+                <col key="col-5" style={{ width: '21%' }} />,
+                <col key="col-6" style={{ width: '12%' }} />,
+                <col key="col-7" style={{ width: '8%' }} />,
               ]}</colgroup>
               <thead>
                 <tr className="bg-gradient-to-b from-slate-100 to-slate-50 sticky top-0 z-10 border-b border-slate-300 shadow-sm">
@@ -196,6 +214,9 @@ export function KelasTable({
                   </th>
                   <th className="px-4 py-3 text-left text-[0.7rem] font-bold uppercase tracking-wider text-slate-700 border-r border-slate-300">
                     Kapasitas
+                  </th>
+                  <th className="px-4 py-3 text-left text-[0.7rem] font-bold uppercase tracking-wider text-slate-700 border-r border-slate-300">
+                    Total Siswa
                   </th>
                   <th className="px-4 py-3 text-left text-[0.7rem] font-bold uppercase tracking-wider text-slate-700 border-r border-slate-300">
                     ID

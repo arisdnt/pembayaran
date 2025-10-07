@@ -8,7 +8,7 @@ export function usePembayaranFilters(data) {
   const tahunAjaranOptions = useMemo(() => {
     const map = new Map()
     data.forEach((item) => {
-      const ta = item.latest_tahun_ajaran
+      const ta = item.tahun_ajaran_tagihan
       if (ta?.id && ta?.nama) {
         map.set(String(ta.id), ta.nama)
       }
@@ -21,7 +21,7 @@ export function usePembayaranFilters(data) {
   const tingkatOptions = useMemo(() => {
     const set = new Set()
     data.forEach((item) => {
-      const tingkat = item.latest_kelas?.tingkat
+      const tingkat = item.kelas_tagihan?.tingkat
       if (tingkat !== undefined && tingkat !== null && `${tingkat}`.trim() !== '') {
         set.add(String(tingkat))
       }
@@ -44,14 +44,14 @@ export function usePembayaranFilters(data) {
 
     if (selectedTahunAjaran !== 'all') {
       filtered = filtered.filter((item) => {
-        const id = item.latest_tahun_ajaran?.id
+        const id = item.tahun_ajaran_tagihan?.id
         return id !== undefined && id !== null && String(id) === selectedTahunAjaran
       })
     }
 
     if (selectedTingkat !== 'all') {
       filtered = filtered.filter((item) => {
-        const tingkat = item.latest_kelas?.tingkat
+        const tingkat = item.kelas_tagihan?.tingkat
         return tingkat !== undefined && tingkat !== null && String(tingkat) === selectedTingkat
       })
     }

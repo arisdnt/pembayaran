@@ -20,6 +20,9 @@ function KelasContent() {
     setError,
     deleteItem,
     saveItem,
+    tahunAjaranOptions,
+    selectedYearId,
+    setSelectedYearId,
   } = useKelas()
 
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -49,6 +52,14 @@ function KelasContent() {
       }
     }
   }, [data, loading, selectedItem])
+
+  useEffect(() => {
+    if (!currentItem) return
+    const updated = data.find((item) => item.id === currentItem.id)
+    if (updated && updated !== currentItem) {
+      setCurrentItem(updated)
+    }
+  }, [data, currentItem])
 
   const handleOpenCreate = () => {
     setEditMode(false)
@@ -85,6 +96,9 @@ function KelasContent() {
       setCurrentItem(null)
     }
   }
+
+  const selectedYearLabel = tahunAjaranOptions.find((item) => item.id === selectedYearId)?.nama || '—'
+
   return (
     <PageLayout>
         <div className="flex flex-col h-full">
@@ -116,6 +130,9 @@ function KelasContent() {
               onAdd={handleOpenCreate}
               selectedItem={selectedItem}
               onSelectItem={setSelectedItem}
+              tahunAjaranOptions={tahunAjaranOptions}
+              selectedYearId={selectedYearId}
+              onSelectYear={setSelectedYearId}
             />
           </div>
 
@@ -125,6 +142,7 @@ function KelasContent() {
               selectedItem={selectedItem}
               isLoading={loading}
               isRefreshing={isRefreshing}
+              selectedYearLabel={selectedYearLabel}
             />
           </div>
         </div>
@@ -149,6 +167,7 @@ function KelasContent() {
         open={detailModalOpen}
         onOpenChange={setDetailModalOpen}
         kelas={currentItem}
+        selectedYearLabel={selectedYearLabel}
       />
       </PageLayout>
   )

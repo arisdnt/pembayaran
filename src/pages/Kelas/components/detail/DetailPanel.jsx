@@ -6,7 +6,7 @@ import { DetailPanelCapacity } from './DetailPanelCapacity'
 import { DetailPanelMetadata } from './DetailPanelMetadata'
 import { DetailPanelFooter } from './DetailPanelFooter'
 
-export function DetailPanel({ selectedItem, isLoading = false, isRefreshing = false }) {
+export function DetailPanel({ selectedItem, isLoading = false, isRefreshing = false, selectedYearLabel = '—' }) {
   const schoolName = import.meta.env.VITE_SCHOOL_NAME || 'Nama Sekolah'
   const schoolAddress = import.meta.env.VITE_SCHOOL_ADDRESS || ''
   const footerInfo = import.meta.env.VITE_SCHOOL_FOOTER || ''
@@ -34,7 +34,7 @@ export function DetailPanel({ selectedItem, isLoading = false, isRefreshing = fa
       <div className="flex-1 min-h-0 overflow-auto excel-scrollbar">
         <div className="pt-4 space-y-3">
           <DetailPanelInfoSection selectedItem={selectedItem} />
-          <DetailPanelCapacity selectedItem={selectedItem} />
+          <DetailPanelCapacity selectedItem={selectedItem} selectedYearLabel={selectedYearLabel} />
           <DetailPanelMetadata selectedItem={selectedItem} />
         </div>
       </div>

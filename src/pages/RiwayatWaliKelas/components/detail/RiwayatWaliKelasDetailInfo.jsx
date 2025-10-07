@@ -117,49 +117,47 @@ export function RiwayatWaliKelasDetailInfo({ riwayat }) {
   const tahunAjaranName = riwayat.tahun_ajaran?.nama || '—'
 
   return (
-    <div className="grid grid-cols-2 gap-4">
-      {/* Left Column */}
-      <div className="space-y-1">
-        {/* Informasi Wali Kelas */}
-        <div className="bg-gradient-to-b from-slate-50 to-white border border-slate-200 p-4 mb-3">
-          <Text size="1" className="text-slate-500 uppercase tracking-wider text-[0.65rem] mb-2 block">
-            Wali Kelas
+    <div className="space-y-4">
+      {/* Informasi Wali Kelas */}
+      <div className="bg-gradient-to-b from-slate-50 to-white border border-slate-200 p-4">
+        <Text size="1" className="text-slate-500 uppercase tracking-wider text-[0.65rem] mb-2 block">
+          Wali Kelas
+        </Text>
+        <Text size="4" weight="bold" className="text-slate-900 leading-tight">
+          {waliKelasName}
+        </Text>
+        {riwayat.wali_kelas?.nip && (
+          <Text size="2" className="text-slate-500 block mt-1">
+            NIP: {riwayat.wali_kelas.nip}
           </Text>
-          <Text size="4" weight="bold" className="text-slate-900 leading-tight">
-            {waliKelasName}
-          </Text>
-          {riwayat.wali_kelas?.nip && (
-            <Text size="2" className="text-slate-500 block mt-1">
-              NIP: {riwayat.wali_kelas.nip}
-            </Text>
-          )}
-          <Text size="2" className="text-slate-600 block mt-2">
-            {tahunAjaranName} • Kelas {kelasName}
-          </Text>
-        </div>
-
-        {/* Periode Penugasan */}
-        <Section title="Periode Penugasan" icon={Calendar}>
-          <Text size="2" className="text-slate-800">
-            {formatDate(riwayat.tanggal_mulai)} - {riwayat.tanggal_selesai ? formatDate(riwayat.tanggal_selesai) : 'sekarang'}
-          </Text>
-          <Text size="1" className="text-slate-500 block mt-1">
-            Durasi {calculateDuration(riwayat.tanggal_mulai, riwayat.tanggal_selesai)}
-          </Text>
-        </Section>
-
-        {/* Catatan */}
-        {riwayat.catatan && (
-          <Section title="Catatan" icon={FileText} className="border-b-0 pb-0 mb-0">
-            <Text size="2" className="text-slate-700 leading-relaxed whitespace-pre-wrap">
-              {riwayat.catatan}
-            </Text>
-          </Section>
         )}
+        <Text size="2" className="text-slate-600 block mt-2">
+          {tahunAjaranName} • Kelas {kelasName}
+        </Text>
       </div>
 
-      {/* Right Column */}
-      <div>
+      {/* Periode Penugasan */}
+      <Section title="Periode Penugasan" icon={Calendar}>
+        <Text size="2" className="text-slate-800">
+          {formatDate(riwayat.tanggal_mulai)} - {riwayat.tanggal_selesai ? formatDate(riwayat.tanggal_selesai) : 'sekarang'}
+        </Text>
+        <Text size="1" className="text-slate-500 block mt-1">
+          Durasi {calculateDuration(riwayat.tanggal_mulai, riwayat.tanggal_selesai)}
+        </Text>
+      </Section>
+
+      {/* Catatan */}
+      {riwayat.catatan && (
+        <Section title="Catatan" icon={FileText}>
+          <Text size="2" className="text-slate-700 leading-relaxed whitespace-pre-wrap">
+            {riwayat.catatan}
+          </Text>
+        </Section>
+      )}
+
+      {/* Daftar Siswa */}
+      <Section title="Daftar Siswa" icon={Users}>
+        <div>
         {studentsLoading ? (
           <Text size="2" className="text-slate-500">
             Memuat daftar siswa...
@@ -201,7 +199,8 @@ export function RiwayatWaliKelasDetailInfo({ riwayat }) {
             ))}
           </div>
         )}
-      </div>
+        </div>
+      </Section>
     </div>
   )
 }

@@ -112,24 +112,6 @@ export function RiwayatKelasSiswaTable({
     return filtered
   }, [data, searchQuery, filterStatus, filterTahunAjaran, filterTingkatKelas])
 
-  const stats = useMemo(() => {
-    const total = data.length
-    const aktif = data.filter((item) => item.status === 'aktif').length
-    const filtered = filteredData.length
-    const lastUpdate = data
-      .map((item) => item.diperbarui_pada || item.dibuat_pada)
-      .filter(Boolean)
-      .sort((a, b) => new Date(b) - new Date(a))
-      .at(0)
-
-    return {
-      total,
-      aktif,
-      filtered,
-      lastUpdate: lastUpdate ? formatDateTime(lastUpdate) : 'Belum ada aktivitas',
-    }
-  }, [data, filteredData])
-
   const isEmpty = !isLoading && filteredData.length === 0
   const hasActiveFilters = searchQuery.trim() || filterStatus !== 'all' || filterTahunAjaran !== 'all' || filterTingkatKelas !== 'all'
 
@@ -256,27 +238,8 @@ export function RiwayatKelasSiswaTable({
               </Button>
             )}
 
-            {/* Stats - Excel-style status bar */}
-            <div className="ml-auto flex items-center gap-1.5 text-xs font-medium">
-              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-300 shadow-sm">
-                <span className="text-slate-600">Total:</span>
-                <span className="font-bold text-slate-900">{stats.total}</span>
-              </div>
-              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 border border-emerald-300 shadow-sm">
-                <span className="inline-flex h-2 w-2 rounded-full bg-emerald-600" />
-                <span className="text-emerald-700">Aktif:</span>
-                <span className="font-bold text-emerald-900">{stats.aktif}</span>
-              </div>
-              {hasActiveFilters && (
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 border border-blue-300 shadow-sm">
-                  <span className="text-blue-700">Tampil:</span>
-                  <span className="font-bold text-blue-900">{stats.filtered}</span>
-                </div>
-              )}
-            </div>
-
             {/* Button Tambah Baru - Excel-style button */}
-            <div>
+            <div className="ml-auto">
               <Button
                 onClick={onAdd}
                 className="cursor-pointer text-white font-medium shadow-sm hover:shadow transition-all"

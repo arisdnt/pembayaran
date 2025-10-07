@@ -1,7 +1,7 @@
 import { Dialog, Text, Badge } from '@radix-ui/themes'
-import { BookOpen, X, Hash, TrendingDown, TrendingUp, FileText, Power } from 'lucide-react'
+import { BookOpen, X, Hash, TrendingDown, TrendingUp, FileText, Power, Users } from 'lucide-react'
 
-export function PeminatanDetailModal({ open, onOpenChange, peminatan }) {
+export function PeminatanDetailModal({ open, onOpenChange, peminatan, selectedYearLabel = 'Semua Tahun Ajaran' }) {
   if (!peminatan) return null
 
   const Section = ({ title, icon: Icon, children, className = '' }) => (
@@ -113,6 +113,17 @@ export function PeminatanDetailModal({ open, onOpenChange, peminatan }) {
                     </Text>
                   )}
                 </div>
+              </div>
+            </Section>
+
+            <Section title="Total Siswa" icon={Users}>
+              <div>
+                <Text size="1" className="text-slate-500 uppercase text-[0.65rem] mb-1 block">
+                  {selectedYearLabel}
+                </Text>
+                <Text size="4" weight="bold" className="text-slate-900">
+                  {peminatan.total_siswa || 0} siswa
+                </Text>
               </div>
             </Section>
 

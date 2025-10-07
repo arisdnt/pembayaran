@@ -14,6 +14,10 @@ export function PeminatanTable({
   selectedItem,
   onSelectItem,
   onViewDetail,
+  tahunAjaranOptions = [],
+  selectedYearId = 'all',
+  selectedYearLabel = 'Semua Tahun Ajaran',
+  onSelectYear,
 }) {
   const {
     searchQuery,
@@ -24,12 +28,12 @@ export function PeminatanTable({
     setFilterTingkat,
     tingkatList,
     filteredData,
-    stats,
     hasActiveFilters,
     handleClearFilters,
   } = usePeminatanFilters(data)
 
   const isEmpty = !isLoading && filteredData.length === 0
+  const selectedYearValue = selectedYearId ?? 'all'
 
   return (
     <div className="h-full flex flex-col">
@@ -102,6 +106,49 @@ export function PeminatanTable({
               </Select.Root>
             </div>
 
+            {/* Filter Tahun Ajaran */}
+            <div className="flex items-center gap-2">
+              <Select.Root
+                value={selectedYearValue === null ? 'all' : selectedYearValue}
+                onValueChange={(value) => onSelectYear?.(value)}
+                disabled={tahunAjaranOptions.length === 0}
+              >
+                <Select.Trigger
+                  placeholder="Tahun ajaran"
+                  style={{
+                    borderRadius: 0,
+                    minWidth: '180px',
+                    border: '1px solid #cbd5e1',
+                    backgroundColor: '#ffffff'
+                  }}
+                  className="cursor-pointer font-sans"
+                />
+                <Select.Content
+                  position="popper"
+                  side="bottom"
+                  align="start"
+                  sideOffset={4}
+                  style={{ borderRadius: 0 }}
+                  className="border-2 border-slate-300 shadow-lg bg-white z-50"
+                >
+                  <Select.Item value="all" style={{ borderRadius: 0 }} className="hover:bg-blue-50 cursor-pointer px-3 py-2">
+                    Semua Tahun Ajaran
+                  </Select.Item>
+                  {tahunAjaranOptions.map((option) => (
+                    <Select.Item
+                      key={option.id}
+                      value={option.id}
+                      style={{ borderRadius: 0 }}
+                      className="hover:bg-blue-50 cursor-pointer px-3 py-2"
+                    >
+                      {option.nama}
+                      {option.status_aktif ? ' • Aktif' : ''}
+                    </Select.Item>
+                  ))}
+                </Select.Content>
+              </Select.Root>
+            </div>
+
             {/* Filter Tingkat */}
             <div className="flex items-center gap-2">
               <Select.Root value={filterTingkat} onValueChange={setFilterTingkat}>
@@ -154,36 +201,8 @@ export function PeminatanTable({
               </Button>
             )}
 
-            {/* Stats */}
-            <div className="ml-auto flex items-center gap-1.5 text-xs font-medium">
-              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-300 shadow-sm">
-                <span className="text-slate-600">Total:</span>
-                <span className="font-bold text-slate-900">{stats.total}</span>
-              </div>
-              {stats.aktif > 0 && (
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 border border-green-300 shadow-sm">
-                  <span className="inline-flex h-2 w-2 rounded-full bg-green-600" />
-                  <span className="text-green-700">Aktif:</span>
-                  <span className="font-bold text-green-900">{stats.aktif}</span>
-                </div>
-              )}
-              {stats.nonaktif > 0 && (
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 border border-red-300 shadow-sm">
-                  <span className="inline-flex h-2 w-2 rounded-full bg-red-600" />
-                  <span className="text-red-700">Non-Aktif:</span>
-                  <span className="font-bold text-red-900">{stats.nonaktif}</span>
-                </div>
-              )}
-              {hasActiveFilters && (
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 border border-emerald-300 shadow-sm">
-                  <span className="text-emerald-700">Tampil:</span>
-                  <span className="font-bold text-emerald-900">{filteredData.length}</span>
-                </div>
-              )}
-            </div>
-
             {/* Button Tambah Baru */}
-            <div>
+            <div className="ml-auto">
               <Button
                 onClick={onAdd}
                 className="cursor-pointer text-white font-medium shadow-sm hover:shadow transition-all"
@@ -206,13 +225,14 @@ export function PeminatanTable({
           <div className="h-full overflow-auto excel-scrollbar">
             <table className="w-full table-fixed text-sm border-collapse">
               <colgroup>
+                <col style={{ width: '9%' }} />
+                <col style={{ width: '21%' }} />
+                <col style={{ width: '21%' }} />
                 <col style={{ width: '10%' }} />
-                <col style={{ width: '22%' }} />
-                <col style={{ width: '22%' }} />
-                <col style={{ width: '11.5%' }} />
-                <col style={{ width: '11.5%' }} />
-                <col style={{ width: '11.5%' }} />
-                <col style={{ width: '11.5%' }} />
+                <col style={{ width: '10%' }} />
+                <col style={{ width: '10%' }} />
+                <col style={{ width: '9%' }} />
+                <col style={{ width: '10%' }} />
               </colgroup>
               <thead>
                 <tr className="bg-gradient-to-b from-slate-100 to-slate-50 sticky top-0 z-10 border-b border-slate-300 shadow-sm">
@@ -232,6 +252,9 @@ export function PeminatanTable({
                     Tingkat Max
                   </th>
                   <th className="px-4 py-3 text-center text-[0.7rem] font-bold uppercase tracking-wider text-slate-700 border-r border-slate-300">
+                    Total Siswa
+                  </th>
+                  <th className="px-4 py-3 text-center text-[0.7rem] font-bold uppercase tracking-wider text-slate-700 border-r border-slate-300">
                     Status
                   </th>
                   <th className="px-4 py-3 text-center text-[0.7rem] font-bold uppercase tracking-wider text-slate-700 border-slate-300">
@@ -242,13 +265,13 @@ export function PeminatanTable({
               <tbody>
                 {isLoading ? (
                   <tr>
-                    <td colSpan="7" className="px-4 py-12 text-center text-slate-500">
+                    <td colSpan="8" className="px-4 py-12 text-center text-slate-500">
                       Memuat data...
                     </td>
                   </tr>
                 ) : isEmpty ? (
                   <tr>
-                    <td colSpan="7" className="px-4 py-12 text-center">
+                    <td colSpan="8" className="px-4 py-12 text-center">
                       <div className="flex flex-col items-center gap-3">
                         <BookOpen className="h-12 w-12 text-slate-300" />
                         <div>

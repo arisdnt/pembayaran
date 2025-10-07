@@ -1,9 +1,9 @@
 import { Text } from '@radix-ui/themes'
 import { Users } from 'lucide-react'
 
-export function DetailPanelCapacity({ selectedItem }) {
+export function DetailPanelCapacity({ selectedItem, selectedYearLabel = '—' }) {
   const capacityMax = Number(selectedItem.kapasitas_maksimal || 0)
-  const occupied = 0
+  const occupied = Number(selectedItem.total_siswa || 0)
   const available = Math.max(capacityMax - occupied, 0)
   const occupancyPct = capacityMax > 0 ? Math.round((occupied / capacityMax) * 100) : 0
 
@@ -33,6 +33,9 @@ export function DetailPanelCapacity({ selectedItem }) {
             </Text>
             <Text size="5" weight="bold" className="text-blue-900 mt-1 block">
               {occupied}
+            </Text>
+            <Text size="1" className="text-blue-500 uppercase tracking-wider text-[0.6rem]">
+              {selectedYearLabel}
             </Text>
           </div>
           <div className="bg-green-50 border border-green-300 p-2">

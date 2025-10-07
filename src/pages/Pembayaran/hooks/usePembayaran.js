@@ -51,26 +51,14 @@ export function usePembayaran() {
     const kelasMap = new Map((kelas || []).map(k => [k.id, k]))
     const tahunAjaranMap = new Map((tahunAjaran || []).map(ta => [ta.id, ta]))
     
-    // Get latest riwayat for each siswa based on tanggal_masuk
-    const latestRksBySiswa = new Map()
-    ;(rks || []).forEach(r => {
-      const existing = latestRksBySiswa.get(r.id_siswa)
-      if (!existing || new Date(r.tanggal_masuk) > new Date(existing.tanggal_masuk)) {
-        latestRksBySiswa.set(r.id_siswa, r)
-      }
-    })
-    
     return (pembayaran || []).map(p => {
       const rp = rincianByPembayaran.get(p.id) || []
       const total_dibayar = rp.reduce((sum, it) => sum + Number(it.jumlah_dibayar || 0), 0)
       const t = tagihanMap.get(p.id_tagihan) || null
       const r = t ? rksMap.get(t.id_riwayat_kelas_siswa) || null : null
       const s = r ? siswaMap.get(r.id_siswa) || null : null
-      
-      // Get latest riwayat for this siswa
-      const latestRks = s ? latestRksBySiswa.get(s.id) : null
-      const latestKelas = latestRks ? kelasMap.get(latestRks.id_kelas) : null
-      const latestTahunAjaran = latestRks ? tahunAjaranMap.get(latestRks.id_tahun_ajaran) : null
+      const kelasTagihan = r ? kelasMap.get(r.id_kelas) || null : null
+      const tahunAjaranTagihan = r ? tahunAjaranMap.get(r.id_tahun_ajaran) || null : null
       
       return {
         ...p,
@@ -81,17 +69,29 @@ export function usePembayaran() {
           nomor_tagihan: t.nomor_tagihan,
           judul: t.judul,
           riwayat_kelas_siswa: r && {
+            id: r.id,
+            id_kelas: r.id_kelas,
+            id_tahun_ajaran: r.id_tahun_ajaran,
             siswa: s && { id: s.id, nama_lengkap: s.nama_lengkap, nisn: s.nisn },
+            kelas: kelasTagihan && {
+              id: kelasTagihan.id,
+              tingkat: kelasTagihan.tingkat,
+              nama_sub_kelas: kelasTagihan.nama_sub_kelas,
+            },
+            tahun_ajaran: tahunAjaranTagihan && {
+              id: tahunAjaranTagihan.id,
+              nama: tahunAjaranTagihan.nama,
+            },
           },
         },
-        latest_kelas: latestKelas && {
-          id: latestKelas.id,
-          tingkat: latestKelas.tingkat,
-          nama_sub_kelas: latestKelas.nama_sub_kelas,
+        kelas_tagihan: kelasTagihan && {
+          id: kelasTagihan.id,
+          tingkat: kelasTagihan.tingkat,
+          nama_sub_kelas: kelasTagihan.nama_sub_kelas,
         },
-        latest_tahun_ajaran: latestTahunAjaran && {
-          id: latestTahunAjaran.id,
-          nama: latestTahunAjaran.nama,
+        tahun_ajaran_tagihan: tahunAjaranTagihan && {
+          id: tahunAjaranTagihan.id,
+          nama: tahunAjaranTagihan.nama,
         },
       }
     })

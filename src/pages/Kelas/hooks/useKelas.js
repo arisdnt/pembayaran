@@ -9,17 +9,68 @@ export function useKelas() {
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [error, setError] = useState('')
   const isMountedRef = useRef(true)
+  const [selectedYearId, setSelectedYearId] = useState(null)
 
   const rows = useLiveQuery(async () => db.kelas.toArray(), [], undefined)
+  const years = useLiveQuery(
+    async () => db.tahun_ajaran.orderBy('tanggal_mulai').reverse().toArray(),
+    [],
+    undefined
+  )
+  const riwayatKelas = useLiveQuery(async () => db.riwayat_kelas_siswa.toArray(), [], undefined)
+
+  useEffect(() => {
+    if (!years || years.length === 0) {
+      return
+    }
+    if (selectedYearId && years.some((item) => item.id === selectedYearId)) {
+      return
+    }
+
+    const aktif = years.find((item) => item.status_aktif)
+    setSelectedYearId((aktif || years[0]).id)
+  }, [years, selectedYearId])
+
+  const tahunAjaranOptions = useMemo(() => {
+    if (!years) return []
+    return years.map((item) => ({
+      id: item.id,
+      nama: item.nama,
+      status_aktif: item.status_aktif,
+    }))
+  }, [years])
+
+  const enrollmentMap = useMemo(() => {
+    if (!riwayatKelas || !selectedYearId) {
+      return new Map()
+    }
+    return riwayatKelas
+      .filter(
+        (row) =>
+          row.id_tahun_ajaran === selectedYearId &&
+          (row.status || '').toLowerCase() === 'aktif'
+      )
+      .reduce((map, row) => {
+        const current = map.get(row.id_kelas) || 0
+        map.set(row.id_kelas, current + 1)
+        return map
+      }, new Map())
+  }, [riwayatKelas, selectedYearId])
 
   const data = useMemo(() => {
     const list = rows || []
-    return [...list].sort((a, b) => {
+    return [...list].map((item) => {
+      const hasTotal = enrollmentMap.has(item.id)
+      return {
+        ...item,
+        total_siswa: hasTotal ? enrollmentMap.get(item.id) : null,
+      }
+    }).sort((a, b) => {
       const t = String(a.tingkat || '').localeCompare(String(b.tingkat || ''), undefined, { numeric: true })
       if (t !== 0) return t
       return String(a.nama_sub_kelas || '').localeCompare(String(b.nama_sub_kelas || ''))
     })
-  }, [rows])
+  }, [rows, enrollmentMap])
 
   const loading = rows === undefined
 
@@ -74,6 +125,8 @@ export function useKelas() {
     deleteItem,
     saveItem,
     refreshData,
+    tahunAjaranOptions,
+    selectedYearId,
+    setSelectedYearId,
   }
 }
-

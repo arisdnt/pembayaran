@@ -3,7 +3,7 @@ import { Text, Badge } from '@radix-ui/themes'
 import { X, GraduationCap, Clock, Hash, Users } from 'lucide-react'
 import { formatDateTime } from '../../helpers/formatters'
 
-export function KelasDetailModal({ open, onOpenChange, kelas }) {
+export function KelasDetailModal({ open, onOpenChange, kelas, selectedYearLabel = '—' }) {
   if (!kelas) return null
 
   // Icon color mapping
@@ -36,7 +36,7 @@ export function KelasDetailModal({ open, onOpenChange, kelas }) {
   }
 
   const capacityMax = Number(kelas.kapasitas_maksimal || 0)
-  const occupied = 0 // TODO: Get actual occupied count
+  const occupied = Number(kelas.total_siswa || 0)
   const available = Math.max(capacityMax - occupied, 0)
   const occupancyPct = capacityMax > 0 ? Math.round((occupied / capacityMax) * 100) : 0
 
@@ -122,7 +122,7 @@ export function KelasDetailModal({ open, onOpenChange, kelas }) {
           </div>
 
           {/* Kapasitas Section - Full Width */}
-          {capacityMax > 0 && (
+          {(capacityMax > 0 || occupied > 0) && (
             <div className="mb-6">
               <div className="border-2 border-slate-300 bg-slate-50 p-4">
                 <div className="flex items-center gap-2 mb-3">
@@ -147,6 +147,9 @@ export function KelasDetailModal({ open, onOpenChange, kelas }) {
                     </Text>
                     <Text size="6" weight="bold" className="text-blue-900">
                       {occupied}
+                    </Text>
+                    <Text size="1" className="text-blue-500 uppercase tracking-wider text-[0.6rem]">
+                      {selectedYearLabel}
                     </Text>
                   </div>
                   <div className="bg-green-50 border border-green-300 p-3 text-center">

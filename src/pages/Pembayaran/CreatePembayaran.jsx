@@ -58,14 +58,11 @@ export function CreatePembayaran() {
     <PageLayout>
       <div className="flex flex-col h-full">
         {/* Header */}
-        <div className="shrink-0 bg-white px-6 py-3">
+        <div className="shrink-0 bg-white px-6 py-2">
           <div className="flex items-center justify-between">
             <div>
-              <Text size="4" weight="bold" className="text-slate-900 block mb-1">
+              <Text size="3" weight="bold" className="text-slate-900 block">
                 Buat Pembayaran Baru
-              </Text>
-              <Text size="1" className="text-slate-500">
-                Pilih siswa, pilih tagihan, dan lakukan pembayaran
               </Text>
             </div>
             <div className="flex items-center gap-2">

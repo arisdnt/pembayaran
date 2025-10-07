@@ -1,4 +1,6 @@
-import { CheckCircle2, Clock, XCircle, Trash2 } from 'lucide-react'
+import { CheckCircle2, Clock, XCircle } from 'lucide-react'
+import { IconButton } from '@radix-ui/themes'
+import { TrashIcon } from '@radix-ui/react-icons'
 
 export default function MessageTable({ data, loading, onDelete }) {
   const sortedData = [...data].sort((a, b) => {
@@ -113,13 +115,18 @@ export default function MessageTable({ data, loading, onDelete }) {
                 )}
               </td>
               <td className="px-2 py-2 text-center">
-                <button
-                  onClick={() => onDelete(originalIndex >= 0 ? originalIndex : idx)}
-                  className="text-red-600 hover:text-red-800 p-1 transition-colors"
-                  title="Hapus"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
+                <div className="flex justify-center">
+                  <IconButton
+                    size="1"
+                    variant="soft"
+                    onClick={() => onDelete(originalIndex >= 0 ? originalIndex : idx)}
+                    className="cursor-pointer hover:bg-red-100 text-red-700 border border-red-200"
+                    style={{ borderRadius: 0 }}
+                    aria-label="Hapus pesan"
+                  >
+                    <TrashIcon />
+                  </IconButton>
+                </div>
               </td>
               </tr>
             )

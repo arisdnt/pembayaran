@@ -1,7 +1,7 @@
 import { Text } from '@radix-ui/themes'
-import { ArrowLeft, User } from 'lucide-react'
+import { ArrowLeft, User, MessageCircle } from 'lucide-react'
 
-export function DetailHeader({ statusAktif, onBack }) {
+export function DetailHeader({ statusAktif, onBack, onSendMessage, hasWhatsApp }) {
   return (
     <div className="shrink-0 bg-white px-2 py-2">
       <div className="flex items-center justify-between">
@@ -20,6 +20,32 @@ export function DetailHeader({ statusAktif, onBack }) {
             <ArrowLeft className="h-4 w-4 text-slate-600" />
             <Text size="2" weight="medium" className="text-slate-700">
               Kembali
+            </Text>
+          </button>
+          <button
+            onClick={onSendMessage}
+            disabled={!hasWhatsApp}
+            className="flex items-center gap-2 px-4 py-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{
+              backgroundColor: hasWhatsApp ? '#075e54' : '#cbd5e1',
+              color: '#ffffff',
+            }}
+            onMouseEnter={(e) => {
+              if (hasWhatsApp) {
+                e.currentTarget.style.backgroundColor = '#064238'
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (hasWhatsApp) {
+                e.currentTarget.style.backgroundColor = '#075e54'
+              }
+            }}
+            type="button"
+            title={!hasWhatsApp ? 'Nomor WhatsApp wali tidak tersedia' : 'Kirim pesan WhatsApp ke wali siswa'}
+          >
+            <MessageCircle className="h-4 w-4" />
+            <Text size="2" weight="medium" className="text-white">
+              Kirim Pesan
             </Text>
           </button>
           {statusAktif ? (

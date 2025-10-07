@@ -1,7 +1,7 @@
 import { Text, Badge } from '@radix-ui/themes'
-import { BookOpen, Hash, FileText, TrendingUp, TrendingDown, Power, PowerOff, Calendar } from 'lucide-react'
+import { BookOpen, Hash, FileText, TrendingUp, TrendingDown, Power, PowerOff, Users } from 'lucide-react'
 
-export function DetailPanel({ selectedItem, isLoading = false, isRefreshing = false }) {
+export function DetailPanel({ selectedItem, isLoading = false, isRefreshing = false, selectedYearLabel = 'Semua Tahun Ajaran' }) {
   if (isLoading) {
     return (
       <div className="h-full flex flex-col border-2 border-slate-300 bg-white shadow-lg">
@@ -106,6 +106,19 @@ export function DetailPanel({ selectedItem, isLoading = false, isRefreshing = fa
               </Text>
             </div>
           )}
+
+          {/* Total Siswa */}
+          <div className="p-3 bg-white border border-slate-300">
+            <div className="flex items-center gap-2 mb-1">
+              <Users className="h-4 w-4 text-emerald-500" />
+              <Text size="1" weight="medium" className="text-slate-600 uppercase tracking-wider">
+                Total Siswa ({selectedYearLabel})
+              </Text>
+            </div>
+            <Text size="3" weight="bold" className="text-slate-900">
+              {selectedItem.total_siswa || 0} siswa
+            </Text>
+          </div>
 
           {/* Tingkat */}
           <div className="p-3 bg-white border border-slate-300">

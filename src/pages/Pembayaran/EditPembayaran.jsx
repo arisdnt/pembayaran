@@ -358,38 +358,26 @@ function EditPembayaranContent() {
 
         {/* Content */}
         <div className="flex-1 overflow-hidden px-6 pb-6 pt-4">
-          <div className="flex gap-4 h-full">
-            {/* Main Content (75%) */}
-            <div className="w-3/4 flex flex-col gap-4 overflow-auto">
+          <div className="grid grid-cols-[3fr_1fr] gap-4 h-full" style={{ gridTemplateRows: 'auto 1fr' }}>
+            {/* Row 1, Col 1: Informasi Pembayaran */}
+            <div className="overflow-hidden">
               <InformasiPembayaranSection
                 formData={formData}
                 onChange={handleInfoChange}
                 errors={validationErrors}
                 disabled={submitting}
               />
-
-              <RincianPembayaranFormSection
-                rincianItems={rincianItems}
-                totalPembayaran={totalPembayaran}
-                onAdd={handleAddRincian}
-                onRemove={handleRemoveRincian}
-                onChange={handleRincianChange}
-                summary={summary}
-                errors={validationErrors}
-                disableAdd={submitting}
-                getNextCicilanKe={getNextCicilanKe}
-              />
             </div>
 
-            {/* Sidebar (25%) */}
-            <div className="w-1/4 flex flex-col gap-4 overflow-auto">
-              <div className="border-2 border-slate-300 bg-white shadow-lg shrink-0">
-                <div className="border-b-2 border-slate-300 bg-gradient-to-b from-slate-100 to-slate-50 px-4 py-3">
+            {/* Row 1, Col 2: Identitas Siswa */}
+            <div className="overflow-hidden">
+              <div className="border-2 border-slate-300 bg-white shadow-lg h-full flex flex-col">
+                <div className="border-b-2 border-slate-300 bg-gradient-to-b from-slate-100 to-slate-50 px-4 py-3 shrink-0">
                   <Text size="2" weight="bold" className="text-slate-700 uppercase tracking-wider">
                     Identitas Siswa
                   </Text>
                 </div>
-                <div className="p-4 space-y-3">
+                <div className="p-4 space-y-3 flex-1 overflow-y-auto">
                   <div className="space-y-2 text-sm text-slate-700">
                     <div>
                       <Text weight="medium" className="text-slate-500 block text-xs uppercase tracking-wide">Nama</Text>
@@ -410,14 +398,32 @@ function EditPembayaranContent() {
                   </div>
                 </div>
               </div>
+            </div>
 
-              <div className="border-2 border-slate-300 bg-white shadow-lg shrink-0">
-                <div className="border-b-2 border-slate-300 bg-gradient-to-b from-slate-100 to-slate-50 px-4 py-3">
+            {/* Row 2, Col 1: Rincian Pembayaran */}
+            <div className="overflow-hidden">
+              <RincianPembayaranFormSection
+                rincianItems={rincianItems}
+                totalPembayaran={totalPembayaran}
+                onAdd={handleAddRincian}
+                onRemove={handleRemoveRincian}
+                onChange={handleRincianChange}
+                summary={summary}
+                errors={validationErrors}
+                disableAdd={submitting}
+                getNextCicilanKe={getNextCicilanKe}
+              />
+            </div>
+
+            {/* Row 2, Col 2: Ringkasan Tagihan */}
+            <div className="overflow-hidden">
+              <div className="border-2 border-slate-300 bg-white shadow-lg h-full flex flex-col">
+                <div className="border-b-2 border-slate-300 bg-gradient-to-b from-slate-100 to-slate-50 px-4 py-3 shrink-0">
                   <Text size="2" weight="bold" className="text-slate-700 uppercase tracking-wider">
                     Ringkasan Tagihan
                   </Text>
                 </div>
-                <div className="p-4 space-y-3">
+                <div className="p-4 space-y-3 flex-1 overflow-y-auto">
                   <div className="space-y-2 text-sm text-slate-700">
                     <div>
                       <Text weight="medium" className="text-slate-500 block text-xs uppercase tracking-wide">Nomor Tagihan</Text>

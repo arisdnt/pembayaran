@@ -51,7 +51,7 @@ export function RincianPembayaranFormSection({
 
   return (
     <>
-      <div className="border-2 border-slate-300 bg-white shadow-lg flex-1 flex flex-col overflow-hidden">
+      <div className="border-2 border-slate-300 bg-white shadow-lg h-full flex flex-col overflow-hidden">
         <div className="border-b-2 border-slate-300 bg-gradient-to-b from-slate-100 to-slate-50 px-4 py-3 shrink-0">
           <div className="flex items-center justify-between gap-3">
             <Text size="2" weight="bold" className="text-slate-700 uppercase tracking-wider">
@@ -69,7 +69,7 @@ export function RincianPembayaranFormSection({
             </Button>
           </div>
         </div>
-        <div className="p-4 space-y-4 flex-1 overflow-auto">
+        <div className="p-4 space-y-4 flex-1 overflow-y-auto">
           <RincianTransaksiTable
             items={rincianItems}
             onEdit={handleEditClick}

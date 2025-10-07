@@ -1,4 +1,4 @@
-import { Edit2, Trash2, Power, PowerOff, Eye } from 'lucide-react'
+import { Eye } from 'lucide-react'
 import { Badge, IconButton, Switch } from '@radix-ui/themes'
 import { Pencil1Icon, TrashIcon } from '@radix-ui/react-icons'
 
@@ -50,6 +50,19 @@ export function PeminatanTableRow({
           </Badge>
         ) : (
           <span className="text-slate-400">-</span>
+        )}
+      </td>
+      <td className="px-4 py-3 text-center text-slate-700 border-r border-slate-200 min-w-0">
+        {item.total_siswa > 0 ? (
+          <Badge
+            color="green"
+            variant="soft"
+            style={{ borderRadius: 0 }}
+          >
+            {item.total_siswa} siswa
+          </Badge>
+        ) : (
+          <span className="text-slate-400">—</span>
         )}
       </td>
       <td className="px-4 py-3 text-center border-r border-slate-200 min-w-0">
