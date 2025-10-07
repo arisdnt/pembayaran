@@ -117,12 +117,12 @@ function KelasFormDialog({
 
         {/* Content */}
         <form onSubmit={handleSubmit} className="overflow-auto bg-white" style={{ maxHeight: 'calc(90vh - 140px)' }}>
-          <div className="p-6">
+          <div className="p-6 space-y-5">
             {/* Row 1: Tingkat & Nama Kelas - 2 Columns */}
-            <div className="grid grid-cols-2 gap-4 mb-4">
+            <div className="grid grid-cols-2 gap-4">
               <label>
-                <div className="flex items-center gap-1.5 mb-1">
-                  <Hash className="h-3.5 w-3.5 text-blue-500" />
+                <div className="flex items-center gap-1.5 mb-2">
+                  <Hash className="h-4 w-4 text-blue-500" />
                   <Text as="div" size="2" weight="medium">
                     Tingkat <span className="text-red-600">*</span>
                   </Text>
@@ -137,14 +137,14 @@ function KelasFormDialog({
                   max="99"
                   required
                 />
-                <Text size="1" className="text-slate-500 mt-1">
+                <Text size="1" className="text-slate-500 mt-1.5">
                   Tingkat kelas (angka 1-99)
                 </Text>
               </label>
 
               <label>
-                <div className="flex items-center gap-1.5 mb-1">
-                  <GraduationCap className="h-3.5 w-3.5 text-indigo-500" />
+                <div className="flex items-center gap-1.5 mb-2">
+                  <GraduationCap className="h-4 w-4 text-indigo-500" />
                   <Text as="div" size="2" weight="medium">
                     Nama Kelas <span className="text-red-600">*</span>
                   </Text>
@@ -156,17 +156,17 @@ function KelasFormDialog({
                   style={{ borderRadius: 0 }}
                   required
                 />
-                <Text size="1" className="text-slate-500 mt-1">
+                <Text size="1" className="text-slate-500 mt-1.5">
                   Nama sub-kelas atau jurusan
                 </Text>
               </label>
             </div>
 
             {/* Row 2: Kapasitas - Full Width */}
-            <div className="mb-4">
+            <div>
               <label>
-                <div className="flex items-center gap-1.5 mb-1">
-                  <Users className="h-3.5 w-3.5 text-green-500" />
+                <div className="flex items-center gap-1.5 mb-2">
+                  <Users className="h-4 w-4 text-green-500" />
                   <Text as="div" size="2" weight="medium">
                     Kapasitas Maksimal
                   </Text>
@@ -179,7 +179,7 @@ function KelasFormDialog({
                   style={{ borderRadius: 0 }}
                   min="1"
                 />
-                <Text size="1" className="text-slate-500 mt-1">
+                <Text size="1" className="text-slate-500 mt-1.5">
                   Jumlah maksimal siswa (opsional)
                 </Text>
               </label>
@@ -187,7 +187,7 @@ function KelasFormDialog({
 
             {/* Error Message */}
             {error && (
-              <div className="flex items-center gap-2 p-3 bg-red-50 border-2 border-red-200 mb-4">
+              <div className="flex items-center gap-2 p-3 bg-red-50 border-2 border-red-200">
                 <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0" />
                 <Text size="2" className="text-red-800 font-medium">
                   {error}

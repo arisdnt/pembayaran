@@ -1,30 +1,82 @@
-﻿# Repository Guidelines
+# AI Agent Handbook
 
-## Project Structure & Module Organization
-- `src/` contains the React SPA: place shared UI in `components/`, routed screens in `pages/`, global state in `contexts/`, Supabase/Dexie hooks in `hooks/`, and offline sync helpers in `offline/`.
-- `src-tauri/` hosts the Tauri shell; keep Rust commands under `src/`, packaging in `tauri.conf.json`, and avoid editing generated files under `src-tauri/gen/`.
-- Static assets, including the base HTML, live in `public/`; docs, deployment notes, and troubleshooting guides belong in `docs/` or top-level markdown files.
+This document summarizes the conventions, workflows, and project layout that Codex (or any automation agent) should follow when working in this repository.
 
-## Build, Test, and Development Commands
-- `npm install` installs all frontend and Tauri dependencies.
-- `npm run dev` launches the desktop shell with hot reload; use `npm run dev:vite` for browser-only work or `npm run dev:tauri` to focus on native APIs.
-- `npm run build` creates the production bundle; `npm run build:web` limits output to web targets, while `npm run build:windows` and `npm run build:portable` prepare distributable artifacts.
-- `npm run lint` runs the shared ESLint configuration; resolve warnings before committing.
+## Repository Overview
+| Area | Summary |
+| --- | --- |
+| Core stack | React SPA (Vite) + Tailwind + Supabase + Dexie for offline sync |
+| Desktop shell | Tauri (Rust) in `src-tauri/` |
+| Assets & docs | Static assets in `public/`, documentation in `docs/` or top-level `.md` files |
 
-## Coding Style & Naming Conventions
-- Follow the rules in `eslint.config.js`; prefer functional React components in PascalCase (e.g., `DashboardHeader.jsx`) and prefix custom hooks with `use`.
-- Leverage Tailwind utilities defined in `index.css` and tune themes via `tailwind.config.js` and `postcss.config.js` when needed.
-- Place Supabase helpers in `src/lib/` and environment-specific settings in `src/config/` for consistency.
+## Project Structure Guardrails
+- `src/`: React application source code.
+  - `components/`: shared UI components.
+  - `pages/`: routed screens.
+  - `contexts/`: React context/state.
+  - `hooks/`: Supabase and Dexie hooks.
+  - `offline/`: helpers for offline sync flows.
+  - `lib/`: Supabase helpers and utilities.
+  - `config/`: environment-specific settings.
+  - `layout/`: global layout elements (e.g., navigation).
+- `src-tauri/`: Tauri shell.
+  - `src/`: Rust commands.
+  - `tauri.conf.json`: packaging/build config.
+  - Never edit generated code under `src-tauri/gen/`.
+- `public/`: base HTML and static assets.
+- `docs/`: detailed guides, deployment notes, schema updates.
 
-## Testing Guidelines
-- No automated suite exists yet; validate flows manually via `npm run dev` against a Supabase project, covering auth, realtime dashboards, and Dexie offline sync.
-- When adding tests, use React Testing Library with Dexie mocks, colocate specs as `Component.test.jsx`, and stub Supabase calls to avoid network access.
+## Coding & Style Guidelines
+- Follow ESLint rules defined in `eslint.config.js`.
+- Prefer functional React components with PascalCase filenames (e.g., `DashboardHeader.jsx`).
+- Prefix custom hooks with `use`.
+- Use Tailwind utilities (see `index.css`, `tailwind.config.js`, `postcss.config.js` for theme tokens).
+- Keep new files ASCII unless non-ASCII is already established.
+- Add concise comments only for non-obvious logic.
 
-## Commit & Pull Request Guidelines
-- Write imperative commit subjects (e.g., `Add dashboard realtime guard`); existing history contains timestamped subjects but new commits should be descriptive.
-- PRs should link issues, summarize UI/API changes, note Supabase migrations or new env vars, and include before/after screenshots for UI updates.
-- Run `npm run lint` and complete a manual smoke test before requesting review; document any known gaps.
+## Development Workflow
+1. Install dependencies via `npm install`.
+2. Choose the appropriate dev server:
+   - `npm run dev`: Tauri shell with hot reload.
+   - `npm run dev:vite`: browser-only.
+   - `npm run dev:tauri`: focus on native APIs.
+3. Build commands:
+   - `npm run build`: full production bundle.
+   - `npm run build:web`: web-only bundle.
+   - `npm run build:windows` / `npm run build:portable`: distributables.
+4. Lint before commits with `npm run lint`; resolve all warnings.
 
-## Security & Configuration Tips
-- Copy `.env.example` to `.env`, keep Supabase keys private, and rotate credentials promptly.
-- Record schema changes inside `docs/` or a migration note so other contributors can stay in sync.
+## Testing Expectations
+- No automated tests yet. Perform manual validation with `npm run dev`, covering auth flows, realtime dashboards, Dexie offline sync.
+- When adding tests:
+  - Use React Testing Library.
+  - Colocate specs (`Component.test.jsx`).
+  - Stub Supabase interactions to stay offline.
+
+## Git & PR Hygiene
+- Use imperative commit subjects (e.g., `Add dashboard realtime guard`).
+- Ensure PRs:
+  - Link issues.
+  - Summarize UI/API changes.
+  - Document Supabase migrations or new env vars.
+  - Include before/after screenshots for UI updates.
+  - Confirm `npm run lint` and manual smoke tests.
+
+## Security & Configuration
+- Copy `.env.example` to `.env` and keep Supabase keys private.
+- Rotate credentials promptly.
+- Document schema or configuration changes in `docs/` or top-level notes.
+
+## Agent Operating Principles
+- Default to safe, non-destructive commands; avoid resetting or deleting user work.
+- Prefer `rg` for code search; avoid heavy commands unless necessary.
+- Use `apply_patch` for targeted edits; skip for generated content.
+- Validate changes when possible and report any unverified areas.
+- Highlight follow-up actions (tests, lint, build) that the user may want to run.
+
+## Ready Reference
+- Active UI file: `src/layout/Navbar.jsx`.
+- Writable roots: repository root (`c:\pembayaran`).
+- Network access: restricted (requires approval).
+- Approval mode: on-request (ask before privileged commands).
+

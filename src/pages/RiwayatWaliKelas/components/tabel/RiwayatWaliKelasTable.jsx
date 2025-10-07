@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Badge, IconButton, Text, Button, TextField, Select } from '@radix-ui/themes'
+import { Badge, IconButton, Text, Button, TextField, Select, Switch } from '@radix-ui/themes'
 import { Pencil1Icon, TrashIcon, MagnifyingGlassIcon } from '@radix-ui/react-icons'
 import { UserCheck, Clock, Plus, X, Eye } from 'lucide-react'
 
@@ -53,6 +53,7 @@ export function RiwayatWaliKelasTable({
   selectedItem,
   onSelectItem,
   onViewDetail,
+  onToggleStatus,
   tahunAjaranList = []
 }) {
   const [searchQuery, setSearchQuery] = useState('')
@@ -250,12 +251,12 @@ export function RiwayatWaliKelasTable({
             <table className="min-w-full table-fixed text-sm border-collapse">
               <colgroup>{[
                 <col key="col-1" style={{ width: '22%' }} />,
-                <col key="col-2" style={{ width: '18%' }} />,
-                <col key="col-3" style={{ width: '18%' }} />,
-                <col key="col-4" style={{ width: '13%' }} />,
-                <col key="col-5" style={{ width: '13%' }} />,
-                <col key="col-6" style={{ width: '10%' }} />,
-                <col key="col-7" style={{ width: '6%' }} />,
+                <col key="col-2" style={{ width: '15%' }} />,
+                <col key="col-3" style={{ width: '15%' }} />,
+                <col key="col-4" style={{ width: '12%' }} />,
+                <col key="col-5" style={{ width: '12%' }} />,
+                <col key="col-6" style={{ width: '15%' }} />,
+                <col key="col-7" style={{ width: '9%' }} />,
               ]}</colgroup>
               <thead>
                 {/* Excel-style header with freeze pane effect */}
@@ -308,7 +309,10 @@ export function RiwayatWaliKelasTable({
                           <div className="h-4 w-24 bg-slate-200" />
                         </td>
                         <td className="px-4 py-3 border-r border-slate-200">
-                          <div className="h-6 w-24 bg-slate-200" />
+                          <div className="flex items-center gap-2.5">
+                            <div className="h-6 w-11 bg-slate-200 rounded-full" />
+                            <div className="h-6 w-16 bg-slate-200" style={{ borderRadius: 0 }} />
+                          </div>
                         </td>
                         <td className="px-4 py-3 text-center">
                           <div className="h-6 w-20 bg-slate-200 mx-auto" />
@@ -364,14 +368,26 @@ export function RiwayatWaliKelasTable({
                       </Text>
                     </td>
                     <td className="px-4 py-3 border-r border-slate-200">
-                      <Badge
-                        variant="solid"
-                        color={getStatusBadgeColor(item.status)}
-                        className="text-[0.7rem] font-semibold px-2"
-                        style={{ borderRadius: 0 }}
+                      <div 
+                        className="flex items-center gap-2.5"
+                        onClick={(e) => e.stopPropagation()}
                       >
-                        {getStatusLabel(item.status)}
-                      </Badge>
+                        <Switch
+                          checked={item.status === 'aktif'}
+                          onCheckedChange={() => onToggleStatus(item)}
+                          size="2"
+                          className="cursor-pointer focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                          style={{ outline: 'none', boxShadow: 'none' }}
+                        />
+                        <Badge
+                          variant="solid"
+                          color={item.status === 'aktif' ? 'green' : item.status === 'selesai' ? 'gray' : 'orange'}
+                          className="text-[0.7rem] font-semibold px-2"
+                          style={{ borderRadius: 0 }}
+                        >
+                          {item.status === 'aktif' ? '✓ Aktif' : item.status === 'selesai' ? '○ Selesai' : '🔄 Diganti'}
+                        </Badge>
+                      </div>
                     </td>
                     <td className="px-4 py-3 text-center">
                       <div className="flex justify-center gap-1">

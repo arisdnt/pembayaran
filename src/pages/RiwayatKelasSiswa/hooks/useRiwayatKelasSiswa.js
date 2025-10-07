@@ -15,12 +15,19 @@ export function useRiwayatKelasSiswa() {
 
   const refreshData = useCallback(async () => {
     const [rows, siswa, kelas, tahun, rwl] = await Promise.all([
-      db.riwayat_kelas_siswa.orderBy('tanggal_masuk').reverse().toArray(),
+      db.riwayat_kelas_siswa.toArray(),
       db.siswa.toArray(),
       db.kelas.toArray(),
       db.tahun_ajaran.toArray(),
       db.riwayat_wali_kelas.toArray(),
     ])
+    
+    rows.sort((a, b) => {
+      const dateA = new Date(a.updated_at || a.created_at || 0)
+      const dateB = new Date(b.updated_at || b.created_at || 0)
+      return dateB - dateA
+    })
+    
     const siswaMap = new Map(siswa.map(s => [s.id, s]))
     const kelasMap = new Map(kelas.map(k => [k.id, k]))
     const tahunMap = new Map(tahun.map(t => [t.id, t]))

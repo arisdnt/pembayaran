@@ -1,10 +1,16 @@
-import { Button, TextField } from '@radix-ui/themes'
+import { Button, TextField, Select } from '@radix-ui/themes'
 import { MagnifyingGlassIcon } from '@radix-ui/react-icons'
 import { Plus, X } from 'lucide-react'
 
 export function PembayaranTableHeader({
   searchQuery,
   setSearchQuery,
+  selectedTahunAjaran,
+  onTahunAjaranChange,
+  tahunAjaranOptions,
+  selectedTingkat,
+  onTingkatChange,
+  tingkatOptions,
   stats,
   hasActiveFilters,
   onClearFilters,
@@ -29,6 +35,7 @@ export function PembayaranTableHeader({
                 <button
                   onClick={() => setSearchQuery('')}
                   className="cursor-pointer text-slate-400 hover:text-slate-600"
+                  type="button"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -36,6 +43,36 @@ export function PembayaranTableHeader({
             )}
           </TextField.Root>
         </div>
+
+        <Select.Root value={selectedTahunAjaran} onValueChange={onTahunAjaranChange}>
+          <Select.Trigger
+            placeholder="Semua Tahun"
+            style={{ borderRadius: 0, border: '1px solid #cbd5e1', backgroundColor: '#ffffff', width: '160px' }}
+          />
+          <Select.Content style={{ borderRadius: 0 }}>
+            <Select.Item value="all">Semua Tahun</Select.Item>
+            {tahunAjaranOptions.map((option) => (
+              <Select.Item key={option.id} value={option.id}>
+                {option.nama}
+              </Select.Item>
+            ))}
+          </Select.Content>
+        </Select.Root>
+
+        <Select.Root value={selectedTingkat} onValueChange={onTingkatChange}>
+          <Select.Trigger
+            placeholder="Semua Tingkat"
+            style={{ borderRadius: 0, border: '1px solid #cbd5e1', backgroundColor: '#ffffff', width: '150px' }}
+          />
+          <Select.Content style={{ borderRadius: 0 }}>
+            <Select.Item value="all">Semua Tingkat</Select.Item>
+            {tingkatOptions.map((option) => (
+              <Select.Item key={option} value={option}>
+                Tingkat {option}
+              </Select.Item>
+            ))}
+          </Select.Content>
+        </Select.Root>
 
         {hasActiveFilters && (
           <Button
@@ -45,6 +82,7 @@ export function PembayaranTableHeader({
             size="2"
             style={{ borderRadius: 0 }}
             className="cursor-pointer"
+            type="button"
           >
             <X className="h-4 w-4" />
           </Button>

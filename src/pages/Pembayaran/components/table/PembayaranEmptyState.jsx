@@ -5,7 +5,7 @@ import { Wallet } from 'lucide-react'
 export function PembayaranEmptyState({ hasActiveFilters, onClearFilters }) {
   return (
     <tr>
-      <td colSpan={6} className="relative">
+      <td colSpan={9} className="relative">
         <div className="flex flex-col items-center justify-center py-20 text-center text-slate-400">
           {hasActiveFilters ? (
             <>

@@ -70,6 +70,18 @@ export function RiwayatKelasSiswaTable({
 }) {
   const [searchQuery, setSearchQuery] = useState('')
   const [filterStatus, setFilterStatus] = useState('all')
+  const [filterTahunAjaran, setFilterTahunAjaran] = useState('all')
+  const [filterTingkatKelas, setFilterTingkatKelas] = useState('all')
+
+  const tahunAjaranOptions = useMemo(() => {
+    const uniqueTahun = [...new Set(data.map(item => item.tahun_ajaran?.nama).filter(Boolean))]
+    return ['all', ...uniqueTahun.sort()]
+  }, [data])
+
+  const tingkatKelasOptions = useMemo(() => {
+    const uniqueTingkat = [...new Set(data.map(item => item.kelas?.tingkat).filter(Boolean))]
+    return ['all', ...uniqueTingkat.sort()]
+  }, [data])
 
   const filteredData = useMemo(() => {
     let filtered = [...data]
@@ -89,8 +101,16 @@ export function RiwayatKelasSiswaTable({
       filtered = filtered.filter((item) => item.status === filterStatus)
     }
 
+    if (filterTahunAjaran !== 'all') {
+      filtered = filtered.filter((item) => item.tahun_ajaran?.nama === filterTahunAjaran)
+    }
+
+    if (filterTingkatKelas !== 'all') {
+      filtered = filtered.filter((item) => item.kelas?.tingkat === filterTingkatKelas)
+    }
+
     return filtered
-  }, [data, searchQuery, filterStatus])
+  }, [data, searchQuery, filterStatus, filterTahunAjaran, filterTingkatKelas])
 
   const stats = useMemo(() => {
     const total = data.length
@@ -111,11 +131,13 @@ export function RiwayatKelasSiswaTable({
   }, [data, filteredData])
 
   const isEmpty = !isLoading && filteredData.length === 0
-  const hasActiveFilters = searchQuery.trim() || filterStatus !== 'all'
+  const hasActiveFilters = searchQuery.trim() || filterStatus !== 'all' || filterTahunAjaran !== 'all' || filterTingkatKelas !== 'all'
 
   const handleClearFilters = () => {
     setSearchQuery('')
     setFilterStatus('all')
+    setFilterTahunAjaran('all')
+    setFilterTingkatKelas('all')
   }
 
   return (
@@ -153,6 +175,48 @@ export function RiwayatKelasSiswaTable({
                   </TextField.Slot>
                 )}
               </TextField.Root>
+            </div>
+
+            {/* Filter Tahun Ajaran */}
+            <div className="flex items-center gap-2">
+              <Select.Root value={filterTahunAjaran} onValueChange={setFilterTahunAjaran}>
+                <Select.Trigger
+                  style={{
+                    borderRadius: 0,
+                    minWidth: '160px',
+                    border: '1px solid #cbd5e1',
+                    backgroundColor: '#ffffff'
+                  }}
+                  className="cursor-pointer font-sans"
+                />
+                <Select.Content style={{ borderRadius: 0 }}>
+                  <Select.Item value="all">📅 Semua Tahun Ajaran</Select.Item>
+                  {tahunAjaranOptions.slice(1).map((tahun) => (
+                    <Select.Item key={tahun} value={tahun}>{tahun}</Select.Item>
+                  ))}
+                </Select.Content>
+              </Select.Root>
+            </div>
+
+            {/* Filter Tingkat Kelas */}
+            <div className="flex items-center gap-2">
+              <Select.Root value={filterTingkatKelas} onValueChange={setFilterTingkatKelas}>
+                <Select.Trigger
+                  style={{
+                    borderRadius: 0,
+                    minWidth: '140px',
+                    border: '1px solid #cbd5e1',
+                    backgroundColor: '#ffffff'
+                  }}
+                  className="cursor-pointer font-sans"
+                />
+                <Select.Content style={{ borderRadius: 0 }}>
+                  <Select.Item value="all">🏫 Semua Tingkat</Select.Item>
+                  {tingkatKelasOptions.slice(1).map((tingkat) => (
+                    <Select.Item key={tingkat} value={tingkat}>{tingkat}</Select.Item>
+                  ))}
+                </Select.Content>
+              </Select.Root>
             </div>
 
             {/* Filter Status */}
@@ -254,10 +318,10 @@ export function RiwayatKelasSiswaTable({
                     </div>
                   </th>
                   <th className="px-4 py-3 text-left text-[0.7rem] font-bold uppercase tracking-wider text-slate-700 border-r border-slate-300">
-                    Kelas
+                    Tahun Ajaran
                   </th>
                   <th className="px-4 py-3 text-left text-[0.7rem] font-bold uppercase tracking-wider text-slate-700 border-r border-slate-300">
-                    Tahun Ajaran
+                    Kelas
                   </th>
                   <th className="px-4 py-3 text-left text-[0.7rem] font-bold uppercase tracking-wider text-slate-700 border-r border-slate-300">
                     Wali Kelas
@@ -339,12 +403,12 @@ export function RiwayatKelasSiswaTable({
                     </td>
                     <td className="px-4 py-3 border-r border-slate-200">
                       <Text size="2" className="text-slate-700 font-sans">
-                        {item.kelas ? `${item.kelas.tingkat} ${item.kelas.nama_sub_kelas}` : '—'}
+                        {item.tahun_ajaran?.nama || '—'}
                       </Text>
                     </td>
                     <td className="px-4 py-3 border-r border-slate-200">
                       <Text size="2" className="text-slate-700 font-sans">
-                        {item.tahun_ajaran?.nama || '—'}
+                        {item.kelas ? `${item.kelas.tingkat} ${item.kelas.nama_sub_kelas}` : '—'}
                       </Text>
                     </td>
                     <td className="px-4 py-3 border-r border-slate-200">

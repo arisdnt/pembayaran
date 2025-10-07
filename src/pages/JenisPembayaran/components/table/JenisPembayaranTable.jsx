@@ -79,7 +79,7 @@ export function JenisPembayaranTable({ data, isLoading, isRefreshing, onEdit, on
                     Wajib
                   </Text>
                 </th>
-                <th className="px-4 py-3 text-left border-r border-slate-200" style={{ width: '140px' }}>
+                <th className="px-4 py-3 text-left border-r border-slate-200">
                   <Text size="1" weight="bold" className="text-slate-700 uppercase tracking-wider">
                     Status
                   </Text>

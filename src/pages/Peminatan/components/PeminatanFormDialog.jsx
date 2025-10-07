@@ -147,12 +147,12 @@ export function PeminatanFormDialog({
 
         {/* Content */}
         <form onSubmit={handleSubmit} className="overflow-auto bg-white" style={{ maxHeight: 'calc(90vh - 140px)' }}>
-          <div className="p-6">
+          <div className="p-6 space-y-5">
             {/* Row 1: Nama & Keterangan - 2 Columns */}
-            <div className="grid grid-cols-2 gap-4 mb-4">
+            <div className="grid grid-cols-2 gap-4">
               <label>
-                <div className="flex items-center gap-1.5 mb-1">
-                  <BookOpen className="h-3.5 w-3.5 text-indigo-500" />
+                <div className="flex items-center gap-1.5 mb-2">
+                  <BookOpen className="h-4 w-4 text-indigo-500" />
                   <Text as="div" size="2" weight="medium">
                     Nama Peminatan <span className="text-red-600">*</span>
                   </Text>
@@ -164,14 +164,14 @@ export function PeminatanFormDialog({
                   style={{ borderRadius: 0 }}
                   required
                 />
-                <Text size="1" className="text-slate-500 mt-1">
+                <Text size="1" className="text-slate-500 mt-1.5">
                   Nama lengkap peminatan
                 </Text>
               </label>
 
               <label>
-                <div className="flex items-center gap-1.5 mb-1">
-                  <FileText className="h-3.5 w-3.5 text-purple-500" />
+                <div className="flex items-center gap-1.5 mb-2">
+                  <FileText className="h-4 w-4 text-purple-500" />
                   <Text as="div" size="2" weight="medium">
                     Keterangan
                   </Text>
@@ -182,17 +182,17 @@ export function PeminatanFormDialog({
                   onChange={(e) => setFormData({ ...formData, keterangan: e.target.value })}
                   style={{ borderRadius: 0 }}
                 />
-                <Text size="1" className="text-slate-500 mt-1">
+                <Text size="1" className="text-slate-500 mt-1.5">
                   Informasi tambahan (opsional)
                 </Text>
               </label>
             </div>
 
             {/* Row 3: Tingkat Min & Max - 2 Columns */}
-            <div className="grid grid-cols-2 gap-4 mb-4">
+            <div className="grid grid-cols-2 gap-4">
               <label>
-                <div className="flex items-center gap-1.5 mb-1">
-                  <TrendingDown className="h-3.5 w-3.5 text-green-500" />
+                <div className="flex items-center gap-1.5 mb-2">
+                  <TrendingDown className="h-4 w-4 text-green-500" />
                   <Text as="div" size="2" weight="medium">
                     Tingkat Minimum
                   </Text>
@@ -214,14 +214,14 @@ export function PeminatanFormDialog({
                     ))}
                   </Select.Content>
                 </Select.Root>
-                <Text size="1" className="text-slate-500 mt-1">
+                <Text size="1" className="text-slate-500 mt-1.5">
                   Tingkat terendah yang diperbolehkan
                 </Text>
               </label>
 
               <label>
-                <div className="flex items-center gap-1.5 mb-1">
-                  <TrendingUp className="h-3.5 w-3.5 text-orange-500" />
+                <div className="flex items-center gap-1.5 mb-2">
+                  <TrendingUp className="h-4 w-4 text-orange-500" />
                   <Text as="div" size="2" weight="medium">
                     Tingkat Maximum
                   </Text>
@@ -243,14 +243,14 @@ export function PeminatanFormDialog({
                     ))}
                   </Select.Content>
                 </Select.Root>
-                <Text size="1" className="text-slate-500 mt-1">
+                <Text size="1" className="text-slate-500 mt-1.5">
                   Tingkat tertinggi yang diperbolehkan
                 </Text>
               </label>
             </div>
 
             {/* Row 4: Status Aktif */}
-            <div className="mb-4">
+            <div>
               <label className="flex items-center gap-3 p-4 bg-slate-50 border border-slate-300">
                 <Power className="h-5 w-5 text-green-600" />
                 <div className="flex-1">
@@ -271,7 +271,7 @@ export function PeminatanFormDialog({
 
             {/* Error Message */}
             {error && (
-              <div className="flex items-center gap-2 p-3 bg-red-50 border-2 border-red-200 mb-4">
+              <div className="flex items-center gap-2 p-3 bg-red-50 border-2 border-red-200">
                 <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0" />
                 <Text size="2" className="text-red-800 font-medium">
                   {error}

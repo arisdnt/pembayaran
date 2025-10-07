@@ -36,7 +36,59 @@ export function TagihanTable({
 }) {
   const [searchQuery, setSearchQuery] = useState('')
   const [filterTahunAjaran, setFilterTahunAjaran] = useState('all')
-  const [filterKelas, setFilterKelas] = useState('all')
+  const [filterTingkatKelas, setFilterTingkatKelas] = useState('all')
+  const [filterJudul, setFilterJudul] = useState('all')
+
+  const handleTahunAjaranChange = (value) => {
+    setFilterTahunAjaran(value)
+    setFilterJudul('all')
+  }
+
+  const handleTingkatKelasChange = (value) => {
+    setFilterTingkatKelas(value)
+    setFilterJudul('all')
+  }
+
+  const tingkatKelasOptions = useMemo(() => {
+    const siswaLatestTingkat = new Map()
+    
+    data.forEach(item => {
+      const rks = item.riwayat_kelas_siswa
+      if (!rks?.siswa?.id || !rks?.kelas?.tingkat || !rks?.tanggal_masuk) return
+      
+      const siswaId = rks.siswa.id
+      const currentLatest = siswaLatestTingkat.get(siswaId)
+      
+      if (!currentLatest || new Date(rks.tanggal_masuk) > new Date(currentLatest.tanggal_masuk)) {
+        siswaLatestTingkat.set(siswaId, {
+          tingkat: rks.kelas.tingkat,
+          tanggal_masuk: rks.tanggal_masuk
+        })
+      }
+    })
+    
+    const uniqueTingkat = [...new Set(Array.from(siswaLatestTingkat.values()).map(v => v.tingkat))]
+    return ['all', ...uniqueTingkat.sort()]
+  }, [data])
+
+  const judulOptions = useMemo(() => {
+    let filteredForJudul = [...data]
+
+    if (filterTahunAjaran !== 'all') {
+      filteredForJudul = filteredForJudul.filter(
+        (item) => item.riwayat_kelas_siswa?.tahun_ajaran?.id === filterTahunAjaran
+      )
+    }
+
+    if (filterTingkatKelas !== 'all') {
+      filteredForJudul = filteredForJudul.filter(
+        (item) => item.riwayat_kelas_siswa?.kelas?.tingkat === filterTingkatKelas
+      )
+    }
+
+    const uniqueJudul = [...new Set(filteredForJudul.map(item => item.judul).filter(Boolean))]
+    return ['all', ...uniqueJudul.sort()]
+  }, [data, filterTahunAjaran, filterTingkatKelas])
 
   const filteredData = useMemo(() => {
     let filtered = [...data]
@@ -57,30 +109,28 @@ export function TagihanTable({
       )
     }
 
-    if (filterKelas !== 'all') {
+    if (filterTingkatKelas !== 'all') {
       filtered = filtered.filter(
-        (item) => item.riwayat_kelas_siswa?.kelas?.id === filterKelas
+        (item) => item.riwayat_kelas_siswa?.kelas?.tingkat === filterTingkatKelas
       )
     }
 
+    if (filterJudul !== 'all') {
+      filtered = filtered.filter((item) => item.judul === filterJudul)
+    }
+
     return filtered
-  }, [data, searchQuery, filterTahunAjaran, filterKelas])
-
-  const stats = useMemo(() => {
-    const total = data.length
-    const filtered = filteredData.length
-
-    return { total, filtered }
-  }, [data, filteredData])
+  }, [data, searchQuery, filterTahunAjaran, filterTingkatKelas, filterJudul])
 
   const isEmpty = filteredData.length === 0
   const hasActiveFilters =
-    searchQuery.trim() || filterTahunAjaran !== 'all' || filterKelas !== 'all'
+    searchQuery.trim() || filterTahunAjaran !== 'all' || filterTingkatKelas !== 'all' || filterJudul !== 'all'
 
   const handleClearFilters = () => {
     setSearchQuery('')
     setFilterTahunAjaran('all')
-    setFilterKelas('all')
+    setFilterTingkatKelas('all')
+    setFilterJudul('all')
   }
 
   return (
@@ -116,7 +166,7 @@ export function TagihanTable({
           </div>
 
           {/* Filter Tahun Ajaran */}
-          <Select.Root value={filterTahunAjaran} onValueChange={setFilterTahunAjaran}>
+          <Select.Root value={filterTahunAjaran} onValueChange={handleTahunAjaranChange}>
             <Select.Trigger
               placeholder="Pilih Tahun Ajaran"
               style={{ borderRadius: 0, minWidth: '160px' }}
@@ -132,41 +182,39 @@ export function TagihanTable({
             </Select.Content>
           </Select.Root>
 
-          {/* Filter Kelas */}
-          <Select.Root value={filterKelas} onValueChange={setFilterKelas}>
+          {/* Filter Tingkat Kelas */}
+          <Select.Root value={filterTingkatKelas} onValueChange={handleTingkatKelasChange}>
             <Select.Trigger
-              placeholder="Pilih Kelas"
-              style={{ borderRadius: 0, minWidth: '140px' }}
+              placeholder="Pilih Tingkat Kelas"
+              style={{ borderRadius: 0, minWidth: '160px' }}
               className="border border-slate-300 bg-white text-slate-700 cursor-pointer"
             />
             <Select.Content style={{ borderRadius: 0 }}>
-              <Select.Item value="all">🏫 Semua Kelas</Select.Item>
-              {kelasList.map((kelas) => {
-                const label = [kelas.tingkat, kelas.nama_sub_kelas]
-                  .filter(Boolean)
-                  .join(' ') || 'Tanpa Kelas'
-                return (
-                  <Select.Item key={kelas.id} value={kelas.id}>
-                    {label}
-                  </Select.Item>
-                )
-              })}
+              <Select.Item value="all">🏫 Semua Tingkat</Select.Item>
+              {tingkatKelasOptions.slice(1).map((tingkat) => (
+                <Select.Item key={tingkat} value={tingkat}>
+                  Tingkat {tingkat}
+                </Select.Item>
+              ))}
             </Select.Content>
           </Select.Root>
 
-          {/* Stats */}
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-300 shadow-sm">
-              <Text size="1" className="text-slate-600">Total:</Text>
-              <Text size="2" weight="bold" className="text-slate-900">{stats.total}</Text>
-            </div>
-            {hasActiveFilters && (
-              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 border border-blue-300 shadow-sm">
-                <Text size="1" className="text-blue-700">Ditampilkan:</Text>
-                <Text size="2" weight="bold" className="text-blue-900">{stats.filtered}</Text>
-              </div>
-            )}
-          </div>
+          {/* Filter Judul Tagihan */}
+          <Select.Root value={filterJudul} onValueChange={setFilterJudul}>
+            <Select.Trigger
+              placeholder="Pilih Judul Tagihan"
+              style={{ borderRadius: 0, minWidth: '180px' }}
+              className="border border-slate-300 bg-white text-slate-700 cursor-pointer"
+            />
+            <Select.Content style={{ borderRadius: 0 }}>
+              <Select.Item value="all">📝 Semua Judul Tagihan</Select.Item>
+              {judulOptions.slice(1).map((judul) => (
+                <Select.Item key={judul} value={judul}>
+                  {judul}
+                </Select.Item>
+              ))}
+            </Select.Content>
+          </Select.Root>
 
           {/* Add Button */}
           <div className="ml-auto">

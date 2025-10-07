@@ -22,6 +22,8 @@ export function usePembayaran() {
   const tagihan = useLiveQuery(async () => db.tagihan.toArray(), [], undefined)
   const rks = useLiveQuery(async () => db.riwayat_kelas_siswa.toArray(), [], undefined)
   const siswa = useLiveQuery(async () => db.siswa.toArray(), [], undefined)
+  const kelas = useLiveQuery(async () => db.kelas.toArray(), [], undefined)
+  const tahunAjaran = useLiveQuery(async () => db.tahun_ajaran.toArray(), [], undefined)
 
   const tagihanList = useMemo(() => {
     const sMap = new Map((siswa || []).map(s => [s.id, s]))
@@ -46,12 +48,30 @@ export function usePembayaran() {
     const tagihanMap = new Map((tagihan || []).map(t => [t.id, t]))
     const rksMap = new Map((rks || []).map(r => [r.id, r]))
     const siswaMap = new Map((siswa || []).map(s => [s.id, s]))
+    const kelasMap = new Map((kelas || []).map(k => [k.id, k]))
+    const tahunAjaranMap = new Map((tahunAjaran || []).map(ta => [ta.id, ta]))
+    
+    // Get latest riwayat for each siswa based on tanggal_masuk
+    const latestRksBySiswa = new Map()
+    ;(rks || []).forEach(r => {
+      const existing = latestRksBySiswa.get(r.id_siswa)
+      if (!existing || new Date(r.tanggal_masuk) > new Date(existing.tanggal_masuk)) {
+        latestRksBySiswa.set(r.id_siswa, r)
+      }
+    })
+    
     return (pembayaran || []).map(p => {
       const rp = rincianByPembayaran.get(p.id) || []
       const total_dibayar = rp.reduce((sum, it) => sum + Number(it.jumlah_dibayar || 0), 0)
       const t = tagihanMap.get(p.id_tagihan) || null
       const r = t ? rksMap.get(t.id_riwayat_kelas_siswa) || null : null
       const s = r ? siswaMap.get(r.id_siswa) || null : null
+      
+      // Get latest riwayat for this siswa
+      const latestRks = s ? latestRksBySiswa.get(s.id) : null
+      const latestKelas = latestRks ? kelasMap.get(latestRks.id_kelas) : null
+      const latestTahunAjaran = latestRks ? tahunAjaranMap.get(latestRks.id_tahun_ajaran) : null
+      
       return {
         ...p,
         rincian_pembayaran: rp,
@@ -61,12 +81,21 @@ export function usePembayaran() {
           nomor_tagihan: t.nomor_tagihan,
           judul: t.judul,
           riwayat_kelas_siswa: r && {
-            siswa: s && { nama_lengkap: s.nama_lengkap, nisn: s.nisn },
+            siswa: s && { id: s.id, nama_lengkap: s.nama_lengkap, nisn: s.nisn },
           },
+        },
+        latest_kelas: latestKelas && {
+          id: latestKelas.id,
+          tingkat: latestKelas.tingkat,
+          nama_sub_kelas: latestKelas.nama_sub_kelas,
+        },
+        latest_tahun_ajaran: latestTahunAjaran && {
+          id: latestTahunAjaran.id,
+          nama: latestTahunAjaran.nama,
         },
       }
     })
-  }, [pembayaran, rincianPembayaran, tagihan, rks, siswa])
+  }, [pembayaran, rincianPembayaran, tagihan, rks, siswa, kelas, tahunAjaran])
 
   const refreshData = useCallback(async () => data, [data])
 

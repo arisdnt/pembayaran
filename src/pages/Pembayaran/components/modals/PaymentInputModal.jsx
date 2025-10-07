@@ -202,14 +202,14 @@ export function PaymentInputModal({ open, onOpenChange, onSubmit, tagihan, summa
                 </Text>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-5">
                 {/* Input Jumlah - FULL WIDTH BESAR */}
                 <div>
                   <label>
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-1.5">
                         <DollarSign className="h-4 w-4 text-green-600" />
-                        <Text size="3" weight="bold">
+                        <Text size="2" weight="bold">
                           Jumlah Dibayar <span className="text-red-600">*</span>
                         </Text>
                       </div>
@@ -241,10 +241,10 @@ export function PaymentInputModal({ open, onOpenChange, onSubmit, tagihan, summa
                       required
                     />
                     {/* Fixed height container untuk error message */}
-                    <div className="mt-1 h-5">
+                    <div className="mt-1.5 h-5">
                       {error ? (
                         <div className="flex items-center gap-1.5 text-red-600">
-                          <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                          <AlertCircle className="h-4 w-4 shrink-0" />
                           <Text size="1" className="text-red-600">{error}</Text>
                         </div>
                       ) : (
@@ -262,7 +262,7 @@ export function PaymentInputModal({ open, onOpenChange, onSubmit, tagihan, summa
                   <div>
                     <label>
                       <div className="flex items-center gap-1.5 mb-2">
-                        <CreditCard className="h-3.5 w-3.5 text-indigo-600" />
+                        <CreditCard className="h-4 w-4 text-indigo-600" />
                         <Text size="2" weight="medium">
                           Metode <span className="text-red-600">*</span>
                         </Text>
@@ -285,7 +285,7 @@ export function PaymentInputModal({ open, onOpenChange, onSubmit, tagihan, summa
                   <div>
                     <label>
                       <div className="flex items-center gap-1.5 mb-2">
-                        <Hash className="h-3.5 w-3.5 text-slate-500" />
+                        <Hash className="h-4 w-4 text-slate-500" />
                         <Text size="2" weight="medium">Referensi</Text>
                       </div>
                       <TextField.Root
@@ -302,7 +302,7 @@ export function PaymentInputModal({ open, onOpenChange, onSubmit, tagihan, summa
                 <div>
                   <label>
                     <div className="flex items-center gap-1.5 mb-2">
-                      <FileText className="h-3.5 w-3.5 text-slate-500" />
+                      <FileText className="h-4 w-4 text-slate-500" />
                       <Text size="2" weight="medium">Catatan</Text>
                     </div>
                     <TextArea

@@ -66,20 +66,26 @@ export function JenisPembayaranTableRow({ item, index, onEdit, onDelete, onViewD
           {item.wajib ? 'Wajib' : 'Opsional'}
         </Badge>
       </td>
-      <td className="px-4 py-3 border-r border-slate-200" style={{ width: '140px' }}>
-        <div className="flex items-center gap-2">
+      <td className="px-4 py-3 border-r border-slate-200">
+        <div 
+          className="flex items-center gap-2.5"
+          onClick={(e) => e.stopPropagation()}
+        >
           <Switch
             checked={item.status_aktif}
-            onCheckedChange={(e) => {
-              e.stopPropagation?.();
-              onToggleStatus(item.id, item.status_aktif)
-            }}
-            onClick={(e) => e.stopPropagation()}
-            size="1"
+            onCheckedChange={() => onToggleStatus(item.id, item.status_aktif)}
+            size="2"
+            className="cursor-pointer focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+            style={{ outline: 'none', boxShadow: 'none' }}
           />
-          <Text size="1" className="text-slate-600">
-            {item.status_aktif ? 'Aktif' : 'Nonaktif'}
-          </Text>
+          <Badge
+            variant="solid"
+            color={item.status_aktif ? 'green' : 'gray'}
+            className="text-[0.7rem] font-semibold px-2"
+            style={{ borderRadius: 0 }}
+          >
+            {item.status_aktif ? '✓ Aktif' : '○ Nonaktif'}
+          </Badge>
         </div>
       </td>
       <td className="px-4 py-3">

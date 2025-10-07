@@ -23,6 +23,9 @@ export function useTagihan() {
     const tMap = new Map((tahun || []).map(t => [t.id, t]))
     return (rks || []).map(r => ({
       id: r.id,
+      id_siswa: r.id_siswa,
+      tanggal_masuk: r.tanggal_masuk,
+      tanggal_keluar: r.tanggal_keluar,
       siswa: sMap.get(r.id_siswa) ? { id: r.id_siswa, nama_lengkap: sMap.get(r.id_siswa).nama_lengkap, nisn: sMap.get(r.id_siswa).nisn } : null,
       kelas: kMap.get(r.id_kelas) ? { id: r.id_kelas, tingkat: kMap.get(r.id_kelas).tingkat, nama_sub_kelas: kMap.get(r.id_kelas).nama_sub_kelas } : null,
       tahun_ajaran: tMap.get(r.id_tahun_ajaran) ? { id: r.id_tahun_ajaran, nama: tMap.get(r.id_tahun_ajaran).nama } : null,

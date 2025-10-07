@@ -54,6 +54,16 @@ export function PembayaranTableRow({ item, index, isSelected, onSelect, onEdit, 
       </td>
       <td className="px-4 py-3 border-r border-slate-200">
         <Text size="2" className="text-slate-700">
+          {item.latest_tahun_ajaran?.nama || '—'}
+        </Text>
+      </td>
+      <td className="px-4 py-3 border-r border-slate-200">
+        <Text size="2" className="text-slate-700">
+          {item.latest_kelas ? `${item.latest_kelas.tingkat} ${item.latest_kelas.nama_sub_kelas}` : '—'}
+        </Text>
+      </td>
+      <td className="px-4 py-3 border-r border-slate-200">
+        <Text size="2" className="text-slate-700">
           {item.catatan || '—'}
         </Text>
       </td>

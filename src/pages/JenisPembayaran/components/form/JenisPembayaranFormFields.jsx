@@ -29,12 +29,12 @@ export function JenisPembayaranFormFields({
   }
   return (
     <>
-      <div className="grid grid-cols-2 gap-4 mb-4">
+      <div className="grid grid-cols-2 gap-4 mb-5">
         {/* Kolom Kiri: Nama + Deskripsi */}
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-5">
           <label>
-            <div className="flex items-center gap-1.5 mb-1">
-              <Tag className="h-3.5 w-3.5 text-indigo-500" />
+            <div className="flex items-center gap-1.5 mb-2">
+              <Tag className="h-4 w-4 text-indigo-500" />
               <Text size="2" weight="medium">Nama <span className="text-red-600">*</span></Text>
             </div>
             <TextField.Root
@@ -44,12 +44,12 @@ export function JenisPembayaranFormFields({
               style={{ borderRadius: 0 }}
               required
             />
-            <Text size="1" className="text-slate-500 mt-1">Kode akan digenerate otomatis berdasarkan nama dan tanggal</Text>
+            <Text size="1" className="text-slate-500 mt-1.5">Kode akan digenerate otomatis berdasarkan nama dan tanggal</Text>
           </label>
 
           <label>
-            <div className="flex items-center gap-1.5 mb-1">
-              <FileText className="h-3.5 w-3.5 text-slate-500" />
+            <div className="flex items-center gap-1.5 mb-2">
+              <FileText className="h-4 w-4 text-slate-500" />
               <Text size="2" weight="medium">Deskripsi</Text>
             </div>
             <TextField.Root
@@ -64,9 +64,9 @@ export function JenisPembayaranFormFields({
         {/* Kolom Kanan: Jumlah Default */}
         <div className="flex flex-col justify-end">
           <label>
-            <div className="flex items-center justify-between mb-1">
+            <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-1.5">
-                <DollarSign className="h-3.5 w-3.5 text-green-500" />
+                <DollarSign className="h-4 w-4 text-green-500" />
                 <Text size="2" weight="medium">Jumlah Default</Text>
               </div>
               <Text size="1" className="text-slate-500">Jumlah dalam Rupiah</Text>
@@ -90,10 +90,10 @@ export function JenisPembayaranFormFields({
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 mb-4">
+      <div className="grid grid-cols-2 gap-4 mb-5">
         <label>
-          <div className="flex items-center gap-1.5 mb-1">
-            <Calendar className="h-3.5 w-3.5 text-blue-500" />
+          <div className="flex items-center gap-1.5 mb-2">
+            <Calendar className="h-4 w-4 text-blue-500" />
             <Text size="2" weight="medium">Tahun Ajaran <span className="text-red-600">*</span></Text>
           </div>
           <Select.Root
@@ -112,12 +112,12 @@ export function JenisPembayaranFormFields({
               ))}
             </Select.Content>
           </Select.Root>
-          <Text size="1" className="text-slate-500 mt-1">Wajib dipilih untuk isolasi data per tahun ajaran</Text>
+          <Text size="1" className="text-slate-500 mt-1.5">Wajib dipilih untuk isolasi data per tahun ajaran</Text>
         </label>
 
         <label>
-          <div className="flex items-center gap-1.5 mb-1">
-            <GraduationCap className="h-3.5 w-3.5 text-indigo-500" />
+          <div className="flex items-center gap-1.5 mb-2">
+            <GraduationCap className="h-4 w-4 text-indigo-500" />
             <Text size="2" weight="medium">Tingkat Kelas <span className="text-red-600">*</span></Text>
           </div>
           <Select.Root
@@ -142,16 +142,16 @@ export function JenisPembayaranFormFields({
               ))}
             </Select.Content>
           </Select.Root>
-          <Text size="1" className="text-slate-500 mt-1">
+          <Text size="1" className="text-slate-500 mt-1.5">
             {!formData.id_tahun_ajaran ? '⚠️ Pilih tahun ajaran terlebih dahulu' : 'Pilih tingkat atau semua tingkat'}
           </Text>
         </label>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 mb-4">
+      <div className="grid grid-cols-2 gap-4 mb-5">
         <label>
-          <div className="flex items-center gap-1.5 mb-1">
-            <School className="h-3.5 w-3.5 text-teal-500" />
+          <div className="flex items-center gap-1.5 mb-2">
+            <School className="h-4 w-4 text-teal-500" />
             <Text size="2" weight="medium">Kelas Spesifik</Text>
           </div>
           <Select.Root
@@ -172,14 +172,14 @@ export function JenisPembayaranFormFields({
               ))}
             </Select.Content>
           </Select.Root>
-          <Text size="1" className="text-slate-500 mt-1">
+          <Text size="1" className="text-slate-500 mt-1.5">
             {!formData.tingkat ? '⚠️ Pilih "Semua Tingkat" tidak dapat memilih kelas spesifik' : 'Pilih kelas atau semua kelas'}
           </Text>
         </label>
 
         <label>
-          <div className="flex items-center gap-1.5 mb-1">
-            <BookOpen className="h-3.5 w-3.5 text-orange-500" />
+          <div className="flex items-center gap-1.5 mb-2">
+            <BookOpen className="h-4 w-4 text-orange-500" />
             <Text size="2" weight="medium">Peminatan</Text>
           </div>
           <Select.Root
@@ -200,7 +200,7 @@ export function JenisPembayaranFormFields({
               ))}
             </Select.Content>
           </Select.Root>
-          <Text size="1" className="text-slate-500 mt-1">
+          <Text size="1" className="text-slate-500 mt-1.5">
             {!formData.tingkat ? '⚠️ Pilih tingkat kelas terlebih dahulu' : 'Peminatan berlaku untuk seluruh tingkat kelas'}
           </Text>
         </label>

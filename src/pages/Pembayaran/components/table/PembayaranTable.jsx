@@ -8,6 +8,12 @@ export function PembayaranTable({ data, isLoading, isRefreshing, onEdit, onDelet
   const {
     searchQuery,
     setSearchQuery,
+    selectedTahunAjaran,
+    setSelectedTahunAjaran,
+    selectedTingkat,
+    setSelectedTingkat,
+    tahunAjaranOptions,
+    tingkatOptions,
     filteredData,
     stats,
     hasActiveFilters,
@@ -22,6 +28,12 @@ export function PembayaranTable({ data, isLoading, isRefreshing, onEdit, onDelet
         <PembayaranTableHeader
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
+          selectedTahunAjaran={selectedTahunAjaran}
+          onTahunAjaranChange={setSelectedTahunAjaran}
+          tahunAjaranOptions={tahunAjaranOptions}
+          selectedTingkat={selectedTingkat}
+          onTingkatChange={setSelectedTingkat}
+          tingkatOptions={tingkatOptions}
           stats={stats}
           hasActiveFilters={hasActiveFilters}
           onClearFilters={handleClearFilters}
@@ -45,6 +57,16 @@ export function PembayaranTable({ data, isLoading, isRefreshing, onEdit, onDelet
                 <th className="px-4 py-3 text-left border-r border-slate-200">
                   <Text size="1" weight="bold" className="text-slate-700 uppercase tracking-wider">
                     Siswa
+                  </Text>
+                </th>
+                <th className="px-4 py-3 text-left border-r border-slate-200">
+                  <Text size="1" weight="bold" className="text-slate-700 uppercase tracking-wider">
+                    Tahun Ajaran
+                  </Text>
+                </th>
+                <th className="px-4 py-3 text-left border-r border-slate-200">
+                  <Text size="1" weight="bold" className="text-slate-700 uppercase tracking-wider">
+                    Kelas
                   </Text>
                 </th>
                 <th className="px-4 py-3 text-left border-r border-slate-200">

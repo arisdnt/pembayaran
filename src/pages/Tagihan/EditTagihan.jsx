@@ -5,6 +5,7 @@ import { Text } from '@radix-ui/themes'
 import { AlertCircle } from 'lucide-react'
 import { db } from '../../offline/db'
 import { updateTagihanWithRincian } from '../../offline/actions/tagihan'
+import { supabase } from '../../lib/supabaseClient'
 import { useTagihan } from './hooks/useTagihan'
 import { CreateTagihanHeader } from './components/CreateTagihanHeader'
 import { TargetSiswaSection } from './components/TargetSiswaSection'
@@ -165,6 +166,40 @@ function EditTagihanContent() {
       }
     }
 
+    const trimmedNomor = formData.nomor_tagihan.trim()
+    const allTagihan = await db.tagihan.toArray()
+    const duplicateLocal = allTagihan.some(t => t.id !== id && (t.nomor_tagihan || '').toLowerCase() === trimmedNomor.toLowerCase())
+    if (duplicateLocal) {
+      setError('Nomor tagihan sudah digunakan, harap pilih nomor lain')
+      setSubmitting(false)
+      return
+    }
+
+    let duplicateRemote = false
+    if (typeof navigator !== 'undefined' && navigator.onLine) {
+      try {
+        const { data, error } = await supabase
+          .from('tagihan')
+          .select('id')
+          .eq('nomor_tagihan', trimmedNomor)
+          .neq('id', id)
+          .limit(1)
+          .maybeSingle()
+        if (error && error.code !== 'PGRST116') {
+          throw error
+        }
+        duplicateRemote = !!data
+      } catch (checkError) {
+        console.warn('[EditTagihan] gagal mengecek nomor_tagihan di Supabase:', checkError)
+      }
+    }
+
+    if (duplicateRemote) {
+      setError('Nomor tagihan sudah digunakan di server, harap pilih nomor lain')
+      setSubmitting(false)
+      return
+    }
+
     try {
       await updateTagihanWithRincian(id, {
         nomor_tagihan: formData.nomor_tagihan,
@@ -297,3 +332,6 @@ function EditTagihanContent() {
 export function EditTagihan() {
   return <EditTagihanContent />
 }
+
+
+

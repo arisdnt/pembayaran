@@ -5,6 +5,7 @@ import { Text } from '@radix-ui/themes'
 import { AlertCircle } from 'lucide-react'
 import { db } from '../../offline/db'
 import { createTagihanWithRincian } from '../../offline/actions/tagihan'
+import { supabase } from '../../lib/supabaseClient'
 import { useTagihan } from './hooks/useTagihan'
 import { CreateTagihanHeader } from './components/CreateTagihanHeader'
 import { TargetSiswaSection } from './components/TargetSiswaSection'
@@ -88,6 +89,50 @@ function CreateTagihanContent() {
 
 
   const totalTagihan = rincianItems.reduce((sum, item) => sum + parseFloat(item.jumlah || 0), 0)
+  const remoteNomorExists = async (nomor) => {
+    if (typeof navigator !== 'undefined' && navigator.onLine) {
+      try {
+        const { data, error } = await supabase
+          .from('tagihan')
+          .select('id')
+          .eq('nomor_tagihan', nomor)
+          .limit(1)
+          .maybeSingle()
+        if (error && error.code !== 'PGRST116') {
+          throw error
+        }
+        return !!data
+      } catch (checkError) {
+        console.warn('[CreateTagihan] gagal mengecek nomor_tagihan di Supabase:', checkError)
+      }
+    }
+    return false
+  }
+
+  const ensureUniqueNomorTagihan = async (initialNomor, nomorSet) => {
+    let candidate = (initialNomor || '').trim()
+    if (!candidate) return candidate
+    const suffixMatch = candidate.match(/-(\d{3})$/)
+    const base = suffixMatch ? candidate.slice(0, -4) : candidate
+    let seq = suffixMatch ? parseInt(suffixMatch[1], 10) : 0
+    let attempt = 0
+
+    while (true) {
+      const normalized = candidate.toLowerCase()
+      const existsLocally = nomorSet.has(normalized)
+      let existsRemotely = false
+      if (!existsLocally) {
+        existsRemotely = await remoteNomorExists(candidate)
+      }
+      if (!existsLocally && !existsRemotely) {
+        nomorSet.add(normalized)
+        return candidate
+      }
+      attempt += 1
+      const nextSeq = seq + attempt
+      candidate = `${base}-${String(nextSeq).padStart(3, '0')}`
+    }
+  }
 
   const generateNomorTagihan = async () => {
     try {
@@ -179,10 +224,19 @@ function CreateTagihanContent() {
         return
       }
 
+      const existingNomorSet = new Set(
+        (await db.tagihan.toArray())
+          .map(t => t.nomor_tagihan)
+          .filter(Boolean)
+          .map(n => n.toLowerCase())
+      )
+
       for (let i = 0; i < targetList.length; i++) {
-        const nomorTagihan = targetList.length > 1
+        const baseNomor = targetList.length > 1
           ? `${formData.nomor_tagihan}-${String(i + 1).padStart(3, '0')}`
           : formData.nomor_tagihan
+
+        const nomorTagihan = await ensureUniqueNomorTagihan(baseNomor, existingNomorSet)
 
         const header = {
           id_riwayat_kelas_siswa: targetList[i],
@@ -326,3 +380,9 @@ function CreateTagihanContent() {
 export function CreateTagihan() {
   return <CreateTagihanContent />
 }
+
+
+
+
+
+

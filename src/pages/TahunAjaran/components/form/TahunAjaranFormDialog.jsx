@@ -131,12 +131,12 @@ function TahunAjaranFormDialog({
 
         {/* Content */}
         <form onSubmit={handleSubmit} className="overflow-auto bg-white" style={{ maxHeight: 'calc(90vh - 140px)' }}>
-          <div className="p-6">
+          <div className="p-6 space-y-5">
             {/* Nama Tahun Ajaran */}
-            <div className="mb-4">
+            <div>
               <label>
-                <div className="flex items-center gap-1.5 mb-1">
-                  <Calendar className="h-3.5 w-3.5 text-indigo-500" />
+                <div className="flex items-center gap-1.5 mb-2">
+                  <Calendar className="h-4 w-4 text-indigo-500" />
                   <Text as="div" size="2" weight="medium">
                     Nama Tahun Ajaran <span className="text-red-600">*</span>
                   </Text>
@@ -149,17 +149,17 @@ function TahunAjaranFormDialog({
                   required
                   style={{ borderRadius: 0 }}
                 />
-                <Text size="1" className="text-slate-500 mt-1">
+                <Text size="1" className="text-slate-500 mt-1.5">
                   Format: xxxx/xxxx (contoh: 2024/2025, tahun harus berurutan)
                 </Text>
               </label>
             </div>
 
             {/* Tanggal Mulai & Selesai - 2 Columns */}
-            <div className="grid grid-cols-2 gap-4 mb-4">
+            <div className="grid grid-cols-2 gap-4">
               <label>
-                <div className="flex items-center gap-1.5 mb-1">
-                  <Calendar className="h-3.5 w-3.5 text-green-500" />
+                <div className="flex items-center gap-1.5 mb-2">
+                  <Calendar className="h-4 w-4 text-green-500" />
                   <Text as="div" size="2" weight="medium">
                     Tanggal Mulai <span className="text-red-600">*</span>
                   </Text>
@@ -178,8 +178,8 @@ function TahunAjaranFormDialog({
               </label>
 
               <label>
-                <div className="flex items-center gap-1.5 mb-1">
-                  <Calendar className="h-3.5 w-3.5 text-red-500" />
+                <div className="flex items-center gap-1.5 mb-2">
+                  <Calendar className="h-4 w-4 text-red-500" />
                   <Text as="div" size="2" weight="medium">
                     Tanggal Selesai <span className="text-red-600">*</span>
                   </Text>
@@ -199,7 +199,7 @@ function TahunAjaranFormDialog({
             </div>
 
             {/* Status Aktif */}
-            <div className="mb-4 p-3 bg-slate-50 border border-slate-200">
+            <div className="p-3 bg-slate-50 border border-slate-200">
               <label>
                 <Flex align="center" gap="2">
                   <Switch
@@ -224,7 +224,7 @@ function TahunAjaranFormDialog({
 
             {/* Error Alert */}
             {error && (
-              <div className="flex items-start gap-3 bg-red-50 border-2 border-red-200 text-red-700 px-4 py-3 mb-4">
+              <div className="flex items-start gap-3 bg-red-50 border-2 border-red-200 text-red-700 px-4 py-3">
                 <AlertCircle className="h-5 w-5 text-red-500 mt-0.5 shrink-0" />
                 <div>
                   <Text size="2" weight="medium" className="text-red-700">

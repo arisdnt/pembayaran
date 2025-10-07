@@ -89,13 +89,13 @@ function RiwayatWaliKelasFormDialog({
         {/* Content */}
         <form onSubmit={handleSubmit} className="overflow-auto bg-white" style={{ maxHeight: 'calc(90vh - 140px)' }}>
           <div className="p-6">
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-2 gap-4">
               {/* Left Column */}
-              <div className="space-y-4">
+              <div className="space-y-5">
                 {/* Wali Kelas */}
                 <div>
                   <label className="flex items-center gap-1.5 mb-2">
-                    <UserCheck className="h-3.5 w-3.5 text-slate-600" />
+                    <UserCheck className="h-4 w-4 text-slate-600" />
                     <Text size="2" weight="medium" className="text-slate-700">
                       Wali Kelas <span className="text-red-500">*</span>
                     </Text>
@@ -123,7 +123,7 @@ function RiwayatWaliKelasFormDialog({
                 {/* Kelas */}
                 <div>
                   <label className="flex items-center gap-1.5 mb-2">
-                    <UserCheck className="h-3.5 w-3.5 text-slate-600" />
+                    <UserCheck className="h-4 w-4 text-slate-600" />
                     <Text size="2" weight="medium" className="text-slate-700">
                       Kelas <span className="text-red-500">*</span>
                     </Text>
@@ -151,7 +151,7 @@ function RiwayatWaliKelasFormDialog({
                 {/* Tahun Ajaran */}
                 <div>
                   <label className="flex items-center gap-1.5 mb-2">
-                    <Calendar className="h-3.5 w-3.5 text-slate-600" />
+                    <Calendar className="h-4 w-4 text-slate-600" />
                     <Text size="2" weight="medium" className="text-slate-700">
                       Tahun Ajaran <span className="text-red-500">*</span>
                     </Text>
@@ -178,11 +178,11 @@ function RiwayatWaliKelasFormDialog({
               </div>
 
               {/* Right Column */}
-              <div className="space-y-4">
+              <div className="space-y-5">
                 {/* Status */}
                 <div>
                   <label className="flex items-center gap-1.5 mb-2">
-                    <AlertCircle className="h-3.5 w-3.5 text-slate-600" />
+                    <AlertCircle className="h-4 w-4 text-slate-600" />
                     <Text size="2" weight="medium" className="text-slate-700">
                       Status <span className="text-red-500">*</span>
                     </Text>

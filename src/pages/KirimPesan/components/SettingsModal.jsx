@@ -163,7 +163,7 @@ export default function SettingsModal({ open, onOpenChange }) {
               Memuat pengaturan...
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-5">
               {/* API Key Input */}
               <div>
                 <label className="block text-sm font-medium mb-2">
@@ -191,7 +191,7 @@ export default function SettingsModal({ open, onOpenChange }) {
                     )}
                   </button>
                 </div>
-                <p className="text-xs text-slate-600 mt-1">
+                <p className="text-xs text-slate-600 mt-1.5">
                   Dapatkan API Key dari{' '}
                   <a
                     href="https://fonnte.com/dashboard"

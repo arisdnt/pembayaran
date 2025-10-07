@@ -94,7 +94,7 @@ export function EditRincianModal({
           </div>
 
           {/* Modal Body */}
-          <div className="p-6 space-y-6 flex-1 overflow-y-auto">
+          <div className="p-6 space-y-5 flex-1 overflow-y-auto">
             {/* Item Info - Consistent with system design */}
             <div className="border-2 border-slate-300 bg-white shadow-sm">
               <div className="bg-gradient-to-b from-amber-100 to-amber-50 border-b-2 border-amber-300 px-4 py-3">
@@ -108,7 +108,7 @@ export function EditRincianModal({
               </div>
 
               {/* Edit Form */}
-              <div className="p-4 space-y-4">
+              <div className="p-6 space-y-5">
                 <div>
                   <Text size="2" weight="medium" className="mb-2 block text-slate-700">Deskripsi Item</Text>
                   <TextField.Root
@@ -131,7 +131,7 @@ export function EditRincianModal({
                     className="w-full"
                   />
                   {jumlah && (
-                    <Text size="2" weight="medium" className="text-emerald-700 font-mono mt-2 block">
+                    <Text size="2" weight="medium" className="text-emerald-700 font-mono mt-1.5 block">
                       {formatCurrency(parseFloat(jumlah) || 0)}
                     </Text>
                   )}

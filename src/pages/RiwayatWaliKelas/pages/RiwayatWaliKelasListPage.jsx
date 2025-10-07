@@ -19,6 +19,7 @@ function RiwayatWaliKelasContent() {
     setError,
     deleteItem,
     saveItem,
+    toggleStatus,
     waliKelasList,
     kelasList,
     tahunAjaranList,
@@ -122,6 +123,7 @@ function RiwayatWaliKelasContent() {
               selectedItem={selectedItem}
               onSelectItem={setSelectedItem}
               onViewDetail={handleOpenDetail}
+              onToggleStatus={toggleStatus}
               tahunAjaranList={tahunAjaranList}
             />
           </div>
