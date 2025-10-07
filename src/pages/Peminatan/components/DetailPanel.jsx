@@ -84,7 +84,7 @@ export function DetailPanel({ selectedItem, isLoading = false, isRefreshing = fa
             <div className="flex items-center gap-2 mb-1">
               <Hash className="h-4 w-4 text-blue-500" />
               <Text size="1" weight="medium" className="text-slate-600 uppercase tracking-wider">
-                Kode
+                Kode (Auto-Generated)
               </Text>
             </div>
             <Text size="2" className="text-slate-900 font-semibold">

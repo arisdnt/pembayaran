@@ -53,7 +53,7 @@ function PeminatanContent() {
     setEditMode(false)
     setCurrentItem({
       id: '',
-      kode: '',
+      kode: '', // Akan digenerate otomatis
       nama: '',
       keterangan: '',
       tingkat_min: '',

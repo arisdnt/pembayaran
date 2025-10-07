@@ -3,6 +3,17 @@ import { useMemo, useState } from 'react'
 export function usePeminatanFilters(data) {
   const [searchQuery, setSearchQuery] = useState('')
   const [filterStatus, setFilterStatus] = useState('all')
+  const [filterTingkat, setFilterTingkat] = useState('all')
+
+  // Get unique tingkat from data (untuk dropdown filter)
+  const tingkatList = useMemo(() => {
+    const tingkatSet = new Set()
+    data.forEach((item) => {
+      if (item.tingkat_min) tingkatSet.add(item.tingkat_min)
+      if (item.tingkat_max) tingkatSet.add(item.tingkat_max)
+    })
+    return Array.from(tingkatSet).sort((a, b) => a - b)
+  }, [data])
 
   const filteredData = useMemo(() => {
     let filtered = [...data]
@@ -22,8 +33,18 @@ export function usePeminatanFilters(data) {
       filtered = filtered.filter((item) => item.aktif === false)
     }
 
+    if (filterTingkat !== 'all') {
+      const tingkat = parseInt(filterTingkat)
+      filtered = filtered.filter((item) => {
+        // Filter: tingkat harus berada dalam range tingkat_min dan tingkat_max
+        const minMatch = item.tingkat_min === null || tingkat >= item.tingkat_min
+        const maxMatch = item.tingkat_max === null || tingkat <= item.tingkat_max
+        return minMatch && maxMatch
+      })
+    }
+
     return filtered
-  }, [data, searchQuery, filterStatus])
+  }, [data, searchQuery, filterStatus, filterTingkat])
 
   const stats = useMemo(() => {
     return {
@@ -34,11 +55,12 @@ export function usePeminatanFilters(data) {
     }
   }, [data, filteredData])
 
-  const hasActiveFilters = searchQuery.trim() || filterStatus !== 'all'
+  const hasActiveFilters = searchQuery.trim() || filterStatus !== 'all' || filterTingkat !== 'all'
 
   const handleClearFilters = () => {
     setSearchQuery('')
     setFilterStatus('all')
+    setFilterTingkat('all')
   }
 
   return {
@@ -46,6 +68,9 @@ export function usePeminatanFilters(data) {
     setSearchQuery,
     filterStatus,
     setFilterStatus,
+    filterTingkat,
+    setFilterTingkat,
+    tingkatList,
     filteredData,
     stats,
     hasActiveFilters,

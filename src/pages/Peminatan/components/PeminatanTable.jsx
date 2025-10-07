@@ -20,6 +20,9 @@ export function PeminatanTable({
     setSearchQuery,
     filterStatus,
     setFilterStatus,
+    filterTingkat,
+    setFilterTingkat,
+    tingkatList,
     filteredData,
     stats,
     hasActiveFilters,
@@ -95,6 +98,43 @@ export function PeminatanTable({
                   <Select.Item value="nonaktif" style={{ borderRadius: 0 }} className="hover:bg-blue-50 cursor-pointer px-3 py-2">
                     ❌ Non-Aktif
                   </Select.Item>
+                </Select.Content>
+              </Select.Root>
+            </div>
+
+            {/* Filter Tingkat */}
+            <div className="flex items-center gap-2">
+              <Select.Root value={filterTingkat} onValueChange={setFilterTingkat}>
+                <Select.Trigger 
+                  style={{ 
+                    borderRadius: 0, 
+                    minWidth: '140px',
+                    border: '1px solid #cbd5e1',
+                    backgroundColor: '#ffffff'
+                  }}
+                  className="cursor-pointer font-sans"
+                />
+                <Select.Content 
+                  position="popper"
+                  side="bottom"
+                  align="start"
+                  sideOffset={4}
+                  style={{ borderRadius: 0 }}
+                  className="border-2 border-slate-300 shadow-lg bg-white z-50"
+                >
+                  <Select.Item value="all" style={{ borderRadius: 0 }} className="hover:bg-blue-50 cursor-pointer px-3 py-2">
+                    🎓 Semua Tingkat
+                  </Select.Item>
+                  {tingkatList.map((tingkat) => (
+                    <Select.Item 
+                      key={tingkat} 
+                      value={tingkat.toString()} 
+                      style={{ borderRadius: 0 }} 
+                      className="hover:bg-blue-50 cursor-pointer px-3 py-2"
+                    >
+                      Tingkat {tingkat}
+                    </Select.Item>
+                  ))}
                 </Select.Content>
               </Select.Root>
             </div>

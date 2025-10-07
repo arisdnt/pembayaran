@@ -3,6 +3,7 @@ import { useAppRefresh } from '../../../hooks/useAppRefresh'
 import { db } from '../../../offline/db'
 import { enqueueDelete, enqueueInsert, enqueueUpdate } from '../../../offline/outbox'
 import { useOffline } from '../../../contexts/OfflineContext'
+import { generateKodePeminatan } from '../../../offline/actions/peminatan'
 
 export function usePeminatan() {
   const { status } = useOffline()
@@ -50,39 +51,29 @@ export function usePeminatan() {
   }, [peminatanRows, psRows])
 
   const saveItem = async (formData, isEdit) => {
-    const payload = {
-      kode: formData.kode,
-      nama: formData.nama,
-      keterangan: formData.keterangan || null,
-      tingkat_min: formData.tingkat_min ? Number(formData.tingkat_min) : null,
-      tingkat_max: formData.tingkat_max ? Number(formData.tingkat_max) : null,
-      aktif: formData.aktif,
-    }
-
-    if (payload.tingkat_min && payload.tingkat_max && payload.tingkat_min > payload.tingkat_max) {
+    // Validasi tingkat min dan max
+    const tingkatMin = formData.tingkat_min ? Number(formData.tingkat_min) : null
+    const tingkatMax = formData.tingkat_max ? Number(formData.tingkat_max) : null
+    
+    if (tingkatMin && tingkatMax && tingkatMin > tingkatMax) {
       throw new Error('Tingkat minimum tidak boleh lebih besar dari tingkat maksimum')
     }
 
-    // Check duplicate kode before insert
-    if (!isEdit) {
-      const existing = await db.peminatan
-        .where('kode')
-        .equalsIgnoreCase(payload.kode.trim())
-        .first()
-      
-      if (existing) {
-        throw new Error(`Kode "${payload.kode}" sudah digunakan. Silakan gunakan kode yang berbeda.`)
-      }
-    } else {
-      // Check duplicate kode for edit (exclude current item)
-      const existing = await db.peminatan
-        .where('kode')
-        .equalsIgnoreCase(payload.kode.trim())
-        .first()
-      
-      if (existing && existing.id !== formData.id) {
-        throw new Error(`Kode "${payload.kode}" sudah digunakan. Silakan gunakan kode yang berbeda.`)
-      }
+    // Generate kode otomatis berdasarkan nama dan tingkat
+    let kode = formData.kode
+    
+    // Generate kode untuk data baru atau jika kode kosong
+    if (!isEdit || !kode) {
+      kode = await generateKodePeminatan(formData.nama, tingkatMin, tingkatMax)
+    }
+
+    const payload = {
+      kode: kode,
+      nama: formData.nama,
+      keterangan: formData.keterangan || null,
+      tingkat_min: tingkatMin,
+      tingkat_max: tingkatMax,
+      aktif: formData.aktif,
     }
 
     try {

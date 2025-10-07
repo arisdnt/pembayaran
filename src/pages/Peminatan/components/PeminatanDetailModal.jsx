@@ -67,7 +67,7 @@ export function PeminatanDetailModal({ open, onOpenChange, peminatan }) {
                     {peminatan.nama}
                   </Text>
                   <Text size="2" className="text-slate-600 block mt-1">
-                    Kode: {peminatan.kode}
+                    Kode (Auto-Generated): <span className="font-semibold">{peminatan.kode}</span>
                   </Text>
                 </div>
                 <Badge

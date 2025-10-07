@@ -62,8 +62,8 @@ export function PeminatanFormDialog({
     setSubmitting(true)
     setError('')
 
-    if (!formData.kode || !formData.nama) {
-      setError('Kode dan Nama Peminatan wajib diisi')
+    if (!formData.nama) {
+      setError('Nama Peminatan wajib diisi')
       setSubmitting(false)
       return
     }
@@ -148,27 +148,8 @@ export function PeminatanFormDialog({
         {/* Content */}
         <form onSubmit={handleSubmit} className="overflow-auto bg-white" style={{ maxHeight: 'calc(90vh - 140px)' }}>
           <div className="p-6">
-            {/* Row 1: Kode & Nama - 2 Columns */}
+            {/* Row 1: Nama & Keterangan - 2 Columns */}
             <div className="grid grid-cols-2 gap-4 mb-4">
-              <label>
-                <div className="flex items-center gap-1.5 mb-1">
-                  <Hash className="h-3.5 w-3.5 text-blue-500" />
-                  <Text as="div" size="2" weight="medium">
-                    Kode <span className="text-red-600">*</span>
-                  </Text>
-                </div>
-                <TextField.Root
-                  placeholder="Contoh: IPA, IPS, BHS"
-                  value={formData.kode}
-                  onChange={(e) => setFormData({ ...formData, kode: e.target.value })}
-                  style={{ borderRadius: 0 }}
-                  required
-                />
-                <Text size="1" className="text-slate-500 mt-1">
-                  Kode unik untuk identifikasi
-                </Text>
-              </label>
-
               <label>
                 <div className="flex items-center gap-1.5 mb-1">
                   <BookOpen className="h-3.5 w-3.5 text-indigo-500" />
@@ -177,7 +158,7 @@ export function PeminatanFormDialog({
                   </Text>
                 </div>
                 <TextField.Root
-                  placeholder="Contoh: IPA, IPS, Bahasa"
+                  placeholder="Contoh: IPA, IPS, Bahasa dan Sastra"
                   value={formData.nama}
                   onChange={(e) => setFormData({ ...formData, nama: e.target.value })}
                   style={{ borderRadius: 0 }}
@@ -187,10 +168,7 @@ export function PeminatanFormDialog({
                   Nama lengkap peminatan
                 </Text>
               </label>
-            </div>
 
-            {/* Row 2: Keterangan - Full Width */}
-            <div className="mb-4">
               <label>
                 <div className="flex items-center gap-1.5 mb-1">
                   <FileText className="h-3.5 w-3.5 text-purple-500" />
@@ -198,11 +176,11 @@ export function PeminatanFormDialog({
                     Keterangan
                   </Text>
                 </div>
-                <TextArea
+                <TextField.Root
                   placeholder="Deskripsi atau catatan tentang peminatan ini"
                   value={formData.keterangan}
                   onChange={(e) => setFormData({ ...formData, keterangan: e.target.value })}
-                  style={{ borderRadius: 0, minHeight: '80px' }}
+                  style={{ borderRadius: 0 }}
                 />
                 <Text size="1" className="text-slate-500 mt-1">
                   Informasi tambahan (opsional)
