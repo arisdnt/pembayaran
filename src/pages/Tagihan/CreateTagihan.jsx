@@ -35,6 +35,16 @@ function CreateTagihanContent() {
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
+  const uniqueById = (items) => {
+    const map = new Map()
+    items.forEach(item => {
+      if (item?.id && !map.has(item.id)) {
+        map.set(item.id, item)
+      }
+    })
+    return Array.from(map.values())
+  }
+
   // Load peminatan list
   useEffect(() => {
     const fetchPeminatan = async () => {
@@ -64,7 +74,7 @@ function CreateTagihanContent() {
         if (filterTingkat && j.tingkat !== filterTingkat) return false
         return true
       })
-      setJenisPembayaranList(filtered)
+      setJenisPembayaranList(uniqueById(filtered))
     }
     fetchJenis()
   }, [targetType, formData.id_riwayat_kelas_siswa, selectedTahunAjaran, selectedTingkat, riwayatKelasSiswaList])

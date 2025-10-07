@@ -53,19 +53,84 @@ export function usePeminatanSiswa() {
 
   const saveItem = async (formData, isEdit) => {
     try {
-      const payload = {
-        id_siswa: formData.id_siswa,
-        id_peminatan: formData.id_peminatan,
-        id_tahun_ajaran: formData.id_tahun_ajaran,
-        tingkat: formData.tingkat,
-        tanggal_mulai: formData.tanggal_mulai,
-        tanggal_selesai: formData.tanggal_selesai || null,
-        catatan: formData.catatan || null,
-      }
+      // EDIT MODE: Single update
       if (isEdit) {
+        const payload = {
+          id_siswa: formData.id_siswa,
+          id_peminatan: formData.id_peminatan,
+          id_tahun_ajaran: formData.id_tahun_ajaran,
+          tingkat: formData.tingkat,
+          tanggal_mulai: formData.tanggal_mulai,
+          tanggal_selesai: formData.tanggal_selesai || null,
+          catatan: formData.catatan || null,
+        }
         await enqueueUpdate('peminatan_siswa', formData.id, payload)
-      } else {
-        await enqueueInsert('peminatan_siswa', payload)
+        return
+      }
+
+      // CREATE MODE: Bulk insert
+      // formData.siswa_ids is an array of siswa IDs
+      if (!formData.siswa_ids || formData.siswa_ids.length === 0) {
+        throw new Error('Minimal 1 siswa harus dipilih')
+      }
+
+      // Cek siswa yang sudah punya peminatan di tahun ajaran & tingkat yang sama
+      // Fetch semua dan filter di JavaScript karena tidak ada compound index
+      const allPeminatanSiswa = await db.peminatan_siswa.toArray()
+      const existingPeminatanSiswa = allPeminatanSiswa.filter(
+        ps => ps.id_tahun_ajaran === formData.id_tahun_ajaran && ps.tingkat === formData.tingkat
+      )
+      
+      const existingSiswaIds = new Set(existingPeminatanSiswa.map(ps => ps.id_siswa))
+      
+      // Filter siswa yang belum punya peminatan
+      const newSiswaIds = formData.siswa_ids.filter(id => !existingSiswaIds.has(id))
+      const duplicateSiswaIds = formData.siswa_ids.filter(id => existingSiswaIds.has(id))
+      
+      // Jika ada siswa yang sudah punya peminatan, beri warning
+      if (duplicateSiswaIds.length > 0) {
+        const siswaList = await db.siswa.toArray()
+        const siswaMap = new Map(siswaList.map(s => [s.id, s]))
+        const duplicateNames = duplicateSiswaIds
+          .map(id => siswaMap.get(id)?.nama_lengkap || id)
+          .join(', ')
+        
+        if (newSiswaIds.length === 0) {
+          throw new Error(`Semua siswa yang dipilih sudah memiliki peminatan di tingkat ${formData.tingkat}: ${duplicateNames}`)
+        } else {
+          // Ada siswa baru yang bisa di-insert, lanjutkan dengan warning
+          console.warn(`Siswa berikut dilewati karena sudah punya peminatan: ${duplicateNames}`)
+        }
+      }
+
+      if (newSiswaIds.length === 0) {
+        throw new Error('Tidak ada siswa baru yang bisa ditambahkan')
+      }
+
+      // Insert untuk setiap siswa yang belum punya peminatan
+      const insertPromises = newSiswaIds.map(id_siswa => {
+        const payload = {
+          id_siswa: id_siswa,
+          id_peminatan: formData.id_peminatan,
+          id_tahun_ajaran: formData.id_tahun_ajaran,
+          tingkat: formData.tingkat,
+          tanggal_mulai: formData.tanggal_mulai,
+          tanggal_selesai: formData.tanggal_selesai || null,
+          catatan: formData.catatan || null,
+        }
+        return enqueueInsert('peminatan_siswa', payload)
+      })
+
+      await Promise.all(insertPromises)
+      
+      // Jika ada siswa yang dilewati, throw error dengan info
+      if (duplicateSiswaIds.length > 0) {
+        const siswaList = await db.siswa.toArray()
+        const siswaMap = new Map(siswaList.map(s => [s.id, s]))
+        const duplicateNames = duplicateSiswaIds
+          .map(id => siswaMap.get(id)?.nama_lengkap || id)
+          .join(', ')
+        throw new Error(`Berhasil menambahkan ${newSiswaIds.length} siswa. ${duplicateSiswaIds.length} siswa dilewati karena sudah memiliki peminatan: ${duplicateNames}`)
       }
     } catch (err) {
       setError(err.message)

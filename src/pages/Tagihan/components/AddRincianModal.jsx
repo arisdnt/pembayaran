@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { Text, Badge, Dialog } from '@radix-ui/themes'
 import { Plus, Search, X, Info } from 'lucide-react'
 
@@ -18,9 +19,17 @@ export function AddRincianModal({
   existingItems = [],
   filterText = '',
 }) {
-  const availableJenisPembayaran = jenisPembayaranList.filter(
-    jenis => !existingItems.some(item => item.id_jenis_pembayaran === jenis.id),
-  )
+  const availableJenisPembayaran = useMemo(() => {
+    const uniqueMap = new Map()
+    jenisPembayaranList.forEach(jenis => {
+      if (jenis?.id && !uniqueMap.has(jenis.id)) {
+        uniqueMap.set(jenis.id, jenis)
+      }
+    })
+    return Array.from(uniqueMap.values()).filter(
+      jenis => !existingItems.some(item => item.id_jenis_pembayaran === jenis.id),
+    )
+  }, [jenisPembayaranList, existingItems])
 
   const handleSelectJenis = jenis => {
     const newItem = {
