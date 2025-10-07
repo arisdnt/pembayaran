@@ -96,9 +96,6 @@ function KelasFormDialog({
               <Text size="3" weight="bold" className="text-slate-800 uppercase tracking-wider">
                 {isEdit ? 'Edit Kelas' : 'Tambah Kelas'}
               </Text>
-              <Text size="1" className="text-slate-500 block mt-0.5">
-                {isEdit ? 'Perbarui informasi kelas' : 'Tambahkan kelas baru ke sistem'}
-              </Text>
             </div>
           </div>
           <button

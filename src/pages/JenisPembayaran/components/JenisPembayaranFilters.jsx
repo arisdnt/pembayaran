@@ -5,8 +5,6 @@ import { Plus, X } from 'lucide-react'
 export function JenisPembayaranFilters({
   searchQuery,
   setSearchQuery,
-  filterTipe,
-  setFilterTipe,
   filterStatus,
   setFilterStatus,
   filterTahunId,
@@ -53,20 +51,6 @@ export function JenisPembayaranFilters({
             )}
           </TextField.Root>
         </div>
-
-        {/* Filter Tipe */}
-        <Select.Root value={filterTipe} onValueChange={setFilterTipe}>
-          <Select.Trigger
-            placeholder="Tipe"
-            style={{ borderRadius: 0, border: '1px solid #cbd5e1', backgroundColor: '#ffffff', width: '140px' }}
-          />
-          <Select.Content style={{ borderRadius: 0 }}>
-            <Select.Item value="all">Semua Tipe</Select.Item>
-            <Select.Item value="bulanan">Bulanan</Select.Item>
-            <Select.Item value="tahunan">Tahunan</Select.Item>
-            <Select.Item value="sekali">Sekali</Select.Item>
-          </Select.Content>
-        </Select.Root>
 
         {/* Filter Status */}
         <Select.Root value={filterStatus} onValueChange={setFilterStatus}>

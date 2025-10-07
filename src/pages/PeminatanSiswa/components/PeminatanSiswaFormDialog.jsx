@@ -216,9 +216,6 @@ export function PeminatanSiswaFormDialog({
               <Text size="3" weight="bold" className="text-slate-800 uppercase tracking-wider">
                 {isEdit ? 'Edit Peminatan Siswa' : 'Tambah Peminatan Siswa'}
               </Text>
-              <Text size="1" className="text-slate-500 block mt-0.5">
-                {isEdit ? 'Perbarui informasi peminatan siswa' : 'Daftarkan siswa ke peminatan tertentu'}
-              </Text>
             </div>
           </div>
           <button

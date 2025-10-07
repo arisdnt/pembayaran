@@ -24,7 +24,8 @@ export function PaymentConfirmationModal({
   payments,
   totalAmount,
   siswaInfo,
-  submitting
+  submitting,
+  generatedNumbers = [],
 }) {
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -44,11 +45,11 @@ export function PaymentConfirmationModal({
                   Konfirmasi Pembayaran
                 </Text>
               </Dialog.Title>
-              <Dialog.Description asChild>
-                <Text size="1" className="text-amber-100 block leading-none mt-0">
-                  Periksa kembali detail pembayaran sebelum menyimpan
+              {generatedNumbers.length > 0 && (
+                <Text size="1" className="text-amber-100 block leading-none mt-1 font-mono">
+                  Nomor pembayaran utama: {generatedNumbers[0]?.nomor_pembayaran}
                 </Text>
-              </Dialog.Description>
+              )}
             </div>
           </div>
           <button
@@ -76,92 +77,110 @@ export function PaymentConfirmationModal({
             </div>
 
             <div className="space-y-3">
-              {payments.map((item, index) => (
-                <div
-                  key={index}
-                  className="border-2 border-slate-300 bg-white"
-                >
-                  {/* Header Item */}
-                  <div className="bg-gradient-to-b from-slate-100 to-slate-50 px-3 py-2 border-b-2 border-slate-300 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Badge color="blue" variant="soft" size="1" style={{ borderRadius: 0 }}>
-                        #{index + 1}
-                      </Badge>
-                      <Text size="2" weight="bold" className="text-slate-800">
-                        {item.tagihan.judul}
-                      </Text>
-                    </div>
-                    <Text size="2" weight="bold" className="font-mono text-green-700 text-right">
-                      {formatCurrency(item.payment.jumlah_dibayar)}
-                    </Text>
-                  </div>
-
-                  {/* Detail Item */}
-                  <div className="p-3 space-y-2 text-sm">
-                    <div className="grid grid-cols-2 gap-x-4 gap-y-1">
-                      <div className="flex justify-between">
-                        <Text size="1" className="text-slate-500">Nomor Tagihan:</Text>
-                        <Text size="1" className="font-mono text-slate-700">
-                          {item.tagihan.nomor_tagihan}
-                        </Text>
-                      </div>
-                      <div className="flex justify-between">
-                        <Text size="1" className="text-slate-500">Tahun Ajaran:</Text>
-                        <Text size="1" className="text-slate-700">
-                          {item.tagihan.tahun_ajaran || '-'}
-                        </Text>
-                      </div>
-                      <div className="flex justify-between">
-                        <Text size="1" className="text-slate-500">Total Tagihan:</Text>
-                        <Text size="1" className="font-mono text-slate-700 text-right">
-                          {formatCurrency(item.summary.total)}
-                        </Text>
-                      </div>
-                      <div className="flex justify-between">
-                        <Text size="1" className="text-slate-500">Kelas:</Text>
-                        <Text size="1" className="text-slate-700">
-                          {item.tagihan.kelas || '-'}
-                        </Text>
-                      </div>
-                      <div className="flex justify-between">
-                        <Text size="1" className="text-slate-500">Sudah Dibayar:</Text>
-                        <Text size="1" className="font-mono text-green-700 text-right">
-                          {formatCurrency(item.summary.dibayar)}
-                        </Text>
-                      </div>
-                      <div className="flex justify-between">
-                        <Text size="1" className="text-slate-500">Metode:</Text>
-                        <Badge color="indigo" variant="soft" size="1" style={{ borderRadius: 0 }}>
-                          {getMetodeLabel(item.payment.metode_pembayaran)}
+              {payments.map((item, index) => {
+                const nomorPreview = generatedNumbers[index] || null
+                return (
+                  <div
+                    key={index}
+                    className="border-2 border-slate-300 bg-white"
+                  >
+                    {/* Header Item */}
+                    <div className="bg-gradient-to-b from-slate-100 to-slate-50 px-3 py-2 border-b-2 border-slate-300 flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2">
+                        <Badge color="blue" variant="soft" size="1" style={{ borderRadius: 0 }}>
+                          #{index + 1}
                         </Badge>
-                      </div>
-                      <div className="flex justify-between">
-                        <Text size="1" className="text-slate-500">Sisa Tagihan:</Text>
-                        <Text size="1" className="font-mono font-bold text-red-700 text-right">
-                          {formatCurrency(item.summary.sisa)}
+                        <Text size="2" weight="bold" className="text-slate-800">
+                          {item.tagihan.judul}
                         </Text>
                       </div>
-                      {item.payment.referensi_pembayaran && (
+                      <div className="text-right space-y-1">
+                        {nomorPreview?.nomor_pembayaran && (
+                          <Text size="1" className="font-mono text-slate-500 block">
+                            {nomorPreview.nomor_pembayaran}
+                          </Text>
+                        )}
+                        <Text size="2" weight="bold" className="font-mono text-green-700 block">
+                          {formatCurrency(item.payment.jumlah_dibayar)}
+                        </Text>
+                      </div>
+                    </div>
+
+                    {/* Detail Item */}
+                    <div className="p-3 space-y-2 text-sm">
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                        {nomorPreview?.nomor_transaksi && (
+                          <div className="flex justify-between col-span-2">
+                            <Text size="1" className="text-slate-500">Nomor Transaksi:</Text>
+                            <Text size="1" className="font-mono text-slate-700">
+                              {nomorPreview.nomor_transaksi}
+                            </Text>
+                          </div>
+                        )}
                         <div className="flex justify-between">
-                          <Text size="1" className="text-slate-500">Referensi:</Text>
+                          <Text size="1" className="text-slate-500">Nomor Tagihan:</Text>
                           <Text size="1" className="font-mono text-slate-700">
-                            {item.payment.referensi_pembayaran}
+                            {item.tagihan.nomor_tagihan}
+                          </Text>
+                        </div>
+                        <div className="flex justify-between">
+                          <Text size="1" className="text-slate-500">Tahun Ajaran:</Text>
+                          <Text size="1" className="text-slate-700">
+                            {item.tagihan.tahun_ajaran || '-'}
+                          </Text>
+                        </div>
+                        <div className="flex justify-between">
+                          <Text size="1" className="text-slate-500">Total Tagihan:</Text>
+                          <Text size="1" className="font-mono text-slate-700 text-right">
+                            {formatCurrency(item.summary.total)}
+                          </Text>
+                        </div>
+                        <div className="flex justify-between">
+                          <Text size="1" className="text-slate-500">Kelas:</Text>
+                          <Text size="1" className="text-slate-700">
+                            {item.tagihan.kelas || '-'}
+                          </Text>
+                        </div>
+                        <div className="flex justify-between">
+                          <Text size="1" className="text-slate-500">Sudah Dibayar:</Text>
+                          <Text size="1" className="font-mono text-green-700 text-right">
+                            {formatCurrency(item.summary.dibayar)}
+                          </Text>
+                        </div>
+                        <div className="flex justify-between">
+                          <Text size="1" className="text-slate-500">Metode:</Text>
+                          <Badge color="indigo" variant="soft" size="1" style={{ borderRadius: 0 }}>
+                            {getMetodeLabel(item.payment.metode_pembayaran)}
+                          </Badge>
+                        </div>
+                        <div className="flex justify-between">
+                          <Text size="1" className="text-slate-500">Sisa Tagihan:</Text>
+                          <Text size="1" className="font-mono font-bold text-red-700 text-right">
+                            {formatCurrency(item.summary.sisa)}
+                          </Text>
+                        </div>
+                        {item.payment.referensi_pembayaran && (
+                          <div className="flex justify-between">
+                            <Text size="1" className="text-slate-500">Referensi:</Text>
+                            <Text size="1" className="font-mono text-slate-700">
+                              {item.payment.referensi_pembayaran}
+                            </Text>
+                          </div>
+                        )}
+                      </div>
+
+                      {item.payment.catatan && (
+                        <div className="pt-2 border-t border-slate-200">
+                          <Text size="1" className="text-slate-500">Catatan:</Text>
+                          <Text size="1" className="text-slate-700 italic">
+                            "{item.payment.catatan}"
                           </Text>
                         </div>
                       )}
                     </div>
-
-                    {item.payment.catatan && (
-                      <div className="pt-2 border-t border-slate-200">
-                        <Text size="1" className="text-slate-500">Catatan:</Text>
-                        <Text size="1" className="text-slate-700 italic">
-                          "{item.payment.catatan}"
-                        </Text>
-                      </div>
-                    )}
                   </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           </div>
 
@@ -220,6 +239,30 @@ export function PaymentConfirmationModal({
                       {payments.length}
                     </Badge>
                   </div>
+                  {generatedNumbers.length > 0 && (
+                    <div className="border border-slate-200 bg-white px-3 py-2 space-y-2">
+                      <Text size="1" className="text-slate-500 uppercase tracking-wider">
+                        Nomor Pembayaran
+                      </Text>
+                      <div className="space-y-1">
+                        {generatedNumbers.map((nomor, idx) => (
+                          <div key={nomor.nomor_pembayaran || idx} className="flex justify-between gap-4">
+                            <Text size="1" className="text-slate-500">#{idx + 1}</Text>
+                            <div className="text-right">
+                              <Text size="1" className="font-mono text-slate-700">
+                                {nomor.nomor_pembayaran || '—'}
+                              </Text>
+                              {nomor.nomor_transaksi && (
+                                <Text size="1" className="font-mono text-slate-400 block">
+                                  {nomor.nomor_transaksi}
+                                </Text>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                   <div className="pt-3 border-t-2 border-slate-300">
                     <Text size="2" className="text-slate-600 mb-2 block">Total Pembayaran:</Text>
                     <div className="text-3xl font-bold font-mono text-green-700 text-right leading-tight">

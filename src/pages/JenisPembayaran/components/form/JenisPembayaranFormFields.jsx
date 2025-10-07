@@ -1,5 +1,5 @@
 import { TextField, Text, Select, Switch } from '@radix-ui/themes'
-import { Hash, Tag, FileText, DollarSign, Calendar, GraduationCap, School, BookOpen } from 'lucide-react'
+import { Tag, FileText, DollarSign, Calendar, GraduationCap, School, BookOpen } from 'lucide-react'
 
 export function JenisPembayaranFormFields({ 
   formData, 
@@ -14,20 +14,6 @@ export function JenisPembayaranFormFields({
       <div className="grid grid-cols-2 gap-4 mb-4">
         <label>
           <div className="flex items-center gap-1.5 mb-1">
-            <Hash className="h-3.5 w-3.5 text-blue-500" />
-            <Text size="2" weight="medium">Kode <span className="text-red-600">*</span></Text>
-          </div>
-          <TextField.Root
-            placeholder="Contoh: SPP, SERAGAM"
-            value={formData.kode}
-            onChange={(e) => setFormData({ ...formData, kode: e.target.value.toUpperCase() })}
-            style={{ borderRadius: 0 }}
-            required
-          />
-        </label>
-
-        <label>
-          <div className="flex items-center gap-1.5 mb-1">
             <Tag className="h-3.5 w-3.5 text-indigo-500" />
             <Text size="2" weight="medium">Nama <span className="text-red-600">*</span></Text>
           </div>
@@ -38,10 +24,9 @@ export function JenisPembayaranFormFields({
             style={{ borderRadius: 0 }}
             required
           />
+          <Text size="1" className="text-slate-500 mt-1">Kode akan digenerate otomatis berdasarkan nama dan tanggal</Text>
         </label>
-      </div>
 
-      <div className="mb-4">
         <label>
           <div className="flex items-center gap-1.5 mb-1">
             <FileText className="h-3.5 w-3.5 text-slate-500" />
@@ -56,7 +41,7 @@ export function JenisPembayaranFormFields({
         </label>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 mb-4">
+      <div className="mb-4">
         <label>
           <div className="flex items-center gap-1.5 mb-1">
             <DollarSign className="h-3.5 w-3.5 text-green-500" />
@@ -70,25 +55,6 @@ export function JenisPembayaranFormFields({
             style={{ borderRadius: 0 }}
           />
           <Text size="1" className="text-slate-500 mt-1">Jumlah dalam Rupiah</Text>
-        </label>
-
-        <label>
-          <div className="flex items-center gap-1.5 mb-1">
-            <Calendar className="h-3.5 w-3.5 text-purple-500" />
-            <Text size="2" weight="medium">Tipe Pembayaran <span className="text-red-600">*</span></Text>
-          </div>
-          <Select.Root 
-            value={formData.tipe_pembayaran} 
-            onValueChange={(value) => setFormData({ ...formData, tipe_pembayaran: value })}
-            required
-          >
-            <Select.Trigger style={{ borderRadius: 0, width: '100%' }} placeholder="Pilih tipe" />
-            <Select.Content style={{ borderRadius: 0 }}>
-              <Select.Item value="bulanan">Bulanan</Select.Item>
-              <Select.Item value="tahunan">Tahunan</Select.Item>
-              <Select.Item value="sekali">Sekali (One-time)</Select.Item>
-            </Select.Content>
-          </Select.Root>
         </label>
       </div>
 
@@ -187,11 +153,11 @@ export function JenisPembayaranFormFields({
           <Select.Root
             value={formData.id_peminatan || 'all'}
             onValueChange={(value) => setFormData({ ...formData, id_peminatan: value === 'all' ? '' : value })}
-            disabled={!formData.id_kelas}
+            disabled={!formData.tingkat}
           >
             <Select.Trigger
               style={{ borderRadius: 0, width: '100%' }}
-              placeholder={!formData.id_kelas ? "Pilih kelas spesifik dulu" : "Semua peminatan"}
+              placeholder={!formData.tingkat ? "Pilih tingkat dulu" : "Semua peminatan"}
             />
             <Select.Content style={{ borderRadius: 0 }}>
               <Select.Item value="all">Semua Peminatan</Select.Item>
@@ -203,7 +169,7 @@ export function JenisPembayaranFormFields({
             </Select.Content>
           </Select.Root>
           <Text size="1" className="text-slate-500 mt-1">
-            {!formData.id_kelas ? '⚠️ Pilih "Semua Kelas" tidak dapat memilih peminatan spesifik' : 'Pilih peminatan atau semua peminatan'}
+            {!formData.tingkat ? '⚠️ Pilih tingkat kelas terlebih dahulu' : 'Peminatan berlaku untuk seluruh tingkat kelas'}
           </Text>
         </label>
       </div>

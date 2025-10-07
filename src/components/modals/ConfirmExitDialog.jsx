@@ -41,9 +41,6 @@ export function ConfirmExitDialog({ open, onOpenChange, onConfirm }) {
               <Text size="3" weight="bold" className="text-slate-800 uppercase tracking-wider">
                 Keluar Aplikasi
               </Text>
-              <Text size="1" className="text-slate-600">
-                Konfirmasi keluar aplikasi
-              </Text>
             </div>
           </div>
           <button

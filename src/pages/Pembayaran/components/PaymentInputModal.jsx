@@ -116,11 +116,6 @@ export function PaymentInputModal({ open, onOpenChange, onSubmit, tagihan, summa
                   Input Pembayaran
                 </Text>
               </Dialog.Title>
-              <Dialog.Description asChild>
-                <Text size="1" className="text-green-100 block leading-none mt-0">
-                  Masukkan nominal yang akan dibayarkan
-                </Text>
-              </Dialog.Description>
             </div>
           </div>
           <button

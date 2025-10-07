@@ -78,9 +78,6 @@ export function TahunAjaranDetailModal({ open, onOpenChange, item }) {
               <Text size="3" weight="bold" className="text-slate-800 uppercase tracking-wider">
                 Detail Tahun Ajaran
               </Text>
-              <Text size="1" className="text-slate-500 block mt-0.5">
-                Informasi lengkap periode akademik
-              </Text>
             </div>
           </div>
           <button

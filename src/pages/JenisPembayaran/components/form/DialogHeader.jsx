@@ -16,11 +16,6 @@ export function DialogHeader({ isEdit, onClose }) {
               {isEdit ? 'Edit Jenis Pembayaran' : 'Tambah Jenis Pembayaran'}
             </Text>
           </Dialog.Title>
-          <Dialog.Description asChild>
-            <Text size="1" className="text-slate-600">
-              {isEdit ? 'Perbarui informasi jenis pembayaran' : 'Tambahkan jenis pembayaran baru'}
-            </Text>
-          </Dialog.Description>
         </div>
       </div>
       <button

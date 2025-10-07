@@ -74,9 +74,6 @@ function RiwayatWaliKelasFormDialog({
               <Text size="3" weight="bold" className="text-slate-800 uppercase tracking-wider">
                 {isEdit ? 'Edit Riwayat Wali Kelas' : 'Tambah Riwayat Wali Kelas'}
               </Text>
-              <Text size="1" className="text-slate-500 block mt-0.5">
-                {isEdit ? 'Perbarui data riwayat penugasan wali kelas' : 'Tambahkan riwayat penugasan wali kelas baru'}
-              </Text>
             </div>
           </div>
           <button

@@ -68,9 +68,6 @@ export function AboutModal({ open, onOpenChange }) {
                   Tentang Aplikasi
                 </Text>
               </div>
-              <Text size="1" className="text-slate-500 italic">
-                Informasi aplikasi dan pengembang
-              </Text>
             </div>
           </div>
           <button

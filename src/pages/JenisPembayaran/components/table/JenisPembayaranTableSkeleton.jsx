@@ -21,11 +21,6 @@ export function JenisPembayaranTableSkeleton() {
             <div className="h-4 w-28 bg-slate-200" />
           </td>
           
-          {/* Tipe */}
-          <td className="px-6 py-4 align-middle">
-            <div className="h-6 w-20 bg-slate-200" />
-          </td>
-          
           {/* Tahun Ajaran */}
           <td className="px-6 py-4 align-middle">
             <div className="h-4 w-32 bg-slate-200" />

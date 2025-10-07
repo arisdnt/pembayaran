@@ -36,11 +36,16 @@ export function CreatePembayaran() {
     error,
     invoiceData,
     setInvoiceData,
+    pendingGeneration,
+    preparePaymentNumbers,
   } = usePaymentFlow()
 
-  const handleSaveClick = () => {
+  const handleSaveClick = async () => {
     if (selectedPayments.length > 0) {
-      setConfirmModalOpen(true)
+      const prepared = await preparePaymentNumbers()
+      if (prepared) {
+        setConfirmModalOpen(true)
+      }
     }
   }
 
@@ -193,6 +198,7 @@ export function CreatePembayaran() {
         totalAmount={totalAmount}
         siswaInfo={selectedSiswa}
         submitting={submitting}
+        generatedNumbers={pendingGeneration?.prepared || []}
       />
 
       {/* Modal Invoice/Bukti Pembayaran */}

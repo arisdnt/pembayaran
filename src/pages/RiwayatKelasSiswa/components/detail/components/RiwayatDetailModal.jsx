@@ -28,9 +28,6 @@ export function RiwayatDetailModal({ open, onOpenChange, riwayat }) {
               <Text size="3" weight="bold" className="text-slate-800 uppercase tracking-wider">
                 Detail Riwayat Kelas
               </Text>
-              <Text size="1" className="text-slate-500 block mt-0.5">
-                Informasi lengkap riwayat kelas siswa
-              </Text>
             </div>
           </div>
           <button

@@ -2,7 +2,7 @@ import { Dialog } from '@radix-ui/themes'
 import { Text, Badge } from '@radix-ui/themes'
 import { X, DollarSign, Clock, FileText, Hash, Tag, Calendar, CheckCircle, AlertCircle } from 'lucide-react'
 import { formatCurrency } from '../../utils/currencyFormatter'
-import { getTipeBadgeColor } from '../../utils/badgeHelper'
+
 
 function formatDateTime(dateStr) {
   if (!dateStr) return '—'
@@ -75,9 +75,6 @@ export function JenisPembayaranDetailModal({ open, onOpenChange, jenisPembayaran
               <Text size="3" weight="bold" className="text-slate-800 uppercase tracking-wider">
                 Detail Jenis Pembayaran
               </Text>
-              <Text size="1" className="text-slate-600">
-                Informasi lengkap jenis pembayaran
-              </Text>
             </div>
           </div>
           <button
@@ -122,17 +119,7 @@ export function JenisPembayaranDetailModal({ open, onOpenChange, jenisPembayaran
                 </Text>
               </FieldItem>
 
-              {jenisPembayaran.tipe_pembayaran && (
-                <FieldItem label="Tipe Pembayaran" icon={Calendar}>
-                  <Badge 
-                    variant="soft" 
-                    color={getTipeBadgeColor(jenisPembayaran.tipe_pembayaran)}
-                    className="text-xs capitalize px-3 py-1"
-                  >
-                    {jenisPembayaran.tipe_pembayaran}
-                  </Badge>
-                </FieldItem>
-              )}
+
 
               {jenisPembayaran.tahun_ajaran && (
                 <FieldItem label="Tahun Ajaran" icon={Calendar}>

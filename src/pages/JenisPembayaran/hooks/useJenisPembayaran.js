@@ -3,6 +3,7 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../../../offline/db'
 import { enqueueDelete, enqueueInsert, enqueueUpdate } from '../../../offline/outbox'
 import { useOffline } from '../../../contexts/OfflineContext'
+import { generateKodeJenisPembayaran } from '../../../offline/actions/jenisPembayaran'
 
 export function useJenisPembayaran() {
   const { status } = useOffline()
@@ -39,17 +40,26 @@ export function useJenisPembayaran() {
 
   const saveItem = async (formData, isEdit) => {
     try {
+      if (!formData.nama) throw new Error('Nama wajib diisi')
       if (!formData.id_tahun_ajaran) throw new Error('Tahun Ajaran wajib dipilih')
       if (!formData.tingkat) throw new Error('Tingkat Kelas wajib dipilih')
-      if (!formData.tipe_pembayaran) throw new Error('Tipe Pembayaran wajib dipilih')
+
+      // Generate kode otomatis jika create atau jika kode kosong
+      let kode = formData.kode
+      if (!isEdit || !kode) {
+        kode = await generateKodeJenisPembayaran(formData.nama)
+      }
+
+      // Set default value untuk tipe_pembayaran (kolom tetap ada di database untuk backward compatibility)
+      const defaultTipePembayaran = 'sekali'
 
       if (isEdit) {
         await enqueueUpdate('jenis_pembayaran', formData.id, {
-          kode: formData.kode,
+          kode: kode,
           nama: formData.nama,
           deskripsi: formData.deskripsi || null,
           jumlah_default: formData.jumlah_default || null,
-          tipe_pembayaran: formData.tipe_pembayaran,
+          tipe_pembayaran: defaultTipePembayaran,
           wajib: formData.wajib,
           status_aktif: formData.status_aktif,
           id_tahun_ajaran: formData.id_tahun_ajaran,
@@ -57,11 +67,11 @@ export function useJenisPembayaran() {
         })
       } else {
         await enqueueInsert('jenis_pembayaran', {
-          kode: formData.kode,
+          kode: kode,
           nama: formData.nama,
           deskripsi: formData.deskripsi || null,
           jumlah_default: formData.jumlah_default || null,
-          tipe_pembayaran: formData.tipe_pembayaran,
+          tipe_pembayaran: defaultTipePembayaran,
           wajib: formData.wajib,
           status_aktif: formData.status_aktif,
           id_tahun_ajaran: formData.id_tahun_ajaran,

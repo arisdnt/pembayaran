@@ -20,6 +20,7 @@ function CreateTagihanContent() {
   const [selectedTingkat, setSelectedTingkat] = useState('')
   const [selectedKelas, setSelectedKelas] = useState('')
   const [jenisPembayaranList, setJenisPembayaranList] = useState([])
+  const [peminatanList, setPeminatanList] = useState([])
 
   const [formData, setFormData] = useState({
     id_riwayat_kelas_siswa: '',
@@ -33,6 +34,15 @@ function CreateTagihanContent() {
   const [rincianItems, setRincianItems] = useState([])
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
+
+  // Load peminatan list
+  useEffect(() => {
+    const fetchPeminatan = async () => {
+      const list = await db.peminatan.toArray()
+      setPeminatanList(list)
+    }
+    fetchPeminatan()
+  }, [])
 
   // Fetch jenis pembayaran dengan filter
   useEffect(() => {
@@ -110,12 +120,6 @@ function CreateTagihanContent() {
     setRincianItems([...rincianItems, newItem])
   }
 
-  const updateCartItem = (index, updatedItem) => {
-    const updated = [...rincianItems]
-    updated[index] = updatedItem
-    setRincianItems(updated)
-  }
-
   const handleSubmit = async () => {
     setSubmitting(true)
     setError('')
@@ -187,6 +191,41 @@ function CreateTagihanContent() {
       setSubmitting(false)
     }
   }
+
+  // Generate filter text for modal header
+  const getFilterText = () => {
+    if (targetType === 'siswa' && formData.id_riwayat_kelas_siswa) {
+      const siswa = riwayatKelasSiswaList?.find(s => s.id === formData.id_riwayat_kelas_siswa)
+      if (!siswa) return ''
+      
+      const parts = []
+      if (siswa.siswa?.nama_lengkap) parts.push(`Siswa: ${siswa.siswa.nama_lengkap}`)
+      if (siswa.tahun_ajaran?.nama) parts.push(`Tahun Ajaran: ${siswa.tahun_ajaran.nama}`)
+      if (siswa.kelas?.tingkat) parts.push(`Tingkat: ${siswa.kelas.tingkat}`)
+      if (siswa.kelas?.nama_sub_kelas) parts.push(`Kelas: ${siswa.kelas.nama_sub_kelas}`)
+      
+      return parts.join(' • ')
+    } else if (targetType !== 'siswa' && selectedTahunAjaran) {
+      const parts = []
+      const ta = tahunAjaranList?.find(ta => ta.id === selectedTahunAjaran)
+      if (ta) parts.push(`Tahun Ajaran: ${ta.nama}`)
+      
+      if (targetType === 'tingkat' && selectedTingkat) {
+        parts.push(`Tingkat: ${selectedTingkat}`)
+      } else if (targetType === 'kelas' && selectedKelas) {
+        const kelas = kelasList?.find(k => k.id === selectedKelas)
+        if (kelas) {
+          parts.push(`Tingkat: ${kelas.tingkat}`)
+          parts.push(`Kelas: ${kelas.nama_sub_kelas}`)
+        }
+      }
+      
+      return parts.join(' • ')
+    }
+    return ''
+  }
+
+  const filterText = getFilterText()
 
   const filterInfo = (targetType === 'siswa' && formData.id_riwayat_kelas_siswa) || (targetType !== 'siswa' && selectedTahunAjaran) ? (
     <div className="px-3 py-2 bg-blue-50 border-2 border-blue-200">
@@ -261,9 +300,12 @@ function CreateTagihanContent() {
             jenisPembayaranList={jenisPembayaranList}
             onAddItem={addItemToCart}
             onRemoveRincian={(idx) => setRincianItems(rincianItems.filter((_, i) => i !== idx))}
-            onEditItem={updateCartItem}
             filterInfo={filterInfo}
             totalTagihan={totalTagihan}
+            filterText={filterText}
+            tahunAjaranList={tahunAjaranList}
+            kelasList={kelasList}
+            peminatanList={peminatanList}
           />
         </div>
       </div>

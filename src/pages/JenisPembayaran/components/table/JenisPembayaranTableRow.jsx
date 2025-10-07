@@ -2,7 +2,6 @@ import { Badge, Text } from '@radix-ui/themes'
 import { Pencil1Icon, TrashIcon } from '@radix-ui/react-icons'
 import { Eye } from 'lucide-react'
 import { formatCurrency } from '../../utils/currencyFormatter'
-import { getTipeBadgeColor } from '../../utils/badgeHelper'
 
 export function JenisPembayaranTableRow({ item, index, onEdit, onDelete, onViewDetail, selectedItem, onSelectItem }) {
   const isSelected = selectedItem?.id === item.id
@@ -38,16 +37,6 @@ export function JenisPembayaranTableRow({ item, index, onEdit, onDelete, onViewD
         <Text size="2" weight="medium" className="text-slate-700">
           {formatCurrency(item.jumlah_default)}
         </Text>
-      </td>
-      <td className="px-4 py-3 border-r border-slate-200">
-        <Badge
-          variant="soft"
-          color={getTipeBadgeColor(item.tipe_pembayaran)}
-          style={{ borderRadius: 0 }}
-          className="text-xs capitalize"
-        >
-          {item.tipe_pembayaran}
-        </Badge>
       </td>
       <td className="px-4 py-3 border-r border-slate-200">
         <Text size="2" className="text-slate-700">{item.tahun_ajaran?.nama || '—'}</Text>

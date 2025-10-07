@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react'
 
 export function useJenisPembayaranFilters(data) {
   const [searchQuery, setSearchQuery] = useState('')
-  const [filterTipe, setFilterTipe] = useState('all')
   const [filterStatus, setFilterStatus] = useState('all')
   const [filterTahunId, setFilterTahunId] = useState('all')
   const [filterTingkat, setFilterTingkat] = useState('all')
@@ -32,10 +31,6 @@ export function useJenisPembayaranFilters(data) {
       )
     }
 
-    if (filterTipe !== 'all') {
-      filtered = filtered.filter((item) => item.tipe_pembayaran === filterTipe)
-    }
-
     if (filterStatus === 'aktif') {
       filtered = filtered.filter((item) => item.status_aktif)
     } else if (filterStatus === 'nonaktif') {
@@ -50,15 +45,14 @@ export function useJenisPembayaranFilters(data) {
     }
 
     return filtered
-  }, [data, searchQuery, filterTipe, filterStatus, filterTahunId, filterTingkat])
+  }, [data, searchQuery, filterStatus, filterTahunId, filterTingkat])
 
-  const hasActiveFilters = searchQuery.trim() || filterTipe !== 'all' || 
+  const hasActiveFilters = searchQuery.trim() || 
     filterStatus !== 'all' || filterTahunId !== 'all' || 
     filterTingkat !== 'all'
 
   const handleClearFilters = () => {
     setSearchQuery('')
-    setFilterTipe('all')
     setFilterStatus('all')
     setFilterTahunId('all')
     setFilterTingkat('all')
@@ -67,8 +61,6 @@ export function useJenisPembayaranFilters(data) {
   return {
     searchQuery,
     setSearchQuery,
-    filterTipe,
-    setFilterTipe,
     filterStatus,
     setFilterStatus,
     filterTahunId,

@@ -6,11 +6,9 @@ export function useJenisPembayaranForm(initialData, isEdit, onSubmit, onClose) {
   const [formData, setFormData] = useState(
     initialData || {
       id: '',
-      kode: '',
       nama: '',
       deskripsi: '',
       jumlah_default: '',
-      tipe_pembayaran: '',
       id_tahun_ajaran: '',
       tingkat: '',
       id_kelas: '',
@@ -31,11 +29,27 @@ export function useJenisPembayaranForm(initialData, isEdit, onSubmit, onClose) {
   }, [formData.tingkat, kelasList])
 
   const filteredPeminatanList = useMemo(() => {
-    if (!formData.id_kelas || !peminatanList || !kelasList) return []
-    const selectedKelas = kelasList.find(k => k.id === formData.id_kelas)
-    if (!selectedKelas || !selectedKelas.id_peminatan) return []
-    return peminatanList.filter(p => p.id === selectedKelas.id_peminatan)
-  }, [formData.id_kelas, peminatanList, kelasList])
+    if (!formData.tingkat || !peminatanList) return []
+    const tingkatNum = parseInt(formData.tingkat, 10)
+    if (isNaN(tingkatNum)) return []
+    
+    // Filter peminatan yang berlaku untuk tingkat ini
+    return peminatanList.filter(p => {
+      // Hanya tampilkan peminatan yang aktif
+      if (!p.aktif) return false
+      
+      // Jika tidak ada batasan tingkat, berarti berlaku untuk semua tingkat
+      if (p.tingkat_min === null && p.tingkat_max === null) return true
+      
+      // Jika ada tingkat_min, cek apakah tingkat >= tingkat_min
+      if (p.tingkat_min !== null && tingkatNum < p.tingkat_min) return false
+      
+      // Jika ada tingkat_max, cek apakah tingkat <= tingkat_max
+      if (p.tingkat_max !== null && tingkatNum > p.tingkat_max) return false
+      
+      return true
+    }).sort((a, b) => a.kode.localeCompare(b.kode))
+  }, [formData.tingkat, peminatanList])
 
   useEffect(() => {
     if (initialData) {
@@ -50,11 +64,9 @@ export function useJenisPembayaranForm(initialData, isEdit, onSubmit, onClose) {
     } else {
       setFormData({
         id: '',
-        kode: '',
         nama: '',
         deskripsi: '',
         jumlah_default: '',
-        tipe_pembayaran: '',
         id_tahun_ajaran: '',
         tingkat: '',
         id_kelas: '',
@@ -66,16 +78,12 @@ export function useJenisPembayaranForm(initialData, isEdit, onSubmit, onClose) {
   }, [initialData])
 
   const validate = () => {
-    if (!formData.kode || !formData.nama) {
-      setError('Kode dan Nama wajib diisi')
+    if (!formData.nama) {
+      setError('Nama wajib diisi')
       return false
     }
     if (!formData.id_tahun_ajaran) {
       setError('Tahun Ajaran wajib dipilih')
-      return false
-    }
-    if (!formData.tipe_pembayaran) {
-      setError('Tipe Pembayaran wajib dipilih')
       return false
     }
     return true

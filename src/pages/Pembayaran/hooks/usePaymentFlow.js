@@ -27,6 +27,7 @@ export function usePaymentFlow() {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [invoiceData, setInvoiceData] = useState(null)
+  const [pendingGeneration, setPendingGeneration] = useState(null)
 
   useEffect(() => {
     loadSiswa()
@@ -138,6 +139,7 @@ export function usePaymentFlow() {
   }
 
   const handleAddPayment = (paymentData) => {
+    setPendingGeneration(null)
     if (editIndex !== null) {
       const updated = [...selectedPayments]
       updated[editIndex] = paymentData
@@ -148,6 +150,7 @@ export function usePaymentFlow() {
   }
 
   const handleRemovePayment = (index) => {
+    setPendingGeneration(null)
     setSelectedPayments(selectedPayments.filter((_, i) => i !== index))
   }
 
@@ -157,6 +160,45 @@ export function usePaymentFlow() {
     setCurrentSummary(item.summary)
     setEditIndex(index)
     setModalOpen(true)
+    setPendingGeneration(null)
+  }
+
+  const preparePaymentNumbers = async () => {
+    if (!selectedSiswa || selectedPayments.length === 0) {
+      setPendingGeneration(null)
+      return null
+    }
+
+    const now = new Date()
+    const prepared = []
+
+    for (let i = 0; i < selectedPayments.length; i += 1) {
+      const nomorPembayaran = await generateNomorPembayaran({
+        siswa: selectedSiswa,
+        timestamp: now,
+        sequenceOffset: i,
+      })
+      const nomorTransaksi = await generateNomorTransaksi({
+        pembayaran: nomorPembayaran,
+        siswa: selectedSiswa,
+        timestamp: now,
+        sequenceOffset: 0,
+      })
+
+      prepared.push({
+        nomor_pembayaran: nomorPembayaran,
+        nomor_transaksi: nomorTransaksi,
+      })
+    }
+
+    const payload = {
+      generatedAt: now,
+      timestamp: now.toISOString(),
+      prepared,
+    }
+
+    setPendingGeneration(payload)
+    return payload
   }
 
   const handleSubmit = async () => {
@@ -170,19 +212,34 @@ export function usePaymentFlow() {
     }
 
     try {
-      const now = new Date()
-      const timestamp = now.toISOString()
+      let generation = pendingGeneration
+
+      if (!generation || generation.prepared.length !== selectedPayments.length) {
+        generation = await preparePaymentNumbers()
+        if (!generation) {
+          throw new Error('Gagal menyiapkan nomor pembayaran')
+        }
+      }
+
+      const timestamp = generation.timestamp
+      const timestampDate = new Date(timestamp)
       const savedPayments = []
 
-      for (const item of selectedPayments) {
-        const nomorPembayaran = await generateNomorPembayaran({
+      for (let index = 0; index < selectedPayments.length; index += 1) {
+        const item = selectedPayments[index]
+        const kandidatPembayaran = generation.prepared[index]?.nomor_pembayaran
+        const kandidatTransaksi = generation.prepared[index]?.nomor_transaksi
+
+        const nomorPembayaran = kandidatPembayaran || await generateNomorPembayaran({
           siswa: selectedSiswa,
-          timestamp: now,
+          timestamp: timestampDate,
+          sequenceOffset: index,
         })
-        const nomorTransaksi = await generateNomorTransaksi({
+        const nomorTransaksi = kandidatTransaksi || await generateNomorTransaksi({
           pembayaran: nomorPembayaran,
           siswa: selectedSiswa,
-          timestamp: now,
+          timestamp: timestampDate,
+          sequenceOffset: 0,
         })
 
         const existingPembayaran = item.tagihan.pembayaran || []
@@ -223,6 +280,7 @@ export function usePaymentFlow() {
         nomor_pembayaran: savedPayments[0]?.nomor_pembayaran || null,
       })
 
+      setPendingGeneration(null)
       setSubmitting(false)
     } catch (err) {
       setError(err.message || 'Gagal menyimpan pembayaran')
@@ -257,5 +315,7 @@ export function usePaymentFlow() {
     error,
     invoiceData,
     setInvoiceData,
+    pendingGeneration,
+    preparePaymentNumbers,
   }
 }

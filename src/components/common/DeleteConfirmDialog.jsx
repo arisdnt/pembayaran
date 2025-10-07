@@ -46,9 +46,6 @@ export function DeleteConfirmDialog({
               <Text size="3" weight="bold" className="text-slate-800 uppercase tracking-wider">
                 {title}
               </Text>
-              <Text size="1" className="text-slate-500 block mt-0.5">
-                Konfirmasi penghapusan data
-              </Text>
             </div>
           </div>
           <button

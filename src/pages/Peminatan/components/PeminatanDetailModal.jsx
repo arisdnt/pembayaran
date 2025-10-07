@@ -41,9 +41,6 @@ export function PeminatanDetailModal({ open, onOpenChange, peminatan }) {
               <Text size="3" weight="bold" className="text-slate-800 uppercase tracking-wider">
                 Detail Peminatan
               </Text>
-              <Text size="1" className="text-slate-500 block mt-0.5">
-                Informasi lengkap peminatan
-              </Text>
             </div>
           </div>
           <button

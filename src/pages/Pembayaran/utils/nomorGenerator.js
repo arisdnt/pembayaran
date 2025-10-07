@@ -30,26 +30,28 @@ async function getNextSequence(prefix, table, fieldName) {
   return currentMax + 1
 }
 
-export async function generateNomorPembayaran({ siswa, timestamp = new Date() }) {
+export async function generateNomorPembayaran({ siswa, timestamp = new Date(), sequenceOffset = 0 }) {
   const date = timestamp instanceof Date ? timestamp : new Date(timestamp)
   const datePart = formatDatePart(date)
   const nisnPart = getNisnSuffix(siswa?.nisn)
   const prefix = `PAY-${datePart}-${nisnPart}`
 
-  const sequence = await getNextSequence(prefix, db.pembayaran, 'nomor_pembayaran')
+  const baseSequence = await getNextSequence(prefix, db.pembayaran, 'nomor_pembayaran')
+  const sequence = baseSequence + sequenceOffset
   const formattedSequence = String(sequence).padStart(3, '0')
 
   return `${prefix}-${formattedSequence}`
 }
 
-export async function generateNomorTransaksi({ siswa, pembayaran, timestamp = new Date() }) {
+export async function generateNomorTransaksi({ siswa, pembayaran, timestamp = new Date(), sequenceOffset = 0 }) {
   const date = timestamp instanceof Date ? timestamp : new Date(timestamp)
   const datePart = formatDatePart(date)
   const nisnPart = getNisnSuffix(siswa?.nisn)
   const paymentSegment = pembayaran ? pembayaran.split('-').slice(-1)[0] : '000'
   const prefix = `TRX-${datePart}-${nisnPart}-${paymentSegment}`
 
-  const sequence = await getNextSequence(prefix, db.rincian_pembayaran, 'nomor_transaksi')
+  const baseSequence = await getNextSequence(prefix, db.rincian_pembayaran, 'nomor_transaksi')
+  const sequence = baseSequence + sequenceOffset
   const formattedSequence = String(sequence).padStart(3, '0')
 
   return `${prefix}-${formattedSequence}`

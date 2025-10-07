@@ -1,7 +1,6 @@
 import { Text, Badge, Button } from '@radix-ui/themes'
-import { ShoppingCart, Plus, Trash2, Edit } from 'lucide-react'
+import { ShoppingCart, Plus, Trash2 } from 'lucide-react'
 import { AddRincianModal } from './AddRincianModal'
-import { EditRincianModal } from './EditRincianModal'
 import { useState } from 'react'
 
 function formatCurrency(value) {
@@ -18,25 +17,14 @@ export function RincianTagihanSection({
   jenisPembayaranList,
   onAddItem,
   onRemoveRincian,
-  onEditItem,
   filterInfo,
-  totalTagihan
+  totalTagihan,
+  filterText = '',
+  tahunAjaranList = [],
+  kelasList = [],
+  peminatanList = []
 }) {
   const [showAddModal, setShowAddModal] = useState(false)
-  const [showEditModal, setShowEditModal] = useState(false)
-  const [editingItem, setEditingItem] = useState(null)
-
-  const handleEditItem = (index, item) => {
-    setEditingItem({ ...item, index })
-    setShowEditModal(true)
-  }
-
-  const handleUpdateItem = (updatedItem) => {
-    if (onEditItem && editingItem) {
-      onEditItem(editingItem.index, updatedItem)
-    }
-    setEditingItem(null)
-  }
   return (
     <div className="flex flex-col">
       {/* Filter Info */}
@@ -82,27 +70,43 @@ export function RincianTagihanSection({
             <div className="bg-gradient-to-b from-slate-100 to-slate-50 border-b-2 border-slate-300">
               <table className="w-full border-collapse table-fixed">
                 <colgroup>
-                  <col style={{width: '8%'}} />   {/* No */}
-                  <col style={{width: '15%'}} />  {/* Kode */}
-                  <col style={{width: '45%'}} />  {/* Deskripsi */}
-                  <col style={{width: '20%'}} />  {/* Jumlah */}
-                  <col style={{width: '12%'}} />  {/* Aksi */}
+                  <col style={{width: '4%'}} />   {/* No */}
+                  <col style={{width: '8%'}} />   {/* Kode */}
+                  <col style={{width: '20%'}} />  {/* Deskripsi */}
+                  <col style={{width: '12%'}} />  {/* Tahun Ajaran */}
+                  <col style={{width: '8%'}} />   {/* Tingkat */}
+                  <col style={{width: '10%'}} />  {/* Kelas */}
+                  <col style={{width: '12%'}} />  {/* Peminatan */}
+                  <col style={{width: '18%'}} />  {/* Jumlah */}
+                  <col style={{width: '8%'}} />   {/* Aksi */}
                 </colgroup>
                 <thead>
                   <tr>
-                    <th className="px-4 py-3 text-left border-r border-slate-200">
+                    <th className="px-2 py-3 text-left border-r border-slate-200">
                       <Text size="1" weight="bold" className="text-slate-700 uppercase tracking-wider">No</Text>
                     </th>
-                    <th className="px-4 py-3 text-left border-r border-slate-200">
+                    <th className="px-2 py-3 text-left border-r border-slate-200">
                       <Text size="1" weight="bold" className="text-slate-700 uppercase tracking-wider">Kode</Text>
                     </th>
-                    <th className="px-4 py-3 text-left border-r border-slate-200">
+                    <th className="px-2 py-3 text-left border-r border-slate-200">
                       <Text size="1" weight="bold" className="text-slate-700 uppercase tracking-wider">Deskripsi</Text>
                     </th>
-                    <th className="px-4 py-3 text-left border-r border-slate-200">
+                    <th className="px-2 py-3 text-left border-r border-slate-200">
+                      <Text size="1" weight="bold" className="text-slate-700 uppercase tracking-wider">Tahun Ajaran</Text>
+                    </th>
+                    <th className="px-2 py-3 text-left border-r border-slate-200">
+                      <Text size="1" weight="bold" className="text-slate-700 uppercase tracking-wider">Tingkat</Text>
+                    </th>
+                    <th className="px-2 py-3 text-left border-r border-slate-200">
+                      <Text size="1" weight="bold" className="text-slate-700 uppercase tracking-wider">Kelas</Text>
+                    </th>
+                    <th className="px-2 py-3 text-left border-r border-slate-200">
+                      <Text size="1" weight="bold" className="text-slate-700 uppercase tracking-wider">Peminatan</Text>
+                    </th>
+                    <th className="px-2 py-3 text-left border-r border-slate-200">
                       <Text size="1" weight="bold" className="text-slate-700 uppercase tracking-wider">Jumlah</Text>
                     </th>
-                    <th className="px-4 py-3 text-center">
+                    <th className="px-2 py-3 text-center">
                       <Text size="1" weight="bold" className="text-slate-700 uppercase tracking-wider">Aksi</Text>
                     </th>
                   </tr>
@@ -123,50 +127,60 @@ export function RincianTagihanSection({
           ) : (
             <table className="w-full border-collapse table-fixed">
               <colgroup>
-                <col style={{width: '8%'}} />   {/* No */}
-                <col style={{width: '15%'}} />  {/* Kode */}
-                <col style={{width: '45%'}} />  {/* Deskripsi */}
-                <col style={{width: '20%'}} />  {/* Jumlah */}
-                <col style={{width: '12%'}} />  {/* Aksi */}
+                <col style={{width: '4%'}} />   {/* No */}
+                <col style={{width: '8%'}} />   {/* Kode */}
+                <col style={{width: '20%'}} />  {/* Deskripsi */}
+                <col style={{width: '12%'}} />  {/* Tahun Ajaran */}
+                <col style={{width: '8%'}} />   {/* Tingkat */}
+                <col style={{width: '10%'}} />  {/* Kelas */}
+                <col style={{width: '12%'}} />  {/* Peminatan */}
+                <col style={{width: '18%'}} />  {/* Jumlah */}
+                <col style={{width: '8%'}} />   {/* Aksi */}
               </colgroup>
               <tbody>
                 {rincianItems.map((item, idx) => {
                   const jenis = jenisPembayaranList.find(j => j.id === item.id_jenis_pembayaran)
+                  const tahunAjaran = tahunAjaranList.find(ta => ta.id === jenis?.id_tahun_ajaran)
+                  const kelas = kelasList.find(k => k.id === jenis?.id_kelas)
+                  const peminatan = peminatanList.find(p => p.id === jenis?.id_peminatan)
+                  
                   return (
                     <tr key={idx} className={`border-b border-slate-200 ${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50'}`}>
-                      <td className="px-4 py-3 border-r border-slate-200">
+                      <td className="px-2 py-3 border-r border-slate-200">
                         <Text size="2" className="text-slate-700">{idx + 1}</Text>
                       </td>
-                      <td className="px-4 py-3 border-r border-slate-200">
-                        <Badge color="blue">{jenis?.kode || '-'}</Badge>
+                      <td className="px-2 py-3 border-r border-slate-200">
+                        <Badge color="blue" size="1">{jenis?.kode || '-'}</Badge>
                       </td>
-                      <td className="px-4 py-3 border-r border-slate-200">
-                        <Text size="2" className="text-slate-700">{item.deskripsi || '-'}</Text>
+                      <td className="px-2 py-3 border-r border-slate-200">
+                        <Text size="1" className="text-slate-700">{item.deskripsi || '-'}</Text>
                       </td>
-                      <td className="px-4 py-3 border-r border-slate-200">
+                      <td className="px-2 py-3 border-r border-slate-200">
+                        <Text size="1" className="text-slate-700">{tahunAjaran?.nama || '-'}</Text>
+                      </td>
+                      <td className="px-2 py-3 border-r border-slate-200 text-center">
+                        <Text size="1" className="text-slate-700">{jenis?.tingkat || '-'}</Text>
+                      </td>
+                      <td className="px-2 py-3 border-r border-slate-200">
+                        <Text size="1" className="text-slate-700">{kelas?.nama_sub_kelas || '-'}</Text>
+                      </td>
+                      <td className="px-2 py-3 border-r border-slate-200">
+                        <Text size="1" className="text-slate-700">{peminatan?.nama || '-'}</Text>
+                      </td>
+                      <td className="px-2 py-3 border-r border-slate-200">
                         <Text size="2" weight="medium" className="text-slate-900 font-mono">
                           {formatCurrency(item.jumlah)}
                         </Text>
                       </td>
-                      <td className="px-4 py-3 text-center">
-                        <div className="flex items-center justify-center gap-1">
-                          <button
-                            onClick={() => handleEditItem(idx, item)}
-                            className="h-7 w-7 inline-flex items-center justify-center border border-slate-300 bg-white hover:bg-blue-50 hover:border-blue-400 transition-colors"
-                            type="button"
-                            title="Edit item"
-                          >
-                            <Edit className="h-3.5 w-3.5 text-slate-600" />
-                          </button>
-                          <button
-                            onClick={() => onRemoveRincian(idx)}
-                            className="h-7 w-7 inline-flex items-center justify-center border border-slate-300 bg-white hover:bg-red-50 hover:border-red-400 transition-colors"
-                            type="button"
-                            title="Hapus item"
-                          >
-                            <Trash2 className="h-3.5 w-3.5 text-slate-600" />
-                          </button>
-                        </div>
+                      <td className="px-2 py-3 text-center">
+                        <button
+                          onClick={() => onRemoveRincian(idx)}
+                          className="h-7 w-7 inline-flex items-center justify-center border border-slate-300 bg-white hover:bg-red-50 hover:border-red-400 transition-colors"
+                          type="button"
+                          title="Hapus item"
+                        >
+                          <Trash2 className="h-3.5 w-3.5 text-slate-600" />
+                        </button>
                       </td>
                     </tr>
                   )
@@ -196,18 +210,7 @@ export function RincianTagihanSection({
         jenisPembayaranList={jenisPembayaranList}
         onAddItem={onAddItem}
         existingItems={rincianItems}
-      />
-
-      {/* Edit Item Modal */}
-      <EditRincianModal
-        open={showEditModal}
-        onOpenChange={(open) => {
-          setShowEditModal(open)
-          if (!open) setEditingItem(null)
-        }}
-        item={editingItem}
-        jenisPembayaranList={jenisPembayaranList}
-        onUpdateItem={handleUpdateItem}
+        filterText={filterText}
       />
     </div>
   )

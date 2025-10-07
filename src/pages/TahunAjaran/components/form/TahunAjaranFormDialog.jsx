@@ -91,9 +91,6 @@ function TahunAjaranFormDialog({
               <Text size="3" weight="bold" className="text-slate-800 uppercase tracking-wider">
                 {isEdit ? 'Edit Tahun Ajaran' : 'Tambah Tahun Ajaran'}
               </Text>
-              <Text size="1" className="text-slate-500 block mt-0.5">
-                {isEdit ? 'Perbarui informasi tahun ajaran' : 'Tambahkan periode tahun ajaran baru'}
-              </Text>
             </div>
           </div>
           <button

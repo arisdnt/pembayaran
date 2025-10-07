@@ -133,9 +133,6 @@ export function PeminatanFormDialog({
               <Text size="3" weight="bold" className="text-slate-800 uppercase tracking-wider leading-none">
                 {isEdit ? 'Edit Peminatan' : 'Tambah Peminatan'}
               </Text>
-              <Text size="1" className="text-slate-600 leading-none mt-0.5">
-                {isEdit ? 'Perbarui informasi peminatan' : 'Tambahkan peminatan baru ke sistem'}
-              </Text>
             </div>
           </div>
           <button

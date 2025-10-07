@@ -22,6 +22,7 @@ function EditTagihanContent() {
   const [selectedTingkat, setSelectedTingkat] = useState('')
   const [selectedKelas, setSelectedKelas] = useState('')
   const [jenisPembayaranList, setJenisPembayaranList] = useState([])
+  const [peminatanList, setPeminatanList] = useState([])
 
   const [formData, setFormData] = useState({
     id_riwayat_kelas_siswa: '',
@@ -33,10 +34,17 @@ function EditTagihanContent() {
   })
 
   const [rincianItems, setRincianItems] = useState([])
-  const [searchTerm, setSearchTerm] = useState('')
-  const [showDropdown, setShowDropdown] = useState(false)
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
+
+  // Load peminatan list
+  useEffect(() => {
+    const fetchPeminatan = async () => {
+      const list = await db.peminatan.toArray()
+      setPeminatanList(list)
+    }
+    fetchPeminatan()
+  }, [])
 
   // Fetch existing tagihan data
   useEffect(() => {
@@ -117,29 +125,10 @@ function EditTagihanContent() {
     return true
   }) || []
 
-  const filteredJenisPembayaran = jenisPembayaranList.filter(jenis =>
-    jenis.nama.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    jenis.kode.toLowerCase().includes(searchTerm.toLowerCase())
-  )
-
   const totalTagihan = rincianItems.reduce((sum, item) => sum + parseFloat(item.jumlah || 0), 0)
 
-  const addJenisToCart = (jenis) => {
-    const existingIndex = rincianItems.findIndex(item => item.id_jenis_pembayaran === jenis.id)
-    if (existingIndex >= 0) {
-      const updated = [...rincianItems]
-      updated[existingIndex].jumlah = (parseFloat(updated[existingIndex].jumlah || 0) + parseFloat(jenis.jumlah_default || 0)).toString()
-      setRincianItems(updated)
-    } else {
-      setRincianItems([...rincianItems, {
-        id_jenis_pembayaran: jenis.id,
-        deskripsi: jenis.nama,
-        jumlah: jenis.jumlah_default || '',
-        urutan: rincianItems.length + 1,
-      }])
-    }
-    setSearchTerm('')
-    setShowDropdown(false)
+  const addJenisToCart = (newItem) => {
+    setRincianItems([...rincianItems, newItem])
   }
 
   const handleSubmit = async () => {
@@ -181,6 +170,25 @@ function EditTagihanContent() {
       setSubmitting(false)
     }
   }
+
+  // Generate filter text for modal header
+  const getFilterText = () => {
+    if (formData.id_riwayat_kelas_siswa) {
+      const siswa = riwayatKelasSiswaList?.find(s => s.id === formData.id_riwayat_kelas_siswa)
+      if (!siswa) return ''
+      
+      const parts = []
+      if (siswa.siswa?.nama_lengkap) parts.push(`Siswa: ${siswa.siswa.nama_lengkap}`)
+      if (siswa.tahun_ajaran?.nama) parts.push(`Tahun Ajaran: ${siswa.tahun_ajaran.nama}`)
+      if (siswa.kelas?.tingkat) parts.push(`Tingkat: ${siswa.kelas.tingkat}`)
+      if (siswa.kelas?.nama_sub_kelas) parts.push(`Kelas: ${siswa.kelas.nama_sub_kelas}`)
+      
+      return parts.join(' • ')
+    }
+    return ''
+  }
+
+  const filterText = getFilterText()
 
   const filterInfo = formData.id_riwayat_kelas_siswa ? (
     <div className="px-3 py-2 bg-blue-50 border-2 border-blue-200">
@@ -261,21 +269,14 @@ function EditTagihanContent() {
           <RincianTagihanSection
             rincianItems={rincianItems}
             jenisPembayaranList={jenisPembayaranList}
-            searchTerm={searchTerm}
-            onSearchChange={setSearchTerm}
-            showDropdown={showDropdown}
-            onSearchFocus={() => setShowDropdown(true)}
-            onSearchBlur={() => setTimeout(() => setShowDropdown(false), 200)}
-            onAddJenis={addJenisToCart}
+            onAddItem={addJenisToCart}
             onRemoveRincian={(idx) => setRincianItems(rincianItems.filter((_, i) => i !== idx))}
-            onRincianChange={(idx, field, value) => {
-              const updated = [...rincianItems]
-              updated[idx][field] = value
-              setRincianItems(updated)
-            }}
-            filteredJenisPembayaran={filteredJenisPembayaran}
             filterInfo={filterInfo}
             totalTagihan={totalTagihan}
+            filterText={filterText}
+            tahunAjaranList={tahunAjaranList}
+            kelasList={kelasList}
+            peminatanList={peminatanList}
           />
         </div>
       </div>

@@ -66,9 +66,6 @@ function RincianTagihanFormDialog({
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Content style={{ maxWidth: 600, borderRadius: 0 }}>
         <Dialog.Title>{isEdit ? 'Edit Rincian Tagihan' : 'Tambah Rincian Tagihan'}</Dialog.Title>
-        <Dialog.Description size="2" mb="4">
-          {isEdit ? 'Perbarui informasi rincian tagihan' : 'Tambahkan item ke tagihan'}
-        </Dialog.Description>
 
         <form onSubmit={handleSubmit}>
           <Flex direction="column" gap="3">
