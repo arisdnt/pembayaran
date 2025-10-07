@@ -14,6 +14,8 @@ import {
   Search,
   RotateCcw,
   Trash2,
+  Copy,
+  Check,
 } from 'lucide-react'
 import { db, syncRegistry } from '../../offline/db'
 import { useOffline } from '../../contexts/OfflineContext'
@@ -64,6 +66,7 @@ export function SyncStatus() {
   const [selectedItem, setSelectedItem] = useState(null)
   const [retrying, setRetrying] = useState(false)
   const [deletingId, setDeletingId] = useState(null)
+  const [copiedErrorId, setCopiedErrorId] = useState(null)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -283,6 +286,16 @@ export function SyncStatus() {
     }
   }
 
+  const handleCopyError = async (errorMessage, itemId) => {
+    try {
+      await navigator.clipboard.writeText(errorMessage)
+      setCopiedErrorId(itemId)
+      setTimeout(() => setCopiedErrorId(null), 2000)
+    } catch (err) {
+      console.error('Error copying to clipboard:', err)
+    }
+  }
+
   return (
     <PageLayout>
       <div className="flex flex-col h-full gap-4">
@@ -413,18 +426,18 @@ export function SyncStatus() {
           </div>
 
           <div className="flex-1 min-h-0 overflow-auto excel-scrollbar">
-            <table className="min-w-full table-fixed text-sm border-collapse">
+            <table className="w-full table-fixed text-sm border-collapse">
                 <colgroup>
-                  <col style={{ width: '9%' }} />
+                  <col style={{ width: '11%' }} />
+                  <col style={{ width: '8%' }} />
                   <col style={{ width: '7%' }} />
-                  <col style={{ width: '7%' }} />
-                  <col style={{ width: '12%' }} />
+                  <col style={{ width: '10%' }} />
                   <col style={{ width: '9%' }} />
                   <col style={{ width: '7%' }} />
                   <col style={{ width: '11%' }} />
-                  <col style={{ width: '17%' }} />
-                  <col style={{ width: '12%' }} />
-                  <col style={{ width: '9%' }} />
+                  <col style={{ width: '15%' }} />
+                  <col style={{ width: '14%' }} />
+                  <col style={{ width: '8%' }} />
                 </colgroup>
                 <thead>
                   <tr className="bg-gradient-to-b from-slate-100 to-slate-50 sticky top-0 z-10 border-b border-slate-300 shadow-sm">
@@ -492,12 +505,12 @@ export function SyncStatus() {
                         } hover:bg-blue-50 transition-colors`}
                       >
                         <td className="px-3 py-1.5 border-r border-slate-200">
-                          <Text size="1" className="text-slate-700 font-mono text-[0.7rem] whitespace-nowrap">
+                          <Text size="1" className="text-slate-700 font-mono text-[0.7rem] whitespace-nowrap overflow-hidden text-ellipsis block" title={formatDateTime(item.created_at)}>
                             {formatDateTime(item.created_at)}
                           </Text>
                         </td>
                         <td className="px-3 py-1.5 border-r border-slate-200">
-                          <Text size="1" weight="medium" className="text-slate-900 font-mono text-[0.7rem]">
+                          <Text size="1" weight="medium" className="text-slate-900 font-mono text-[0.7rem] truncate block" title={item.table}>
                             {item.table}
                           </Text>
                         </td>
@@ -530,22 +543,22 @@ export function SyncStatus() {
                           </Badge>
                         </td>
                         <td className="px-3 py-1.5 border-r border-slate-200">
-                          <Text size="1" className="text-slate-700 font-mono text-[0.7rem] whitespace-nowrap">
+                          <Text size="1" className="text-slate-700 font-mono text-[0.7rem] whitespace-nowrap overflow-hidden text-ellipsis block" title={item.last_attempt_at ? formatDateTime(item.last_attempt_at) : '—'}>
                             {item.last_attempt_at ? formatDateTime(item.last_attempt_at) : '—'}
                           </Text>
                         </td>
                         <td className="px-3 py-1.5 border-r border-slate-200">
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-1 min-w-0">
                             <Text
                               size="1"
-                              className="text-slate-600 font-mono text-[0.7rem] truncate max-w-[180px]"
+                              className="text-slate-600 font-mono text-[0.7rem] truncate flex-1 min-w-0"
                               title={item.payload ? JSON.stringify(item.payload) : 'Tidak ada payload'}
                             >
                               {getPayloadSummary(item.payload)}
                             </Text>
                             <button
                               onClick={() => setSelectedItem(item)}
-                              className="text-xs text-blue-600 underline hover:text-blue-800"
+                              className="text-xs text-blue-600 underline hover:text-blue-800 flex-shrink-0 whitespace-nowrap"
                               type="button"
                             >
                               Detail
@@ -554,23 +567,38 @@ export function SyncStatus() {
                         </td>
                         <td className="px-3 py-1.5 border-r border-slate-200">
                           {item.error_message ? (
-                            <Text size="1" className="text-red-600 font-mono text-[0.7rem] truncate block" title={item.error_message}>
-                              {item.error_message}
-                            </Text>
+                            <div className="flex items-center gap-1 min-w-0">
+                              <Text size="1" className="text-red-600 font-mono text-[0.7rem] truncate block overflow-hidden text-ellipsis flex-1 min-w-0" title={item.error_message}>
+                                {item.error_message}
+                              </Text>
+                              <button
+                                onClick={() => handleCopyError(item.error_message, item.id)}
+                                className="p-1 text-slate-500 hover:text-blue-600 hover:bg-blue-50 border border-slate-300 hover:border-blue-300 transition-colors flex-shrink-0"
+                                style={{ borderRadius: 0 }}
+                                title="Copy error message"
+                                type="button"
+                              >
+                                {copiedErrorId === item.id ? (
+                                  <Check className="h-3 w-3 text-green-600" />
+                                ) : (
+                                  <Copy className="h-3 w-3" />
+                                )}
+                              </button>
+                            </div>
                           ) : (
-                            <Text size="1" className="text-slate-400">
+                            <Text size="1" className="text-slate-400 truncate block">
                               —
                             </Text>
                           )}
                         </td>
                         <td className="px-3 py-1.5">
-                          <div className="flex items-center justify-center gap-1">
+                          <div className="flex items-center justify-center gap-1 flex-nowrap">
                             {(item.status === 'error' || item.status === 'pending') && (
                               <>
                                 <button
                                   onClick={() => handleRetryItem(item.id)}
                                   disabled={retrying}
-                                  className="p-1 text-blue-600 hover:bg-blue-50 border border-blue-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                  className="p-1 text-blue-600 hover:bg-blue-50 border border-blue-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
                                   style={{ borderRadius: 0 }}
                                   title="Retry item ini"
                                 >
@@ -579,7 +607,7 @@ export function SyncStatus() {
                                 <button
                                   onClick={() => handleDeleteItem(item.id)}
                                   disabled={deletingId === item.id}
-                                  className="p-1 text-red-600 hover:bg-red-50 border border-red-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                  className="p-1 text-red-600 hover:bg-red-50 border border-red-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
                                   style={{ borderRadius: 0 }}
                                   title="Hapus item ini"
                                 >
@@ -588,7 +616,7 @@ export function SyncStatus() {
                               </>
                             )}
                             {(item.status === 'applied' || item.status === 'syncing') && (
-                              <Text size="1" className="text-slate-400 text-[0.65rem]">
+                              <Text size="1" className="text-slate-400 text-[0.65rem] truncate">
                                 {item.status === 'syncing' ? 'Syncing...' : '—'}
                               </Text>
                             )}

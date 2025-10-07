@@ -63,8 +63,7 @@ export function useRiwayatKelasSiswa() {
 
   const saveItem = async (formData, isEdit) => {
     try {
-      const payload = {
-        id_siswa: formData.id_siswa,
+      const basePayload = {
         id_kelas: formData.id_kelas,
         id_tahun_ajaran: formData.id_tahun_ajaran,
         tanggal_masuk: formData.tanggal_masuk,
@@ -72,6 +71,23 @@ export function useRiwayatKelasSiswa() {
         status: formData.status,
         catatan: formData.catatan || null,
       }
+
+      if (!isEdit && Array.isArray(formData.siswa_ids) && formData.siswa_ids.length) {
+        const uniqueSiswaIds = [...new Set(formData.siswa_ids.filter(Boolean))]
+        await Promise.all(uniqueSiswaIds.map((id_siswa) =>
+          enqueueInsert('riwayat_kelas_siswa', {
+            ...basePayload,
+            id_siswa,
+          })
+        ))
+        return
+      }
+
+      const payload = {
+        ...basePayload,
+        id_siswa: formData.id_siswa,
+      }
+
       if (isEdit) await enqueueUpdate('riwayat_kelas_siswa', formData.id, payload)
       else await enqueueInsert('riwayat_kelas_siswa', payload)
     } catch (err) { setError(err.message); throw err }

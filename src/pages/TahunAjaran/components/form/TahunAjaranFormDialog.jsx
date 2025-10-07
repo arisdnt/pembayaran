@@ -21,6 +21,22 @@ function TahunAjaranFormDialog({
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
 
+  const handleNamaChange = (e) => {
+    let value = e.target.value
+    
+    // Remove all non-numeric characters
+    const numbers = value.replace(/\D/g, '')
+    
+    // Auto-format: add "/" after 4 digits
+    if (numbers.length <= 4) {
+      value = numbers
+    } else {
+      value = numbers.slice(0, 4) + '/' + numbers.slice(4, 8)
+    }
+    
+    setFormData({ ...formData, nama: value })
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setSubmitting(true)
@@ -38,8 +54,18 @@ function TahunAjaranFormDialog({
       return
     }
 
-    if (formData.nama.length > 20) {
-      setError('Nama maksimal 20 karakter')
+    // Validasi format xxxx/xxxx
+    const formatRegex = /^\d{4}\/\d{4}$/
+    if (!formatRegex.test(formData.nama)) {
+      setError('Nama tahun ajaran harus dalam format xxxx/xxxx (contoh: 2024/2025)')
+      setSubmitting(false)
+      return
+    }
+
+    // Validasi tahun harus berurutan
+    const [tahunAwal, tahunAkhir] = formData.nama.split('/').map(Number)
+    if (tahunAkhir !== tahunAwal + 1) {
+      setError('Tahun kedua harus berurutan dari tahun pertama (contoh: 2024/2025)')
       setSubmitting(false)
       return
     }
@@ -116,15 +142,15 @@ function TahunAjaranFormDialog({
                   </Text>
                 </div>
                 <TextField.Root
-                  placeholder="Contoh: 2024/2025"
+                  placeholder="2024/2025"
                   value={formData.nama}
-                  onChange={(e) => setFormData({ ...formData, nama: e.target.value })}
-                  maxLength={20}
+                  onChange={handleNamaChange}
+                  maxLength={9}
                   required
                   style={{ borderRadius: 0 }}
                 />
                 <Text size="1" className="text-slate-500 mt-1">
-                  Maksimal 20 karakter
+                  Format: xxxx/xxxx (contoh: 2024/2025, tahun harus berurutan)
                 </Text>
               </label>
             </div>
