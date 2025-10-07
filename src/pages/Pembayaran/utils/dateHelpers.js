@@ -9,3 +9,12 @@ export function formatDateTime(dateStr) {
     timeZone: 'Asia/Jakarta',
   })
 }
+
+export function formatDate(dateStr) {
+  if (!dateStr) return '-'
+  return new Date(dateStr).toLocaleDateString('id-ID', {
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric',
+  })
+}

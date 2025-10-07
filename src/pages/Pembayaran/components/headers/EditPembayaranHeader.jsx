@@ -1,38 +1,43 @@
-import { Button, Text } from '@radix-ui/themes'
-import { ArrowLeft, AlertCircle } from 'lucide-react'
+import { Text } from '@radix-ui/themes'
+import { ArrowLeft, Save } from 'lucide-react'
 
-export function EditPembayaranHeader({ onBack, error }) {
+export function EditPembayaranHeader({ onBack, onSave, canSubmit, submitting }) {
   return (
-    <>
-      <div className="shrink-0 border-b border-slate-200 bg-white px-6 py-4">
-        <div className="flex items-center gap-4">
-          <Button
-            variant="soft"
-            color="gray"
+    <div className="shrink-0 bg-white px-6 py-3">
+      <div className="flex items-center justify-between">
+        <div>
+          <Text size="4" weight="bold" className="text-slate-900 block mb-1">
+            Edit Pembayaran
+          </Text>
+          <Text size="1" className="text-slate-500">
+            Perbarui nomor pembayaran dan rincian transaksi untuk tagihan siswa.
+          </Text>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
             onClick={onBack}
-            style={{ borderRadius: 0 }}
-            className="cursor-pointer"
+            className="flex items-center gap-2 px-4 py-2 border border-slate-300 bg-white hover:bg-slate-50 transition-colors"
+            type="button"
+            disabled={submitting}
           >
-            <ArrowLeft className="h-4 w-4" />
-            Kembali
-          </Button>
-          <div>
-            <Text size="5" weight="bold" className="text-slate-900">
-              Edit Pembayaran
+            <ArrowLeft className="h-4 w-4 text-slate-600" />
+            <Text size="2" weight="medium" className="text-slate-700">
+              Kembali
             </Text>
-            <Text size="2" className="text-slate-500">
-              Perbarui informasi pembayaran dan rincian transaksi
+          </button>
+          <button
+            onClick={onSave}
+            disabled={!canSubmit}
+            className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-colors"
+            type="button"
+          >
+            <Save className="h-4 w-4" />
+            <Text size="2" weight="medium" className="text-white">
+              {submitting ? 'Menyimpan...' : 'Simpan Perubahan'}
             </Text>
-          </div>
+          </button>
         </div>
       </div>
-
-      {error && (
-        <div className="shrink-0 mx-6 mt-4 flex items-start gap-3 bg-red-50 border border-red-200 text-red-700 px-4 py-3">
-          <AlertCircle className="h-5 w-5 text-red-500 mt-0.5" />
-          <Text size="2" className="text-red-700">{error}</Text>
-        </div>
-      )}
-    </>
+    </div>
   )
 }

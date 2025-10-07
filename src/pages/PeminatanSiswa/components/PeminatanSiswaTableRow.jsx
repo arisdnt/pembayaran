@@ -19,13 +19,11 @@ export function PeminatanSiswaTableRow({
   onEdit,
   onDelete,
   onViewDetail,
-  isEven,
+  groupColors,
 }) {
   const rowBgClass = isSelected
-    ? 'bg-blue-100 hover:bg-blue-100'
-    : isEven
-      ? 'bg-white hover:bg-slate-50'
-      : 'bg-slate-50/50 hover:bg-slate-100'
+    ? groupColors.selected
+    : `${groupColors.bg} ${groupColors.hover}`
 
   return (
     <tr

@@ -1,3 +1,4 @@
+import React from 'react'
 import { usePeminatanSiswaFilters } from '../../hooks/usePeminatanSiswaFilters'
 import { PeminatanSiswaTableRow } from '../PeminatanSiswaTableRow'
 import { TableToolbar } from './components/TableToolbar'
@@ -32,6 +33,41 @@ export function PeminatanSiswaTable({
   } = usePeminatanSiswaFilters(data)
 
   const isEmpty = !isLoading && filteredData.length === 0
+
+  // Group data by tahun_ajaran + tingkat + peminatan
+  const dataWithGroups = React.useMemo(() => {
+    const groupMap = new Map()
+    const groupColors = [
+      { bg: 'bg-blue-50/70', hover: 'hover:bg-blue-100', selected: 'bg-blue-200' },
+      { bg: 'bg-green-50/70', hover: 'hover:bg-green-100', selected: 'bg-green-200' },
+      { bg: 'bg-yellow-50/70', hover: 'hover:bg-yellow-100', selected: 'bg-yellow-200' },
+      { bg: 'bg-purple-50/70', hover: 'hover:bg-purple-100', selected: 'bg-purple-200' },
+      { bg: 'bg-pink-50/70', hover: 'hover:bg-pink-100', selected: 'bg-pink-200' },
+      { bg: 'bg-indigo-50/70', hover: 'hover:bg-indigo-100', selected: 'bg-indigo-200' },
+      { bg: 'bg-orange-50/70', hover: 'hover:bg-orange-100', selected: 'bg-orange-200' },
+      { bg: 'bg-teal-50/70', hover: 'hover:bg-teal-100', selected: 'bg-teal-200' },
+    ]
+
+    return filteredData.map(item => {
+      // Create unique group key from tahun_ajaran + tingkat + peminatan
+      const groupKey = `${item.id_tahun_ajaran || 'none'}-${item.tingkat || 'none'}-${item.id_peminatan || 'none'}`
+      
+      // Assign color index for this group
+      if (!groupMap.has(groupKey)) {
+        groupMap.set(groupKey, groupMap.size)
+      }
+      
+      const groupIndex = groupMap.get(groupKey)
+      const colorIndex = groupIndex % groupColors.length
+      
+      return {
+        ...item,
+        groupKey,
+        groupIndex,
+        groupColors: groupColors[colorIndex]
+      }
+    })
+  }, [filteredData])
 
   // Use Map to deduplicate objects by their id property
   const peminatanMap = new Map()
@@ -110,7 +146,7 @@ export function PeminatanSiswaTable({
                     onClearFilters={handleClearFilters} 
                   />
                 ) : (
-                  filteredData.map((item, index) => (
+                  dataWithGroups.map((item) => (
                     <PeminatanSiswaTableRow
                       key={item.id}
                       item={item}
@@ -119,7 +155,7 @@ export function PeminatanSiswaTable({
                       onEdit={onEdit}
                       onDelete={onDelete}
                       onViewDetail={onViewDetail}
-                      isEven={index % 2 === 0}
+                      groupColors={item.groupColors}
                     />
                   ))
                 )}
