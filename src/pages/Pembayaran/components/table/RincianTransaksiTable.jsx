@@ -1,6 +1,6 @@
 import { Text, IconButton } from '@radix-ui/themes'
 import { Edit2, Trash2 } from 'lucide-react'
-import { formatCurrency } from '../utils/currencyHelpers'
+import { formatCurrency } from '../../utils/currencyHelpers'
 
 function formatDate(dateStr) {
   if (!dateStr) return '-'

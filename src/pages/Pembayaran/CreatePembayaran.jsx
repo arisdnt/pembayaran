@@ -4,12 +4,12 @@ import { Text, Badge } from '@radix-ui/themes'
 import { AlertCircle, ArrowLeft, Save } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { usePaymentFlow } from './hooks/usePaymentFlow'
-import { SiswaSearchSection } from './components/SiswaSearchSection'
-import { UnpaidTagihanList } from './components/UnpaidTagihanList'
-import { PaymentInputModal } from './components/PaymentInputModal'
-import { SelectedPaymentList } from './components/SelectedPaymentList'
-import { PaymentConfirmationModal } from './components/PaymentConfirmationModal'
-import { PaymentInvoiceModal } from './components/PaymentInvoiceModal'
+import { SiswaSearchSection } from './components/sections/SiswaSearchSection'
+import { UnpaidTagihanList } from './components/lists/UnpaidTagihanList'
+import { PaymentInputModal } from './components/modals/PaymentInputModal'
+import { SelectedPaymentList } from './components/lists/SelectedPaymentList'
+import { PaymentConfirmationModal } from './components/modals/PaymentConfirmationModal'
+import { PaymentInvoiceModal } from './components/modals/PaymentInvoiceModal'
 
 export function CreatePembayaran() {
   const navigate = useNavigate()

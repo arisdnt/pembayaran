@@ -1,7 +1,7 @@
 import { Text } from '@radix-ui/themes'
 import { Pencil1Icon, TrashIcon } from '@radix-ui/react-icons'
 import { Eye } from 'lucide-react'
-import { formatDateTime } from '../utils/dateHelpers'
+import { formatDateTime } from '../../utils/dateHelpers'
 
 function formatCurrency(amount) {
   return new Intl.NumberFormat('id-ID', {

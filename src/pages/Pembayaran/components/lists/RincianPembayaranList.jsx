@@ -1,7 +1,7 @@
 import { Card, Text, Button } from '@radix-ui/themes'
 import { Plus } from 'lucide-react'
-import { RincianPembayaranItem } from './RincianPembayaranItem'
-import { formatCurrency } from '../utils/currencyHelpers'
+import { RincianPembayaranItem } from '../items/RincianPembayaranItem'
+import { formatCurrency } from '../../utils/currencyHelpers'
 
 export function RincianPembayaranList({
   rincianItems,

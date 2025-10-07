@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { Text, Button } from '@radix-ui/themes'
 import { Plus } from 'lucide-react'
-import { RincianTransaksiTable } from './RincianTransaksiTable'
-import { RincianTransaksiModal } from './RincianTransaksiModal'
-import { formatCurrency } from '../utils/currencyHelpers'
+import { RincianTransaksiTable } from '../table/RincianTransaksiTable'
+import { RincianTransaksiModal } from '../modals/RincianTransaksiModal'
+import { formatCurrency } from '../../utils/currencyHelpers'
 
 export function RincianPembayaranFormSection({
   rincianItems,

@@ -4,7 +4,7 @@ import { PageLayout } from '../../layout/PageLayout'
 import { Text, Button } from '@radix-ui/themes'
 import { ArrowLeft, Printer } from 'lucide-react'
 import { db } from '../../offline/db'
-import { PaymentInvoiceDocument } from './components/PaymentInvoiceDocument'
+import { PaymentInvoiceDocument } from './components/documents/PaymentInvoiceDocument'
 
 function buildInvoiceData(pembayaran) {
   if (!pembayaran) return null

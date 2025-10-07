@@ -1,6 +1,6 @@
 import { forwardRef } from 'react'
 import { Text } from '@radix-ui/themes'
-import { SCHOOL_IDENTITY } from '../../../config/appInfo'
+import { SCHOOL_IDENTITY } from '../../../../config/appInfo'
 
 function formatCurrency(amount) {
   return new Intl.NumberFormat('id-ID', {

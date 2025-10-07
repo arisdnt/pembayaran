@@ -4,9 +4,9 @@ import { PageLayout } from '../../layout/PageLayout'
 import { Text } from '@radix-ui/themes'
 import { AlertCircle } from 'lucide-react'
 import { usePembayaran } from './hooks/usePembayaran'
-import { PembayaranTable } from './components/PembayaranTable'
+import { PembayaranTable } from './components/table/PembayaranTable'
 import { DeleteConfirmDialog } from '../../components/common/DeleteConfirmDialog'
-import { DetailPanel } from './components/DetailPanel'
+import { DetailPanel } from './components/panels/DetailPanel'
 
 function PembayaranContent() {
   const navigate = useNavigate()

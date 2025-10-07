@@ -1,7 +1,7 @@
 import { Dialog, Text } from '@radix-ui/themes'
 import { X, Printer } from 'lucide-react'
 import { useRef } from 'react'
-import { PaymentInvoiceDocument } from './PaymentInvoiceDocument'
+import { PaymentInvoiceDocument } from '../documents/PaymentInvoiceDocument'
 
 export function PaymentInvoiceModal({ open, onOpenChange, paymentData }) {
   const printRef = useRef()
