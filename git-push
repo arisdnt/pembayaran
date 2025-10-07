@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+git add -A
+
+if git diff --cached --quiet; then
+  echo "No changes to commit."
+  exit 0
+fi
+
+timestamp="$(date '+%Y-%m-%d %H:%M:%S')"
+git commit -m "Update ${timestamp}"
+git push
