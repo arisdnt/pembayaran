@@ -11,7 +11,11 @@ export function useSiswa() {
   const isMountedRef = useRef(true)
 
   // Load base tables
-  const siswa = useLiveQuery(async () => db.siswa.orderBy('nama_lengkap').toArray(), [], undefined)
+  const siswa = useLiveQuery(
+    async () => db.siswa.orderBy('diperbarui_pada').reverse().toArray(),
+    [],
+    undefined
+  )
   const rks = useLiveQuery(async () => db.riwayat_kelas_siswa.toArray(), [], undefined)
   const kelas = useLiveQuery(async () => db.kelas.toArray(), [], undefined)
   const tahun = useLiveQuery(async () => db.tahun_ajaran.toArray(), [], undefined)
