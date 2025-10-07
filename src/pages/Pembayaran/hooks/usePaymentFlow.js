@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { db } from '../../../offline/db'
 import { createPembayaranWithRincian } from '../../../offline/actions/pembayaran'
+import { generateNomorPembayaran, generateNomorTransaksi } from '../utils/nomorGenerator'
 
 function calculateTagihanSummary(tagihan) {
   const total = (tagihan.rincian_tagihan || []).reduce(
@@ -169,11 +170,20 @@ export function usePaymentFlow() {
     }
 
     try {
-      const timestamp = new Date().toISOString()
+      const now = new Date()
+      const timestamp = now.toISOString()
+      const savedPayments = []
 
       for (const item of selectedPayments) {
-        const nomorPembayaran = `PAY-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
-        const nomorTransaksi = `TRX-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+        const nomorPembayaran = await generateNomorPembayaran({
+          siswa: selectedSiswa,
+          timestamp: now,
+        })
+        const nomorTransaksi = await generateNomorTransaksi({
+          pembayaran: nomorPembayaran,
+          siswa: selectedSiswa,
+          timestamp: now,
+        })
 
         const existingPembayaran = item.tagihan.pembayaran || []
         const allRincian = existingPembayaran.flatMap(p => p.rincian_pembayaran || [])
@@ -195,14 +205,22 @@ export function usePaymentFlow() {
             cicilan_ke: maxCicilan + 1,
           }]
         )
+
+        savedPayments.push({
+          ...item,
+          nomor_pembayaran: nomorPembayaran,
+          nomor_transaksi: nomorTransaksi,
+          timestamp,
+        })
       }
 
       // Set invoice data dan tampilkan modal invoice
       setInvoiceData({
         siswaInfo: selectedSiswa,
-        payments: selectedPayments,
+        payments: savedPayments,
         totalAmount,
         timestamp,
+        nomor_pembayaran: savedPayments[0]?.nomor_pembayaran || null,
       })
 
       setSubmitting(false)

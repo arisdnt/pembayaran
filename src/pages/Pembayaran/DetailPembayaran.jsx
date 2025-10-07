@@ -40,6 +40,7 @@ function buildInvoiceData(pembayaran) {
     payments,
     totalAmount,
     timestamp,
+    nomor_pembayaran: pembayaran.nomor_pembayaran || null,
   }
 }
 
@@ -127,11 +128,16 @@ function DetailPembayaranContent() {
 
   return (
     <PageLayout>
-      <div className="flex flex-col h-full bg-slate-100">
-        <div className="print:hidden flex items-center justify-between bg-white px-6 py-4 border-b border-slate-200">
-          <Text size="4" weight="bold" className="text-slate-900">
-            Bukti Pembayaran
-          </Text>
+      <div className="flex flex-col h-full bg-white">
+        <div className="print:hidden sticky top-0 z-10 flex items-center justify-between bg-white/90 backdrop-blur px-5 py-3 shadow-sm">
+          <div className="flex flex-col">
+            <Text size="4" weight="bold" className="text-slate-900 leading-tight">
+              Bukti Pembayaran
+            </Text>
+            <Text size="2" className="text-slate-500 font-mono mt-0.5">
+              {pembayaran?.nomor_pembayaran || '—'}
+            </Text>
+          </div>
           <div className="flex items-center gap-3">
             <Button
               onClick={handlePrint}
@@ -156,9 +162,12 @@ function DetailPembayaranContent() {
           </div>
         </div>
 
-        <div className="flex-1 overflow-auto bg-slate-100 px-4 py-6">
-          <div className="max-w-[900px] mx-auto">
-            <PaymentInvoiceDocument paymentData={invoiceData} contentId="invoice-page-content" />
+        <div className="flex-1 overflow-auto bg-white px-4 py-6">
+          <div className="max-w-[900px] mx-auto relative">
+            <div className="absolute inset-0 translate-y-3 scale-[0.99] bg-slate-900/5 blur-xl opacity-60 pointer-events-none print:hidden" aria-hidden="true" />
+            <div className="relative bg-white border border-slate-100 p-6 sm:p-10 shadow-[0_12px_32px_rgba(15,23,42,0.07)] print:shadow-none print:border-none print:p-0">
+              <PaymentInvoiceDocument paymentData={invoiceData} contentId="invoice-page-content" />
+            </div>
           </div>
         </div>
       </div>

@@ -153,6 +153,11 @@ export const PaymentInvoiceDocument = forwardRef(function PaymentInvoiceDocument
               BUKTI PEMBAYARAN
             </Text>
           </div>
+          {paymentData?.nomor_pembayaran && (
+            <Text size="2" className="text-slate-500 font-mono mt-2 block uppercase tracking-widest">
+              {paymentData.nomor_pembayaran}
+            </Text>
+          )}
         </div>
 
         <div className="mb-6">
@@ -187,7 +192,7 @@ export const PaymentInvoiceDocument = forwardRef(function PaymentInvoiceDocument
                       {item.tagihan?.judul || '-'}
                     </Text>
                     <Text size="1" className="text-slate-600">
-                      No. {item.tagihan?.nomor_tagihan || '-'} • {item.tagihan?.tahun_ajaran || '-'}
+                      No. {item.tagihan?.nomor_tagihan || '-'} - {item.tagihan?.tahun_ajaran || '-'}
                     </Text>
                   </td>
                   <td className="py-2 px-3 border-r border-slate-300 text-center">
