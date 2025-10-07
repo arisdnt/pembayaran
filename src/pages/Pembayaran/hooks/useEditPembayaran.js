@@ -56,7 +56,6 @@ export function useEditPembayaran() {
         metode_pembayaran: r.metode_pembayaran,
         referensi_pembayaran: r.referensi_pembayaran || '',
         catatan: r.catatan || '',
-        status: r.status,
         cicilan_ke: r.cicilan_ke,
       })))
     }
@@ -82,7 +81,6 @@ export function useEditPembayaran() {
       metode_pembayaran: 'transfer',
       referensi_pembayaran: '',
       catatan: '',
-      status: 'menunggu_verifikasi',
       cicilan_ke: rincianItems.length + 1,
     }])
   }

@@ -64,9 +64,13 @@ export function SiswaSearchSection({ siswaList, selectedSiswa, onSelect }) {
                 onClick={() => handleSelect(s)}
                 className="w-full text-left px-4 py-2.5 hover:bg-blue-50 border-b border-slate-100 transition-colors"
               >
-                <div className="text-slate-800 font-medium">{s.nama_lengkap}</div>
-                <div className="text-xs text-slate-500 mt-0.5">
-                  NISN: {s.nisn || '-'} • Wali: {s.nama_wali_siswa || '-'}
+                <div className="text-slate-800 font-medium mb-1">{s.nama_lengkap}</div>
+                <div className="text-xs text-slate-500 flex items-center gap-2 flex-wrap">
+                  <span className="font-mono">NISN: {s.nisn || '-'}</span>
+                  <span>•</span>
+                  <span>{s.tahun_ajaran || '-'}</span>
+                  <span>•</span>
+                  <span>{s.kelas || '-'}</span>
                 </div>
               </button>
             ))}
@@ -84,12 +88,32 @@ export function SiswaSearchSection({ siswaList, selectedSiswa, onSelect }) {
 
       {selectedSiswa && (
         <div className="mt-3 p-3 bg-blue-50 border-2 border-blue-200">
-          <Text size="2" className="text-blue-900 font-medium">
-            ✓ Siswa dipilih: {selectedSiswa.nama_lengkap}
-          </Text>
-          <Text size="1" className="text-blue-700 block mt-1">
-            NISN: {selectedSiswa.nisn || '-'}
-          </Text>
+          <div className="flex items-center gap-2 flex-wrap">
+            <Text size="2" className="text-blue-900 font-medium">
+              ✓ Siswa dipilih:
+            </Text>
+            <Text size="2" weight="bold" className="text-blue-900">
+              {selectedSiswa.nama_lengkap}
+            </Text>
+            <Text size="2" className="text-blue-700">
+              |
+            </Text>
+            <Text size="2" className="text-blue-700 font-mono">
+              NISN: {selectedSiswa.nisn || '-'}
+            </Text>
+            <Text size="2" className="text-blue-700">
+              |
+            </Text>
+            <Text size="2" className="text-blue-700">
+              {selectedSiswa.tahun_ajaran || '-'}
+            </Text>
+            <Text size="2" className="text-blue-700">
+              |
+            </Text>
+            <Text size="2" className="text-blue-700">
+              {selectedSiswa.kelas || '-'}
+            </Text>
+          </div>
         </div>
       )}
     </div>

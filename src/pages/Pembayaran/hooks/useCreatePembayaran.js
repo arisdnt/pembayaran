@@ -65,7 +65,6 @@ export function useCreatePembayaran() {
       metode_pembayaran: 'transfer',
       referensi_pembayaran: '',
       catatan: '',
-      status: 'menunggu_verifikasi',
       cicilan_ke: rincianItems.length + 1,
     }])
   }
@@ -114,7 +113,6 @@ export function useCreatePembayaran() {
         metode_pembayaran: item.metode_pembayaran,
         referensi_pembayaran: item.referensi_pembayaran || null,
         catatan: item.catatan || null,
-        status: item.status,
         cicilan_ke: item.cicilan_ke,
       }))
       await createPembayaranWithRincian({

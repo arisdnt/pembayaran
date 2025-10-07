@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { db } from '../../../offline/db'
 import { createPembayaranWithRincian } from '../../../offline/actions/pembayaran'
 
@@ -16,7 +15,6 @@ function calculateTagihanSummary(tagihan) {
 }
 
 export function usePaymentFlow() {
-  const navigate = useNavigate()
   const [siswaList, setSiswaList] = useState([])
   const [selectedSiswa, setSelectedSiswa] = useState(null)
   const [unpaidTagihan, setUnpaidTagihan] = useState([])
@@ -27,6 +25,7 @@ export function usePaymentFlow() {
   const [editIndex, setEditIndex] = useState(null)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
+  const [invoiceData, setInvoiceData] = useState(null)
 
   useEffect(() => {
     loadSiswa()
@@ -41,8 +40,37 @@ export function usePaymentFlow() {
   }, [selectedSiswa])
 
   const loadSiswa = async () => {
-    const data = await db.siswa.orderBy('nama_lengkap').toArray()
-    setSiswaList(data || [])
+    const siswa = await db.siswa.orderBy('nama_lengkap').toArray()
+    const allRks = await db.riwayat_kelas_siswa.toArray()
+    const tahunAjaranMap = new Map((await db.tahun_ajaran.toArray()).map(ta => [ta.id, ta]))
+    const kelasMap = new Map((await db.kelas.toArray()).map(k => [k.id, k]))
+
+    const enriched = siswa.map(s => {
+      // Cari riwayat kelas siswa yang aktif (status = 'aktif')
+      // Urutkan berdasarkan tanggal_masuk terbaru untuk mendapat riwayat terakhir
+      const rksAktif = allRks
+        .filter(rks => rks.id_siswa === s.id && rks.status === 'aktif')
+        .sort((a, b) => new Date(b.tanggal_masuk) - new Date(a.tanggal_masuk))[0]
+      
+      if (rksAktif) {
+        const tahunAjaran = tahunAjaranMap.get(rksAktif.id_tahun_ajaran)
+        const kelas = kelasMap.get(rksAktif.id_kelas)
+        
+        return {
+          ...s,
+          tahun_ajaran: tahunAjaran?.nama || '-',
+          kelas: kelas ? `${kelas.tingkat} - ${kelas.nama_sub_kelas}` : '-'
+        }
+      }
+      
+      return {
+        ...s,
+        tahun_ajaran: '-',
+        kelas: '-'
+      }
+    })
+
+    setSiswaList(enriched || [])
   }
 
   const loadUnpaidTagihan = async (idSiswa) => {
@@ -141,6 +169,8 @@ export function usePaymentFlow() {
     }
 
     try {
+      const timestamp = new Date().toISOString()
+
       for (const item of selectedPayments) {
         const nomorPembayaran = `PAY-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
         const nomorTransaksi = `TRX-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
@@ -158,7 +188,7 @@ export function usePaymentFlow() {
           [{
             nomor_transaksi: nomorTransaksi,
             jumlah_dibayar: item.payment.jumlah_dibayar,
-            tanggal_bayar: new Date().toISOString(),
+            tanggal_bayar: timestamp,
             metode_pembayaran: item.payment.metode_pembayaran,
             referensi_pembayaran: item.payment.referensi_pembayaran || null,
             catatan: item.payment.catatan || null,
@@ -167,7 +197,15 @@ export function usePaymentFlow() {
         )
       }
 
-      navigate('/pembayaran')
+      // Set invoice data dan tampilkan modal invoice
+      setInvoiceData({
+        siswaInfo: selectedSiswa,
+        payments: selectedPayments,
+        totalAmount,
+        timestamp,
+      })
+
+      setSubmitting(false)
     } catch (err) {
       setError(err.message || 'Gagal menyimpan pembayaran')
       setSubmitting(false)
@@ -199,5 +237,7 @@ export function usePaymentFlow() {
     selectedTagihanIds,
     submitting,
     error,
+    invoiceData,
+    setInvoiceData,
   }
 }

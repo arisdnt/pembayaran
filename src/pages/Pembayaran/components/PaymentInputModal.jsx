@@ -23,7 +23,7 @@ function parseFormattedNumber(str) {
 export function PaymentInputModal({ open, onOpenChange, onSubmit, tagihan, summary }) {
   const [formData, setFormData] = useState({
     jumlah_dibayar: '',
-    metode_pembayaran: 'cash',
+    metode_pembayaran: 'tunai',
     referensi_pembayaran: '',
     catatan: '',
   })
@@ -35,7 +35,7 @@ export function PaymentInputModal({ open, onOpenChange, onSubmit, tagihan, summa
       const sisaAmount = summary?.sisa || ''
       setFormData({
         jumlah_dibayar: sisaAmount,
-        metode_pembayaran: 'cash',
+        metode_pembayaran: 'tunai',
         referensi_pembayaran: '',
         catatan: '',
       })
@@ -49,8 +49,18 @@ export function PaymentInputModal({ open, onOpenChange, onSubmit, tagihan, summa
     const numericValue = parseFormattedNumber(value)
 
     if (numericValue === '' || /^\d+$/.test(numericValue)) {
-      setDisplayAmount(numericValue ? formatNumber(numericValue) : '')
-      setFormData({ ...formData, jumlah_dibayar: numericValue })
+      const parsedValue = parseFloat(numericValue)
+
+      // Jika melebihi sisa tagihan, set ke maksimal sisa tagihan
+      if (parsedValue > summary.sisa) {
+        setDisplayAmount(formatNumber(summary.sisa))
+        setFormData({ ...formData, jumlah_dibayar: summary.sisa.toString() })
+        setError(`Maksimal pembayaran: ${formatCurrency(summary.sisa)}`)
+      } else {
+        setDisplayAmount(numericValue ? formatNumber(numericValue) : '')
+        setFormData({ ...formData, jumlah_dibayar: numericValue })
+        setError('')
+      }
     }
   }
 
@@ -100,14 +110,14 @@ export function PaymentInputModal({ open, onOpenChange, onSubmit, tagihan, summa
             <div className="flex h-10 w-10 items-center justify-center bg-white border border-green-800 shadow">
               <DollarSign className="h-5 w-5 text-green-700" />
             </div>
-            <div>
+            <div className="leading-none">
               <Dialog.Title asChild>
-                <Text size="3" weight="bold" className="text-white uppercase tracking-wider">
+                <Text size="3" weight="bold" className="text-white uppercase tracking-wider block leading-none mb-0">
                   Input Pembayaran
                 </Text>
               </Dialog.Title>
               <Dialog.Description asChild>
-                <Text size="1" className="text-green-100">
+                <Text size="1" className="text-green-100 block leading-none mt-0">
                   Masukkan nominal yang akan dibayarkan
                 </Text>
               </Dialog.Description>
@@ -197,16 +207,6 @@ export function PaymentInputModal({ open, onOpenChange, onSubmit, tagihan, summa
                 </Text>
               </div>
 
-              {error && (
-                <div className="flex items-start gap-3 bg-red-50 border-2 border-red-300 p-3 mb-4">
-                  <AlertCircle className="h-5 w-5 text-red-600 mt-0.5 shrink-0" />
-                  <div>
-                    <Text size="2" weight="medium" className="text-red-900">Error</Text>
-                    <Text size="2" className="text-red-700">{error}</Text>
-                  </div>
-                </div>
-              )}
-
               <div className="space-y-4">
                 {/* Input Jumlah - FULL WIDTH BESAR */}
                 <div>
@@ -218,13 +218,24 @@ export function PaymentInputModal({ open, onOpenChange, onSubmit, tagihan, summa
                           Jumlah Dibayar <span className="text-red-600">*</span>
                         </Text>
                       </div>
-                      <button
-                        type="button"
-                        onClick={handleSetFullPayment}
-                        className="px-3 py-1 text-xs bg-blue-600 hover:bg-blue-700 text-white font-medium"
-                      >
-                        Bayar Penuh
-                      </button>
+                      <div className="flex items-center gap-2">
+                        {formData.jumlah_dibayar && parseFloat(formData.jumlah_dibayar) > 0 && (
+                          <span className={`px-2 py-1 text-xs font-medium ${
+                            parseFloat(formData.jumlah_dibayar) >= summary.sisa
+                              ? 'bg-green-100 text-green-800 border border-green-300'
+                              : 'bg-amber-100 text-amber-800 border border-amber-300'
+                          }`}>
+                            {parseFloat(formData.jumlah_dibayar) >= summary.sisa ? 'Bayar Penuh' : 'Bayar Sebagian'}
+                          </span>
+                        )}
+                        <button
+                          type="button"
+                          onClick={handleSetFullPayment}
+                          className="px-3 py-1 text-xs bg-blue-600 hover:bg-blue-700 text-white font-medium"
+                        >
+                          Set Penuh
+                        </button>
+                      </div>
                     </div>
                     <input
                       type="text"
@@ -234,9 +245,19 @@ export function PaymentInputModal({ open, onOpenChange, onSubmit, tagihan, summa
                       className="w-full px-4 py-3 text-2xl font-mono font-bold text-right border-2 border-slate-300 focus:border-green-600 focus:outline-none bg-green-50"
                       required
                     />
-                    <Text size="1" className="text-slate-500 mt-1 block text-right">
-                      Masukkan nominal dalam Rupiah
-                    </Text>
+                    {/* Fixed height container untuk error message */}
+                    <div className="mt-1 h-5">
+                      {error ? (
+                        <div className="flex items-center gap-1.5 text-red-600">
+                          <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                          <Text size="1" className="text-red-600">{error}</Text>
+                        </div>
+                      ) : (
+                        <Text size="1" className="text-slate-500 text-right block">
+                          Masukkan nominal dalam Rupiah
+                        </Text>
+                      )}
+                    </div>
                   </label>
                 </div>
 
@@ -258,12 +279,8 @@ export function PaymentInputModal({ open, onOpenChange, onSubmit, tagihan, summa
                       >
                         <Select.Trigger style={{ borderRadius: 0, width: '100%' }} />
                         <Select.Content style={{ borderRadius: 0 }}>
-                          <Select.Item value="cash">Tunai</Select.Item>
-                          <Select.Item value="transfer">Transfer</Select.Item>
-                          <Select.Item value="qris">QRIS</Select.Item>
-                          <Select.Item value="e-wallet">E-Wallet</Select.Item>
-                          <Select.Item value="kartu_debit">Debit</Select.Item>
-                          <Select.Item value="kartu_kredit">Kredit</Select.Item>
+                          <Select.Item value="tunai">Tunai</Select.Item>
+                          <Select.Item value="non_tunai">Non Tunai</Select.Item>
                         </Select.Content>
                       </Select.Root>
                     </label>
@@ -332,3 +349,5 @@ export function PaymentInputModal({ open, onOpenChange, onSubmit, tagihan, summa
     </Dialog.Root>
   )
 }
+
+

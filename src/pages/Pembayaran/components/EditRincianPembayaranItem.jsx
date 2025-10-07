@@ -7,15 +7,6 @@ export function EditRincianPembayaranItem({ item, index, onChange, onRemove }) {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Badge size="2">Transaksi {index + 1}</Badge>
-          <Badge 
-            color={
-              item.status === 'terverifikasi' ? 'green' : 
-              item.status === 'ditolak' ? 'red' : 'orange'
-            }
-            size="1"
-          >
-            {item.status}
-          </Badge>
         </div>
         <IconButton
           size="1"

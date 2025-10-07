@@ -9,6 +9,7 @@ import { UnpaidTagihanList } from './components/UnpaidTagihanList'
 import { PaymentInputModal } from './components/PaymentInputModal'
 import { SelectedPaymentList } from './components/SelectedPaymentList'
 import { PaymentConfirmationModal } from './components/PaymentConfirmationModal'
+import { PaymentInvoiceModal } from './components/PaymentInvoiceModal'
 
 export function CreatePembayaran() {
   const navigate = useNavigate()
@@ -33,6 +34,8 @@ export function CreatePembayaran() {
     selectedTagihanIds,
     submitting,
     error,
+    invoiceData,
+    setInvoiceData,
   } = usePaymentFlow()
 
   const handleSaveClick = () => {
@@ -53,10 +56,10 @@ export function CreatePembayaran() {
         <div className="shrink-0 bg-white px-6 py-3">
           <div className="flex items-center justify-between">
             <div>
-              <Text size="4" weight="bold" className="text-slate-900">
+              <Text size="4" weight="bold" className="text-slate-900 block mb-1">
                 Buat Pembayaran Baru
               </Text>
-              <Text size="2" className="text-slate-600">
+              <Text size="1" className="text-slate-500">
                 Pilih siswa, pilih tagihan, dan lakukan pembayaran
               </Text>
             </div>
@@ -190,6 +193,18 @@ export function CreatePembayaran() {
         totalAmount={totalAmount}
         siswaInfo={selectedSiswa}
         submitting={submitting}
+      />
+
+      {/* Modal Invoice/Bukti Pembayaran */}
+      <PaymentInvoiceModal
+        open={!!invoiceData}
+        onOpenChange={(open) => {
+          if (!open) {
+            setInvoiceData(null)
+            navigate('/pembayaran')
+          }
+        }}
+        paymentData={invoiceData}
       />
     </PageLayout>
   )
