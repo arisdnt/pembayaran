@@ -1,13 +1,18 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+echo "[git-push] Staging changes..."
 git add -A
 
 if git diff --cached --quiet; then
-  echo "No changes to commit."
+  echo "[git-push] No changes detected after staging. Nothing to do."
   exit 0
 fi
 
 timestamp="$(date '+%Y-%m-%d %H:%M:%S')"
+echo "[git-push] Committing changes with message: Update ${timestamp}"
 git commit -m "Update ${timestamp}"
+
+echo "[git-push] Pushing to remote..."
 git push
+echo "[git-push] Done."

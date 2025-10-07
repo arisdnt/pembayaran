@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+git --no-pager log --graph --abbrev-commit --date=relative \
+  --format='%C(auto)%h %C(blue)%ad%C(reset) %C(bold cyan)%an%C(reset) %C(yellow)%d%C(reset)%n    %C(reset)%s' \
+  "$@"
