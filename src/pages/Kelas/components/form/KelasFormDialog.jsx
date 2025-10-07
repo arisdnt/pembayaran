@@ -44,6 +44,13 @@ function KelasFormDialog({
       return
     }
 
+    const tingkatNum = parseInt(formData.tingkat, 10)
+    if (isNaN(tingkatNum) || tingkatNum < 1 || tingkatNum > 99) {
+      setError('Tingkat harus berupa angka antara 1 sampai 99')
+      setSubmitting(false)
+      return
+    }
+
     if (formData.kapasitas_maksimal && formData.kapasitas_maksimal <= 0) {
       setError('Kapasitas maksimal harus lebih dari 0')
       setSubmitting(false)
@@ -121,14 +128,17 @@ function KelasFormDialog({
                   </Text>
                 </div>
                 <TextField.Root
+                  type="number"
                   placeholder="Contoh: 10, 11, 12"
                   value={formData.tingkat}
                   onChange={(e) => setFormData({ ...formData, tingkat: e.target.value })}
                   style={{ borderRadius: 0 }}
+                  min="1"
+                  max="99"
                   required
                 />
                 <Text size="1" className="text-slate-500 mt-1">
-                  Tingkat kelas (10, 11, 12, dst)
+                  Tingkat kelas (angka 1-99)
                 </Text>
               </label>
 

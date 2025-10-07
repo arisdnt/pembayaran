@@ -5,7 +5,7 @@ import { JenisPembayaranTableRow } from './JenisPembayaranTableRow'
 import { JenisPembayaranEmptyState } from '../JenisPembayaranEmptyState'
 import { JenisPembayaranTableSkeleton } from './JenisPembayaranTableSkeleton'
 
-export function JenisPembayaranTable({ data, isLoading, isRefreshing, onEdit, onDelete, onAdd, onViewDetail, selectedItem, onSelectItem }) {
+export function JenisPembayaranTable({ data, isLoading, isRefreshing, onEdit, onDelete, onAdd, onViewDetail, onToggleStatus, selectedItem, onSelectItem }) {
   const filters = useJenisPembayaranFilters(data)
   const isEmpty = filters.filteredData.length === 0
 
@@ -66,10 +66,20 @@ export function JenisPembayaranTable({ data, isLoading, isRefreshing, onEdit, on
                 </th>
                 <th className="px-4 py-3 text-left border-r border-slate-200">
                   <Text size="1" weight="bold" className="text-slate-700 uppercase tracking-wider">
-                    Wajib
+                    Kelas Spesifik
                   </Text>
                 </th>
                 <th className="px-4 py-3 text-left border-r border-slate-200">
+                  <Text size="1" weight="bold" className="text-slate-700 uppercase tracking-wider">
+                    Peminatan
+                  </Text>
+                </th>
+                <th className="px-4 py-3 text-left border-r border-slate-200">
+                  <Text size="1" weight="bold" className="text-slate-700 uppercase tracking-wider">
+                    Wajib
+                  </Text>
+                </th>
+                <th className="px-4 py-3 text-left border-r border-slate-200" style={{ width: '140px' }}>
                   <Text size="1" weight="bold" className="text-slate-700 uppercase tracking-wider">
                     Status
                   </Text>
@@ -94,6 +104,7 @@ export function JenisPembayaranTable({ data, isLoading, isRefreshing, onEdit, on
                       onEdit={onEdit}
                       onDelete={onDelete}
                       onViewDetail={onViewDetail}
+                      onToggleStatus={onToggleStatus}
                       selectedItem={selectedItem}
                       onSelectItem={onSelectItem}
                     />

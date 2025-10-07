@@ -9,53 +9,85 @@ export function JenisPembayaranFormFields({
   filteredKelasList,
   filteredPeminatanList 
 }) {
+  // Format number dengan pemisah ribuan
+  const formatNumber = (value) => {
+    if (!value) return ''
+    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+  }
+
+  // Parse number dari format ribuan
+  const parseNumber = (value) => {
+    return value.replace(/\./g, '')
+  }
+
+  const handleJumlahChange = (e) => {
+    const rawValue = parseNumber(e.target.value)
+    // Hanya izinkan angka
+    if (rawValue === '' || /^\d+$/.test(rawValue)) {
+      setFormData({ ...formData, jumlah_default: rawValue })
+    }
+  }
   return (
     <>
       <div className="grid grid-cols-2 gap-4 mb-4">
-        <label>
-          <div className="flex items-center gap-1.5 mb-1">
-            <Tag className="h-3.5 w-3.5 text-indigo-500" />
-            <Text size="2" weight="medium">Nama <span className="text-red-600">*</span></Text>
-          </div>
-          <TextField.Root
-            placeholder="Nama jenis pembayaran"
-            value={formData.nama}
-            onChange={(e) => setFormData({ ...formData, nama: e.target.value })}
-            style={{ borderRadius: 0 }}
-            required
-          />
-          <Text size="1" className="text-slate-500 mt-1">Kode akan digenerate otomatis berdasarkan nama dan tanggal</Text>
-        </label>
+        {/* Kolom Kiri: Nama + Deskripsi */}
+        <div className="flex flex-col gap-3">
+          <label>
+            <div className="flex items-center gap-1.5 mb-1">
+              <Tag className="h-3.5 w-3.5 text-indigo-500" />
+              <Text size="2" weight="medium">Nama <span className="text-red-600">*</span></Text>
+            </div>
+            <TextField.Root
+              placeholder="Nama jenis pembayaran"
+              value={formData.nama}
+              onChange={(e) => setFormData({ ...formData, nama: e.target.value })}
+              style={{ borderRadius: 0 }}
+              required
+            />
+            <Text size="1" className="text-slate-500 mt-1">Kode akan digenerate otomatis berdasarkan nama dan tanggal</Text>
+          </label>
 
-        <label>
-          <div className="flex items-center gap-1.5 mb-1">
-            <FileText className="h-3.5 w-3.5 text-slate-500" />
-            <Text size="2" weight="medium">Deskripsi</Text>
-          </div>
-          <TextField.Root
-            placeholder="Keterangan tambahan..."
-            value={formData.deskripsi}
-            onChange={(e) => setFormData({ ...formData, deskripsi: e.target.value })}
-            style={{ borderRadius: 0 }}
-          />
-        </label>
-      </div>
+          <label>
+            <div className="flex items-center gap-1.5 mb-1">
+              <FileText className="h-3.5 w-3.5 text-slate-500" />
+              <Text size="2" weight="medium">Deskripsi</Text>
+            </div>
+            <TextField.Root
+              placeholder="Keterangan tambahan..."
+              value={formData.deskripsi}
+              onChange={(e) => setFormData({ ...formData, deskripsi: e.target.value })}
+              style={{ borderRadius: 0 }}
+            />
+          </label>
+        </div>
 
-      <div className="mb-4">
-        <label>
-          <div className="flex items-center gap-1.5 mb-1">
-            <DollarSign className="h-3.5 w-3.5 text-green-500" />
-            <Text size="2" weight="medium">Jumlah Default</Text>
-          </div>
-          <TextField.Root
-            type="number"
-            placeholder="0"
-            value={formData.jumlah_default}
-            onChange={(e) => setFormData({ ...formData, jumlah_default: e.target.value })}
-            style={{ borderRadius: 0 }}
-          />
-          <Text size="1" className="text-slate-500 mt-1">Jumlah dalam Rupiah</Text>
-        </label>
+        {/* Kolom Kanan: Jumlah Default */}
+        <div className="flex flex-col justify-end">
+          <label>
+            <div className="flex items-center justify-between mb-1">
+              <div className="flex items-center gap-1.5">
+                <DollarSign className="h-3.5 w-3.5 text-green-500" />
+                <Text size="2" weight="medium">Jumlah Default</Text>
+              </div>
+              <Text size="1" className="text-slate-500">Jumlah dalam Rupiah</Text>
+            </div>
+            <div className="relative flex items-center border border-slate-300 focus-within:border-blue-500 transition-colors" style={{ backgroundColor: '#48B3AF' }}>
+              <span className="pl-4 pr-2 font-bold text-white" style={{ fontSize: '1.25rem' }}>Rp.</span>
+              <input
+                type="text"
+                placeholder="0"
+                value={formatNumber(formData.jumlah_default)}
+                onChange={handleJumlahChange}
+                className="flex-1 py-3 pr-4 border-0 focus:outline-none text-right font-bold text-white placeholder-white placeholder-opacity-50"
+                style={{ 
+                  borderRadius: 0,
+                  fontSize: '1.25rem',
+                  backgroundColor: 'transparent'
+                }}
+              />
+            </div>
+          </label>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4 mb-4">

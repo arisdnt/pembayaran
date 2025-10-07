@@ -101,14 +101,30 @@ export function JenisPembayaranDetailInfo({ jenisPembayaran }) {
         </FieldItem>
       )}
 
-      {/* Kelas */}
-      {jenisPembayaran.kelas && (
-        <FieldItem label="Kelas" icon={Tag}>
-          <Text size="2" weight="medium" className="text-slate-900">
-            Kelas {jenisPembayaran.kelas.tingkat} {jenisPembayaran.kelas.nama_sub_kelas}
-          </Text>
-        </FieldItem>
-      )}
+      {/* Tingkat */}
+      <FieldItem label="Tingkat Kelas" icon={Tag}>
+        <Text size="2" weight="medium" className="text-slate-900">
+          {jenisPembayaran.tingkat ? `Kelas ${jenisPembayaran.tingkat}` : 'Semua Tingkat'}
+        </Text>
+      </FieldItem>
+
+      {/* Kelas Spesifik */}
+      <FieldItem label="Kelas Spesifik" icon={Tag}>
+        <Text size="2" weight="medium" className="text-slate-900">
+          {jenisPembayaran.kelas 
+            ? `Kelas ${jenisPembayaran.kelas.tingkat} ${jenisPembayaran.kelas.nama_sub_kelas}` 
+            : 'Semua Kelas'}
+        </Text>
+      </FieldItem>
+
+      {/* Peminatan */}
+      <FieldItem label="Peminatan" icon={Tag}>
+        <Text size="2" weight="medium" className="text-slate-900">
+          {jenisPembayaran.peminatan 
+            ? `${jenisPembayaran.peminatan.kode} - ${jenisPembayaran.peminatan.nama}` 
+            : 'Semua Peminatan'}
+        </Text>
+      </FieldItem>
 
       {/* Status Wajib */}
       <FieldItem label="Status Pembayaran" icon={jenisPembayaran.wajib ? CheckCircle : AlertCircle}>

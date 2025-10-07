@@ -1,9 +1,9 @@
-import { Badge, Text } from '@radix-ui/themes'
+import { Badge, Text, Switch } from '@radix-ui/themes'
 import { Pencil1Icon, TrashIcon } from '@radix-ui/react-icons'
 import { Eye } from 'lucide-react'
 import { formatCurrency } from '../../utils/currencyFormatter'
 
-export function JenisPembayaranTableRow({ item, index, onEdit, onDelete, onViewDetail, selectedItem, onSelectItem }) {
+export function JenisPembayaranTableRow({ item, index, onEdit, onDelete, onViewDetail, onToggleStatus, selectedItem, onSelectItem }) {
   const isSelected = selectedItem?.id === item.id
   const isEven = index % 2 === 0
 
@@ -43,7 +43,17 @@ export function JenisPembayaranTableRow({ item, index, onEdit, onDelete, onViewD
       </td>
       <td className="px-4 py-3 border-r border-slate-200">
         <Text size="2" className="text-slate-700">
-          {item.tingkat ? `Kelas ${item.tingkat}` : '—'}
+          {item.tingkat ? `Kelas ${item.tingkat}` : 'Semua Tingkat'}
+        </Text>
+      </td>
+      <td className="px-4 py-3 border-r border-slate-200">
+        <Text size="2" className="text-slate-700">
+          {item.kelas ? `Kelas ${item.kelas.tingkat} ${item.kelas.nama_sub_kelas}` : 'Semua Kelas'}
+        </Text>
+      </td>
+      <td className="px-4 py-3 border-r border-slate-200">
+        <Text size="2" className="text-slate-700">
+          {item.peminatan ? `${item.peminatan.kode} - ${item.peminatan.nama}` : 'Semua Peminatan'}
         </Text>
       </td>
       <td className="px-4 py-3 border-r border-slate-200">
@@ -56,15 +66,21 @@ export function JenisPembayaranTableRow({ item, index, onEdit, onDelete, onViewD
           {item.wajib ? 'Wajib' : 'Opsional'}
         </Badge>
       </td>
-      <td className="px-4 py-3 border-r border-slate-200">
-        <Badge
-          variant="soft"
-          color={item.status_aktif ? 'green' : 'gray'}
-          style={{ borderRadius: 0 }}
-          className="text-xs"
-        >
-          {item.status_aktif ? 'Aktif' : 'Nonaktif'}
-        </Badge>
+      <td className="px-4 py-3 border-r border-slate-200" style={{ width: '140px' }}>
+        <div className="flex items-center gap-2">
+          <Switch
+            checked={item.status_aktif}
+            onCheckedChange={(e) => {
+              e.stopPropagation?.();
+              onToggleStatus(item.id, item.status_aktif)
+            }}
+            onClick={(e) => e.stopPropagation()}
+            size="1"
+          />
+          <Text size="1" className="text-slate-600">
+            {item.status_aktif ? 'Aktif' : 'Nonaktif'}
+          </Text>
+        </div>
       </td>
       <td className="px-4 py-3">
         <div className="flex items-center justify-center gap-1">

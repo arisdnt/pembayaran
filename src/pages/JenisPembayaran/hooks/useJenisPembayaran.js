@@ -84,6 +84,17 @@ export function useJenisPembayaran() {
     }
   }
 
+  const toggleStatus = async (id, currentStatus) => {
+    try {
+      await enqueueUpdate('jenis_pembayaran', id, {
+        status_aktif: !currentStatus,
+      })
+    } catch (err) {
+      setError(err.message)
+      throw err
+    }
+  }
+
   return {
     data,
     loading,
@@ -93,6 +104,7 @@ export function useJenisPembayaran() {
     setError,
     deleteItem,
     saveItem,
+    toggleStatus,
     refreshData,
   }
 }

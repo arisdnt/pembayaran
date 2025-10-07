@@ -19,6 +19,7 @@ function JenisPembayaranContent() {
     setError,
     deleteItem,
     saveItem,
+    toggleStatus,
   } = useJenisPembayaran()
 
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -80,6 +81,14 @@ function JenisPembayaranContent() {
     setDetailModalOpen(true)
   }
 
+  const handleToggleStatus = async (id, currentStatus) => {
+    try {
+      await toggleStatus(id, currentStatus)
+    } catch (err) {
+      console.error('Error toggling status:', err)
+    }
+  }
+
   return (
       <PageLayout>
         <div className="flex flex-col h-full">
@@ -107,6 +116,7 @@ function JenisPembayaranContent() {
               onDelete={handleOpenDelete}
               onAdd={handleOpenCreate}
               onViewDetail={handleOpenDetail}
+              onToggleStatus={handleToggleStatus}
               selectedItem={selectedItem}
               onSelectItem={setSelectedItem}
             />
