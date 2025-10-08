@@ -1,6 +1,6 @@
 import { Text, IconButton } from '@radix-ui/themes'
 import { Pencil1Icon, TrashIcon } from '@radix-ui/react-icons'
-import { Eye } from 'lucide-react'
+import { Eye, FileText, Image as ImageIcon } from 'lucide-react'
 import { formatDateTime } from '../../utils/dateHelpers'
 
 function formatCurrency(amount) {
@@ -11,7 +11,34 @@ function formatCurrency(amount) {
   }).format(amount || 0)
 }
 
-export function PembayaranTableRow({ item, index, onEdit, onDelete, onViewDetail }) {
+function getFileNameFromUrl(url) {
+  if (!url) return ''
+  try {
+    const urlObj = new URL(url)
+    const pathParts = urlObj.pathname.split('/')
+    const fileName = pathParts[pathParts.length - 1]
+    const parts = fileName.split('_')
+    if (parts.length > 1 && /^\d+$/.test(parts[0])) {
+      return decodeURIComponent(parts.slice(1).join('_'))
+    }
+    return decodeURIComponent(fileName)
+  } catch {
+    return 'bukti_pembayaran'
+  }
+}
+
+function getFileTypeFromUrl(url) {
+  if (!url) return null
+  const extension = url.split('.').pop()?.toLowerCase()
+  if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'].includes(extension)) {
+    return 'image'
+  } else if (extension === 'pdf') {
+    return 'pdf'
+  }
+  return 'file'
+}
+
+export function PembayaranTableRow({ item, index, onEdit, onDelete, onViewDetail, onViewBukti }) {
   const isEven = index % 2 === 0
 
   return (
@@ -73,6 +100,43 @@ export function PembayaranTableRow({ item, index, onEdit, onDelete, onViewDetail
         <Text size="2" weight="bold" className="text-green-700">
           {formatCurrency(item.total_dibayar)}
         </Text>
+      </td>
+      <td className="px-4 py-3 border-r border-slate-200">
+        {(() => {
+          // Get first rincian with bukti_pembayaran_url
+          const rincianWithBukti = item.rincian_pembayaran?.find(r => r.bukti_pembayaran_url)
+          
+          if (!rincianWithBukti?.bukti_pembayaran_url) {
+            return (
+              <Text size="1" className="text-slate-400">
+                -
+              </Text>
+            )
+          }
+
+          const buktiUrl = rincianWithBukti.bukti_pembayaran_url
+          const nomorTransaksi = rincianWithBukti.nomor_transaksi
+          const fileType = getFileTypeFromUrl(buktiUrl)
+          const fileName = getFileNameFromUrl(buktiUrl)
+
+          return (
+            <button
+              onClick={() => onViewBukti(buktiUrl, nomorTransaksi)}
+              className="flex items-center gap-2 hover:bg-blue-50 transition-colors px-2 py-1 rounded group max-w-full"
+            >
+              {fileType === 'image' ? (
+                <ImageIcon className="h-3.5 w-3.5 text-blue-600 shrink-0" />
+              ) : (
+                <FileText className="h-3.5 w-3.5 text-blue-600 shrink-0" />
+              )}
+              <div className="flex-1 min-w-0 text-left">
+                <Text size="1" className="text-blue-700 group-hover:text-blue-800 font-medium block truncate">
+                  {fileName}
+                </Text>
+              </div>
+            </button>
+          )
+        })()}
       </td>
       <td className="px-4 py-3">
         <div className="flex justify-center gap-1">

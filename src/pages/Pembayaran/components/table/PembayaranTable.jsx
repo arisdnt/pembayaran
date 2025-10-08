@@ -1,10 +1,21 @@
+import { useState } from 'react'
 import { Text } from '@radix-ui/themes'
 import { usePembayaranFilters } from '../../hooks/usePembayaranFilters'
 import { PembayaranTableHeader } from './PembayaranTableHeader'
 import { PembayaranTableRow } from './PembayaranTableRow'
 import { PembayaranEmptyState } from './PembayaranEmptyState'
+import { BuktiPembayaranModal } from '../modals/BuktiPembayaranModal'
 
 export function PembayaranTable({ data, isLoading, isRefreshing, onEdit, onDelete, onAdd, onViewDetail }) {
+  const [buktiModalOpen, setBuktiModalOpen] = useState(false)
+  const [selectedBukti, setSelectedBukti] = useState(null)
+  const [selectedNomor, setSelectedNomor] = useState(null)
+
+  const handleViewBukti = (buktiUrl, nomorTransaksi) => {
+    setSelectedBukti(buktiUrl)
+    setSelectedNomor(nomorTransaksi)
+    setBuktiModalOpen(true)
+  }
   const {
     searchQuery,
     setSearchQuery,
@@ -84,6 +95,11 @@ export function PembayaranTable({ data, isLoading, isRefreshing, onEdit, onDelet
                     Nominal
                   </Text>
                 </th>
+                <th className="px-4 py-3 text-left border-r border-slate-200">
+                  <Text size="1" weight="bold" className="text-slate-700 uppercase tracking-wider">
+                    Bukti
+                  </Text>
+                </th>
                 <th className="px-4 py-3 text-center">
                   <Text size="1" weight="bold" className="text-slate-700 uppercase tracking-wider">
                     Aksi
@@ -100,6 +116,7 @@ export function PembayaranTable({ data, isLoading, isRefreshing, onEdit, onDelet
                   onEdit={onEdit}
                   onDelete={onDelete}
                   onViewDetail={onViewDetail}
+                  onViewBukti={handleViewBukti}
                 />
               ))}
               {isEmpty && (
@@ -112,6 +129,14 @@ export function PembayaranTable({ data, isLoading, isRefreshing, onEdit, onDelet
           </table>
         </div>
       </div>
+
+      {/* Modal Preview Bukti Pembayaran */}
+      <BuktiPembayaranModal
+        open={buktiModalOpen}
+        onOpenChange={setBuktiModalOpen}
+        buktiUrl={selectedBukti}
+        nomorTransaksi={selectedNomor}
+      />
     </div>
   )
 }
