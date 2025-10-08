@@ -12,15 +12,24 @@ export function useJenisPembayaran() {
 
   const jp = useLiveQuery(async () => db.jenis_pembayaran.orderBy('kode').toArray(), [], undefined)
   const tahun = useLiveQuery(async () => db.tahun_ajaran.toArray(), [], undefined)
+  const rincian = useLiveQuery(async () => db.rincian_tagihan.toArray(), [], undefined)
 
   const data = useMemo(() => {
     const list = jp || []
     const tahunMap = new Map((tahun || []).map((t) => [t.id, { id: t.id, nama: t.nama }]))
+    const rtCount = new Map()
+    ;(rincian || []).forEach((r) => {
+      const key = r.id_jenis_pembayaran
+      if (!key) return
+      rtCount.set(key, (rtCount.get(key) || 0) + 1)
+    })
     return list.map((it) => ({
       ...it,
       tahun_ajaran: tahunMap.get(it.id_tahun_ajaran) || null,
+      has_relasi: (rtCount.get(it.id) || 0) > 0,
+      _relasi_counts: { rincian_tagihan: rtCount.get(it.id) || 0 },
     }))
-  }, [jp, tahun])
+  }, [jp, tahun, rincian])
 
   const loading = jp === undefined
 
@@ -31,6 +40,13 @@ export function useJenisPembayaran() {
 
   const deleteItem = async (id) => {
     try {
+      const rCount = await db.rincian_tagihan.where('id_jenis_pembayaran').equals(id).count()
+      if (rCount > 0) {
+        const msg = `Jenis pembayaran tidak dapat dihapus karena masih digunakan pada ${rCount} rincian tagihan. ` +
+          `Hapus atau ubah rincian tagihan terkait terlebih dahulu.`
+        setError(msg)
+        throw new Error(msg)
+      }
       await enqueueDelete('jenis_pembayaran', id)
     } catch (err) {
       setError(err.message)

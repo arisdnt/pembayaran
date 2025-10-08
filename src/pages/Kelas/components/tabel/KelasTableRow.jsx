@@ -89,7 +89,8 @@ export function KelasTableRow({ item, isSelected, onSelect, onEdit, onDelete, on
               e.stopPropagation()
               onDelete(item)
             }}
-            className="cursor-pointer hover:bg-red-100 text-red-700 border border-red-200"
+            title={item.has_relasi ? 'Kelas memiliki data terkait — klik untuk melihat alasan' : `Hapus ${item.nama_sub_kelas}`}
+            className={`cursor-pointer hover:bg-red-100 text-red-700 border border-red-200`}
             style={{ borderRadius: 0 }}
             aria-label={`Hapus ${item.nama_sub_kelas}`}
           >

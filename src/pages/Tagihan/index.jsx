@@ -8,6 +8,8 @@ import { useTagihan } from './hooks/useTagihan'
 import { TagihanTable } from './components/TagihanTable'
 import { DeleteConfirmDialog } from '../../components/common/DeleteConfirmDialog'
 import { TagihanDetailModal } from './components/TagihanDetailModal'
+import { ErrorModal } from '../../components/modals/ErrorModal'
+import { db } from '../../offline/db'
 
 function TagihanContent() {
   const navigate = useNavigate()
@@ -57,16 +59,46 @@ function TagihanContent() {
     navigate(`/tagihan/edit/${item.id}`)
   }
 
-  const handleOpenDelete = (item) => {
+  const [errorModalOpen, setErrorModalOpen] = useState(false)
+  const [errorModalData, setErrorModalData] = useState({ title: '', message: '', details: '', variant: 'error' })
+
+  const handleOpenDelete = async (item) => {
     setCurrentItem(item)
+    if (item?.has_relasi) {
+      let rCount = 0, pCount = 0
+      try { rCount = await db.rincian_tagihan.where('id_tagihan').equals(item.id).count() } catch {}
+      try { pCount = await db.pembayaran.where('id_tagihan').equals(item.id).count() } catch {}
+      const parts = []
+      if (rCount) parts.push(`${rCount} rincian tagihan`)
+      if (pCount) parts.push(`${pCount} pembayaran`)
+      const refs = parts.length ? ` (${parts.join(' dan ')})` : ''
+      setErrorModalData({
+        title: 'Tidak Dapat Menghapus',
+        message: 'Tagihan ini masih memiliki data terkait',
+        details: `Hapus data terkait${refs} terlebih dahulu sebelum menghapus tagihan.`,
+        variant: 'error'
+      })
+      setErrorModalOpen(true)
+      return
+    }
     setDeleteDialogOpen(true)
   }
 
   const handleDelete = async () => {
-    if (currentItem) {
+    if (!currentItem) return
+    try {
       await deleteItem(currentItem.id)
       setCurrentItem(null)
       setSelectedItem(null)
+    } catch (e) {
+      setDeleteDialogOpen(false)
+      setErrorModalData({
+        title: 'Tidak Dapat Menghapus',
+        message: 'Tagihan ini masih memiliki data terkait',
+        details: e?.message || 'Hapus data terkait terlebih dahulu.',
+        variant: 'error'
+      })
+      setErrorModalOpen(true)
     }
   }
 
@@ -120,6 +152,14 @@ function TagihanContent() {
         open={detailModalOpen}
         onOpenChange={setDetailModalOpen}
         tagihan={selectedItem}
+      />
+      <ErrorModal
+        open={errorModalOpen}
+        onOpenChange={setErrorModalOpen}
+        title={errorModalData.title}
+        message={errorModalData.message}
+        details={errorModalData.details}
+        variant={errorModalData.variant}
       />
       </PageLayout>
   )

@@ -70,6 +70,8 @@ export function useTagihan() {
         total_tagihan,
         total_dibayar,
         kekurangan,
+        has_relasi: (rList.length > 0) || (pList.length > 0),
+        _relasi_counts: { rincian: rList.length, pembayaran: pList.length },
       }
     })
   }, [tagihan, rksList, rincianTagihan, pembayaran, rincianPembayaran])
@@ -84,6 +86,20 @@ export function useTagihan() {
 
   const deleteItem = async (id) => {
     try {
+      const [rCount, pCount] = await Promise.all([
+        db.rincian_tagihan.where('id_tagihan').equals(id).count(),
+        db.pembayaran.where('id_tagihan').equals(id).count(),
+      ])
+      if (rCount > 0 || pCount > 0) {
+        const parts = []
+        if (rCount) parts.push(`${rCount} rincian tagihan`)
+        if (pCount) parts.push(`${pCount} pembayaran`)
+        const refs = parts.join(' dan ')
+        const msg = `Tagihan tidak dapat dihapus karena masih memiliki relasi: ${refs}. ` +
+          `Hapus rincian/pembayaran terkait terlebih dahulu.`
+        setError(msg)
+        throw new Error(msg)
+      }
       await enqueueDelete('tagihan', id)
     } catch (err) {
       setError(err.message)

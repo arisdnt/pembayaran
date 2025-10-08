@@ -8,6 +8,8 @@ import { useSiswa } from '../hooks/useSiswa'
 import { SiswaTable } from '../components/tabel'
 import SiswaFormDialog from '../components/form'
 import { DeleteConfirmDialog } from '../../../components/common/DeleteConfirmDialog'
+import { ErrorModal } from '../../../components/modals/ErrorModal'
+import { db } from '../../../offline/db'
 
 function SiswaContent() {
   const navigate = useNavigate()
@@ -73,15 +75,56 @@ function SiswaContent() {
     setDialogOpen(true)
   }
 
-  const handleOpenDelete = (item) => {
+  const [errorModalOpen, setErrorModalOpen] = useState(false)
+  const [errorModalData, setErrorModalData] = useState({ title: '', message: '', details: '', variant: 'error' })
+
+  const handleOpenDelete = async (item) => {
     setCurrentItem(item)
+    // Derive relations live for accuracy
+    let rksCount = 0, pemCount = 0, tagihanCount = 0
+    try { rksCount = await db.riwayat_kelas_siswa.where('id_siswa').equals(item.id).count() } catch {}
+    try { pemCount = await db.peminatan_siswa.where('id_siswa').equals(item.id).count() } catch {}
+    try {
+      if (rksCount > 0) {
+        const rksRows = await db.riwayat_kelas_siswa.where('id_siswa').equals(item.id).toArray()
+        const rksIds = rksRows.map(r => r.id)
+        const allTagihan = await db.tagihan.toArray()
+        tagihanCount = allTagihan.filter(t => rksIds.includes(t.id_riwayat_kelas_siswa)).length
+      }
+    } catch {}
+
+    if (rksCount + pemCount + tagihanCount > 0) {
+      const parts = []
+      if (rksCount) parts.push(`${rksCount} riwayat kelas`)
+      if (tagihanCount) parts.push(`${tagihanCount} tagihan`)
+      if (pemCount) parts.push(`${pemCount} peminatan siswa`)
+      const refs = parts.length ? ` (${parts.join(' dan ')})` : ''
+      setErrorModalData({
+        title: 'Tidak Dapat Menghapus',
+        message: 'Siswa ini masih memiliki data terkait',
+        details: `Pindahkan atau hapus data terkait${refs} terlebih dahulu sebelum menghapus siswa.`,
+        variant: 'error'
+      })
+      setErrorModalOpen(true)
+      return
+    }
     setDeleteDialogOpen(true)
   }
 
   const handleDelete = async () => {
-    if (currentItem) {
+    if (!currentItem) return
+    try {
       await deleteItem(currentItem.id)
       setCurrentItem(null)
+    } catch (e) {
+      setDeleteDialogOpen(false)
+      setErrorModalData({
+        title: 'Tidak Dapat Menghapus',
+        message: 'Siswa ini masih memiliki data terkait',
+        details: e?.message || 'Pindahkan atau hapus data terkait terlebih dahulu.',
+        variant: 'error'
+      })
+      setErrorModalOpen(true)
     }
   }
 
@@ -139,6 +182,14 @@ function SiswaContent() {
         itemName={currentItem?.nama_lengkap || ''}
         title="Hapus Siswa"
         description="Apakah Anda yakin ingin menghapus siswa"
+      />
+      <ErrorModal
+        open={errorModalOpen}
+        onOpenChange={setErrorModalOpen}
+        title={errorModalData.title}
+        message={errorModalData.message}
+        details={errorModalData.details}
+        variant={errorModalData.variant}
       />
       </PageLayout>
   )

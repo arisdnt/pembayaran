@@ -21,6 +21,25 @@ export function useLogin() {
     }
   }, [navigate, redirectPath, user])
 
+  function isOfflineLike(message) {
+    try {
+      const msg = (message || '').toString().toLowerCase()
+      return (
+        (typeof navigator !== 'undefined' && navigator?.onLine === false) ||
+        msg.includes('failed to fetch') ||
+        msg.includes('networkerror') ||
+        msg.includes('network request failed') ||
+        msg.includes('fetch failed') ||
+        msg.includes('getaddrinfo enotfound') ||
+        msg.includes('enotfound') ||
+        msg.includes('econnrefused') ||
+        msg.includes('timeout')
+      )
+    } catch (_) {
+      return false
+    }
+  }
+
   async function handleSubmit(event) {
     event.preventDefault()
     setError(null)
@@ -33,8 +52,17 @@ export function useLogin() {
       })
 
       if (signInError) {
+        // Default messages
+        let errorTitle = 'Login Gagal'
         let errorMessage = 'Login gagal. Silakan coba lagi.'
         let errorDetails = signInError.message
+
+        // Offline / network-friendly messaging
+        if (isOfflineLike(signInError.message)) {
+          errorTitle = 'Masalah Koneksi'
+          errorMessage = 'Tidak ada koneksi internet'
+          errorDetails = 'Periksa jaringan Anda (Wi‑Fi/data), lalu coba lagi.'
+        }
 
         if (signInError.message.includes('Invalid login credentials')) {
           errorMessage = 'Email atau password salah'
@@ -45,7 +73,7 @@ export function useLogin() {
         }
 
         setError({
-          title: 'Login Gagal',
+          title: errorTitle,
           message: errorMessage,
           details: errorDetails
         })
@@ -54,10 +82,11 @@ export function useLogin() {
         navigate(redirectPath, { replace: true })
       }
     } catch (err) {
+      const offline = isOfflineLike(err?.message)
       setError({
         title: 'Masalah Koneksi',
-        message: 'Tidak dapat terhubung ke server',
-        details: 'Periksa koneksi internet Anda dan coba lagi.'
+        message: offline ? 'Tidak ada koneksi internet' : 'Tidak dapat terhubung ke server',
+        details: offline ? 'Periksa jaringan Anda (Wi‑Fi/data), lalu coba lagi.' : 'Periksa koneksi internet Anda dan coba lagi.'
       })
       setErrorModalOpen(true)
     }
@@ -75,10 +104,11 @@ export function useLogin() {
       })
 
       if (magicError) {
+        const offline = isOfflineLike(magicError.message)
         setError({
-          title: 'Magic Link Gagal',
-          message: 'Gagal mengirim link login',
-          details: magicError.message
+          title: offline ? 'Masalah Koneksi' : 'Magic Link Gagal',
+          message: offline ? 'Tidak ada koneksi internet' : 'Gagal mengirim link login',
+          details: offline ? 'Periksa jaringan Anda (Wi‑Fi/data), lalu coba lagi.' : magicError.message
         })
         setErrorModalOpen(true)
       } else {
@@ -91,10 +121,11 @@ export function useLogin() {
         setErrorModalOpen(true)
       }
     } catch (err) {
+      const offline = isOfflineLike(err?.message)
       setError({
         title: 'Masalah Koneksi',
-        message: 'Tidak dapat terhubung ke server',
-        details: 'Periksa koneksi internet Anda dan coba lagi.'
+        message: offline ? 'Tidak ada koneksi internet' : 'Tidak dapat terhubung ke server',
+        details: offline ? 'Periksa jaringan Anda (Wi‑Fi/data), lalu coba lagi.' : 'Periksa koneksi internet Anda dan coba lagi.'
       })
       setErrorModalOpen(true)
     }

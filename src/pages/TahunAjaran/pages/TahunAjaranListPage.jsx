@@ -9,6 +9,8 @@ import TahunAjaranFormDialog from '../components/form/TahunAjaranFormDialog'
 import { DeleteConfirmDialog } from '../../../components/common/DeleteConfirmDialog'
 import { DetailPanel } from '../components/detail/DetailPanel'
 import { TahunAjaranDetailModal } from '../components/detail/TahunAjaranDetailModal'
+import { ErrorModal } from '../../../components/modals/ErrorModal'
+import { db } from '../../../offline/db'
 
 function TahunAjaranContent() {
   const {
@@ -71,15 +73,51 @@ function TahunAjaranContent() {
     setDialogOpen(true)
   }
 
-  const handleOpenDelete = (item) => {
+  const [errorModalOpen, setErrorModalOpen] = useState(false)
+  const [errorModalData, setErrorModalData] = useState({ title: '', message: '', details: '', variant: 'error' })
+
+  const handleOpenDelete = async (item) => {
     setCurrentItem(item)
+    if (item?.has_relasi) {
+      let cRks = 0, cRwk = 0, cJp = 0, cPem = 0
+      try { cRks = await db.riwayat_kelas_siswa.where('id_tahun_ajaran').equals(item.id).count() } catch {}
+      try { cRwk = await db.riwayat_wali_kelas.where('id_tahun_ajaran').equals(item.id).count() } catch {}
+      try { cJp = await db.jenis_pembayaran.where('id_tahun_ajaran').equals(item.id).count() } catch {}
+      try { cPem = await db.peminatan_siswa.where('id_tahun_ajaran').equals(item.id).count() } catch {}
+
+      const parts = []
+      if (cRks) parts.push(`${cRks} riwayat kelas siswa`)
+      if (cRwk) parts.push(`${cRwk} riwayat wali kelas`)
+      if (cJp) parts.push(`${cJp} jenis pembayaran`)
+      if (cPem) parts.push(`${cPem} peminatan siswa`)
+      const refs = parts.length ? ` (${parts.join(' dan ')})` : ''
+
+      setErrorModalData({
+        title: 'Tidak Dapat Menghapus',
+        message: 'Tahun ajaran ini masih memiliki data terkait',
+        details: `Hapus atau pindahkan data terkait${refs} terlebih dahulu sebelum menghapus tahun ajaran.`,
+        variant: 'error'
+      })
+      setErrorModalOpen(true)
+      return
+    }
     setDeleteDialogOpen(true)
   }
 
   const handleDelete = async () => {
-    if (currentItem) {
+    if (!currentItem) return
+    try {
       await deleteItem(currentItem.id)
       setCurrentItem(null)
+    } catch (e) {
+      setDeleteDialogOpen(false)
+      setErrorModalData({
+        title: 'Tidak Dapat Menghapus',
+        message: 'Tahun ajaran ini masih memiliki data terkait',
+        details: e?.message || 'Pindahkan atau hapus data terkait terlebih dahulu.',
+        variant: 'error'
+      })
+      setErrorModalOpen(true)
     }
   }
 
@@ -155,6 +193,15 @@ function TahunAjaranContent() {
         open={detailModalOpen}
         onOpenChange={setDetailModalOpen}
         item={currentItem}
+      />
+
+      <ErrorModal
+        open={errorModalOpen}
+        onOpenChange={setErrorModalOpen}
+        title={errorModalData.title}
+        message={errorModalData.message}
+        details={errorModalData.details}
+        variant={errorModalData.variant}
       />
     </PageLayout>
   )

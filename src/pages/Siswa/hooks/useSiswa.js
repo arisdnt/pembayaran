@@ -104,6 +104,10 @@ export function useSiswa() {
       }
       const totalTunggakan = Math.max(totalTagihan - totalDibayar, 0)
 
+      const relRks = (rksBySiswa.get(s.id) || [])
+      const relPem = (peminatanBySiswa.get(s.id) || [])
+      const relTagihanCount = rksIds.reduce((acc, rksId) => acc + (tagihanByRks.get(rksId)?.length || 0), 0)
+
       return {
         ...s,
         kelas_terbaru: kelasTerbaru,
@@ -112,6 +116,8 @@ export function useSiswa() {
         total_tagihan: totalTagihan,
         total_dibayar: totalDibayar,
         total_tunggakan: totalTunggakan,
+        has_relasi: (relRks.length + relPem.length + relTagihanCount) > 0,
+        _relasi_counts: { riwayat_kelas: relRks.length, peminatan: relPem.length, tagihan: relTagihanCount },
       }
     })
   }, [siswa, rks, kelas, tahun, peminatan, peminatanSiswa, tagihan, rincianTagihan, pembayaran, rincianPembayaran])
@@ -139,6 +145,30 @@ export function useSiswa() {
 
   const deleteItem = async (id) => {
     try {
+      const [rksCount, pemCount] = await Promise.all([
+        db.riwayat_kelas_siswa.where('id_siswa').equals(id).count(),
+        db.peminatan_siswa.where('id_siswa').equals(id).count(),
+      ])
+      // Tagihan via RKS
+      let tagihanCount = 0
+      if (rksCount > 0) {
+        const rksRows = await db.riwayat_kelas_siswa.where('id_siswa').equals(id).toArray()
+        const rksIds = rksRows.map(r => r.id)
+        // Dexie lacks where-in easily without compound; fallback to filter in JS
+        const allTagihan = await db.tagihan.toArray()
+        tagihanCount = allTagihan.filter(t => rksIds.includes(t.id_riwayat_kelas_siswa)).length
+      }
+      if (rksCount + pemCount + tagihanCount > 0) {
+        const parts = []
+        if (rksCount) parts.push(`${rksCount} riwayat kelas`)
+        if (tagihanCount) parts.push(`${tagihanCount} tagihan`)
+        if (pemCount) parts.push(`${pemCount} peminatan siswa`)
+        const refs = parts.join(' dan ')
+        const msg = `Siswa tidak dapat dihapus karena masih memiliki relasi: ${refs}. ` +
+          `Pindahkan atau hapus data terkait terlebih dahulu.`
+        setError(msg)
+        throw new Error(msg)
+      }
       await enqueueDelete('siswa', id)
     } catch (err) {
       setError(err.message)

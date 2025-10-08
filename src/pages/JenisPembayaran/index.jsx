@@ -8,6 +8,8 @@ import { DeleteConfirmDialog } from '../../components/common/DeleteConfirmDialog
 import { DetailPanel } from './components/detail/DetailPanel'
 import { JenisPembayaranDetailModal } from './components/detail/JenisPembayaranDetailModal'
 import { JenisPembayaranFormDialog } from './components/form/JenisPembayaranFormDialog'
+import { ErrorModal } from '../../components/modals/ErrorModal'
+import { db } from '../../offline/db'
 
 function JenisPembayaranContent() {
   const {
@@ -64,15 +66,40 @@ function JenisPembayaranContent() {
     setDialogOpen(true)
   }
 
-  const handleOpenDelete = (item) => {
+  const [errorModalOpen, setErrorModalOpen] = useState(false)
+  const [errorModalData, setErrorModalData] = useState({ title: '', message: '', details: '', variant: 'error' })
+
+  const handleOpenDelete = async (item) => {
     setCurrentItem(item)
+    if (item?.has_relasi) {
+      let rCount = 0
+      try { rCount = await db.rincian_tagihan.where('id_jenis_pembayaran').equals(item.id).count() } catch {}
+      setErrorModalData({
+        title: 'Tidak Dapat Menghapus',
+        message: 'Jenis pembayaran ini masih digunakan',
+        details: `Jenis pembayaran terkait pada ${rCount} rincian tagihan. Hapus atau ubah rincian tagihan terlebih dahulu sebelum menghapus jenis pembayaran.`,
+        variant: 'error'
+      })
+      setErrorModalOpen(true)
+      return
+    }
     setDeleteDialogOpen(true)
   }
 
   const handleDelete = async () => {
-    if (currentItem) {
+    if (!currentItem) return
+    try {
       await deleteItem(currentItem.id)
       setCurrentItem(null)
+    } catch (e) {
+      setDeleteDialogOpen(false)
+      setErrorModalData({
+        title: 'Tidak Dapat Menghapus',
+        message: 'Jenis pembayaran ini masih digunakan',
+        details: e?.message || 'Hapus atau ubah rincian tagihan terkait terlebih dahulu.',
+        variant: 'error'
+      })
+      setErrorModalOpen(true)
     }
   }
 
@@ -154,6 +181,14 @@ function JenisPembayaranContent() {
         open={detailModalOpen}
         onOpenChange={setDetailModalOpen}
         jenisPembayaran={selectedItem}
+      />
+      <ErrorModal
+        open={errorModalOpen}
+        onOpenChange={setErrorModalOpen}
+        title={errorModalData.title}
+        message={errorModalData.message}
+        details={errorModalData.details}
+        variant={errorModalData.variant}
       />
       </PageLayout>
   )

@@ -9,6 +9,8 @@ import WaliKelasFormDialog from '../components/form/WaliKelasFormDialog'
 import { DeleteConfirmDialog } from '../../../components/common/DeleteConfirmDialog'
 import { DetailPanel } from '../components/detail/DetailPanel'
 import { WaliKelasDetailModal } from '../components/detail/components/WaliKelasDetailModal'
+import { ErrorModal } from '../../../components/modals/ErrorModal'
+import { db } from '../../../offline/db'
 
 function WaliKelasContent() {
   const {
@@ -80,15 +82,41 @@ function WaliKelasContent() {
     setDialogOpen(true)
   }
 
-  const handleOpenDelete = (item) => {
+  const [errorModalOpen, setErrorModalOpen] = useState(false)
+  const [errorModalData, setErrorModalData] = useState({ title: '', message: '', details: '', variant: 'error' })
+
+  const handleOpenDelete = async (item) => {
     setCurrentItem(item)
+    // Cek relasi riwayat_wali_kelas
+    let rwkCount = 0
+    try { rwkCount = await db.riwayat_wali_kelas.where('id_wali_kelas').equals(item.id).count() } catch {}
+    if (rwkCount > 0) {
+      setErrorModalData({
+        title: 'Tidak Dapat Menghapus',
+        message: 'Wali kelas ini masih memiliki data terkait',
+        details: `Terdapat ${rwkCount} riwayat penugasan wali kelas yang terkait. Hapus atau pindahkan data terkait terlebih dahulu.`,
+        variant: 'error'
+      })
+      setErrorModalOpen(true)
+      return
+    }
     setDeleteDialogOpen(true)
   }
 
   const handleDelete = async () => {
-    if (currentItem) {
+    if (!currentItem) return
+    try {
       await deleteItem(currentItem.id)
       setCurrentItem(null)
+    } catch (e) {
+      setDeleteDialogOpen(false)
+      setErrorModalData({
+        title: 'Tidak Dapat Menghapus',
+        message: 'Wali kelas ini masih memiliki data terkait',
+        details: e?.message || 'Hapus atau pindahkan data terkait terlebih dahulu.',
+        variant: 'error'
+      })
+      setErrorModalOpen(true)
     }
   }
 
@@ -164,6 +192,14 @@ function WaliKelasContent() {
         open={detailModalOpen}
         onOpenChange={setDetailModalOpen}
         waliKelas={selectedItem}
+      />
+      <ErrorModal
+        open={errorModalOpen}
+        onOpenChange={setErrorModalOpen}
+        title={errorModalData.title}
+        message={errorModalData.message}
+        details={errorModalData.details}
+        variant={errorModalData.variant}
       />
       </PageLayout>
   )

@@ -9,6 +9,8 @@ import RiwayatKelasSiswaFormDialog from '../components/form/RiwayatKelasSiswaFor
 import { DeleteConfirmDialog } from '../../../components/common/DeleteConfirmDialog'
 import { DetailPanel } from '../components/detail/DetailPanel'
 import { RiwayatDetailModal } from '../components/detail/components/RiwayatDetailModal'
+import { ErrorModal } from '../../../components/modals/ErrorModal'
+import { db } from '../../../offline/db'
 
 function RiwayatKelasSiswaContent() {
   const {
@@ -85,15 +87,40 @@ function RiwayatKelasSiswaContent() {
     setDialogOpen(true)
   }
 
-  const handleOpenDelete = (item) => {
+  const [errorModalOpen, setErrorModalOpen] = useState(false)
+  const [errorModalData, setErrorModalData] = useState({ title: '', message: '', details: '', variant: 'error' })
+
+  const handleOpenDelete = async (item) => {
     setCurrentItem(item)
+    let tCount = 0
+    try { tCount = await db.tagihan.where('id_riwayat_kelas_siswa').equals(item.id).count() } catch {}
+    if (tCount > 0) {
+      setErrorModalData({
+        title: 'Tidak Dapat Menghapus',
+        message: 'Riwayat kelas ini masih memiliki data terkait',
+        details: `Terdapat ${tCount} tagihan terkait. Hapus tagihan tersebut terlebih dahulu sebelum menghapus riwayat kelas.`,
+        variant: 'error'
+      })
+      setErrorModalOpen(true)
+      return
+    }
     setDeleteDialogOpen(true)
   }
 
   const handleDelete = async () => {
-    if (currentItem) {
+    if (!currentItem) return
+    try {
       await deleteItem(currentItem.id)
       setCurrentItem(null)
+    } catch (e) {
+      setDeleteDialogOpen(false)
+      setErrorModalData({
+        title: 'Tidak Dapat Menghapus',
+        message: 'Riwayat kelas ini masih memiliki data terkait',
+        details: e?.message || 'Hapus data terkait terlebih dahulu.',
+        variant: 'error'
+      })
+      setErrorModalOpen(true)
     }
   }
 
@@ -169,6 +196,14 @@ function RiwayatKelasSiswaContent() {
         open={detailModalOpen}
         onOpenChange={setDetailModalOpen}
         riwayat={selectedItem}
+      />
+      <ErrorModal
+        open={errorModalOpen}
+        onOpenChange={setErrorModalOpen}
+        title={errorModalData.title}
+        message={errorModalData.message}
+        details={errorModalData.details}
+        variant={errorModalData.variant}
       />
       </PageLayout>
   )

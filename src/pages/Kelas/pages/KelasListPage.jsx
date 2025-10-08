@@ -9,6 +9,8 @@ import KelasFormDialog from '../components/form/KelasFormDialog'
 import { DeleteConfirmDialog } from '../../../components/common/DeleteConfirmDialog'
 import { DetailPanel } from '../components/detail/DetailPanel'
 import { KelasDetailModal } from '../components/detail/KelasDetailModal'
+import { ErrorModal } from '../../../components/modals/ErrorModal'
+import { db } from '../../../offline/db'
 
 function KelasContent() {
   const {
@@ -80,8 +82,40 @@ function KelasContent() {
     setDialogOpen(true)
   }
 
-  const handleOpenDelete = (item) => {
+  const [errorModalOpen, setErrorModalOpen] = useState(false)
+  const [errorModalData, setErrorModalData] = useState({ title: '', message: '', details: '', variant: 'error' })
+
+  const handleOpenDelete = async (item) => {
     setCurrentItem(item)
+    // If item has relations, show a friendly error modal instead of opening confirm dialog
+    if (item?.has_relasi) {
+      // Count related records for clearer message
+      let rksCount = 0
+      let rwkCount = 0
+      try {
+        rksCount = await db.riwayat_kelas_siswa.where('id_kelas').equals(item.id).count()
+      } catch {}
+      try {
+        if (db.riwayat_wali_kelas?.where) {
+          rwkCount = await db.riwayat_wali_kelas.where('id_kelas').equals(item.id).count()
+        }
+      } catch {}
+
+      const parts = []
+      if (rksCount > 0) parts.push(`${rksCount} riwayat kelas siswa`)
+      if (rwkCount > 0) parts.push(`${rwkCount} riwayat wali kelas`)
+      const refs = parts.length ? ` (${parts.join(' dan ')})` : ''
+
+      setErrorModalData({
+        title: 'Tidak Dapat Menghapus',
+        message: 'Kelas ini masih memiliki data terkait',
+        details: `Hapus atau pindahkan data terkait${refs} terlebih dahulu sebelum menghapus kelas.`,
+        variant: 'error'
+      })
+      setErrorModalOpen(true)
+      return
+    }
+
     setDeleteDialogOpen(true)
   }
 
@@ -91,9 +125,21 @@ function KelasContent() {
   }
 
   const handleDelete = async () => {
-    if (currentItem) {
+    if (!currentItem) return
+    try {
       await deleteItem(currentItem.id)
       setCurrentItem(null)
+      // Dialog will be closed by DeleteConfirmDialog on success
+    } catch (e) {
+      // Close dialog so the error banner is visible
+      setDeleteDialogOpen(false)
+      setErrorModalData({
+        title: 'Tidak Dapat Menghapus',
+        message: 'Kelas ini masih memiliki data terkait',
+        details: e?.message || 'Pindahkan atau hapus data terkait terlebih dahulu.',
+        variant: 'error'
+      })
+      setErrorModalOpen(true)
     }
   }
 
@@ -168,6 +214,15 @@ function KelasContent() {
         onOpenChange={setDetailModalOpen}
         kelas={currentItem}
         selectedYearLabel={selectedYearLabel}
+      />
+
+      <ErrorModal
+        open={errorModalOpen}
+        onOpenChange={setErrorModalOpen}
+        title={errorModalData.title}
+        message={errorModalData.message}
+        details={errorModalData.details}
+        variant={errorModalData.variant}
       />
       </PageLayout>
   )

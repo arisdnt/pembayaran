@@ -65,7 +65,16 @@ export function useRiwayatKelasSiswa() {
   useEffect(() => { refreshData() }, [refreshData])
 
   const deleteItem = async (id) => {
-    try { await enqueueDelete('riwayat_kelas_siswa', id) } catch (err) { setError(err.message); throw err }
+    try {
+      const tCount = await db.tagihan.where('id_riwayat_kelas_siswa').equals(id).count()
+      if (tCount > 0) {
+        const msg = `Riwayat kelas tidak dapat dihapus karena masih memiliki ${tCount} tagihan terkait. ` +
+          `Hapus tagihan terkait terlebih dahulu.`
+        setError(msg)
+        throw new Error(msg)
+      }
+      await enqueueDelete('riwayat_kelas_siswa', id)
+    } catch (err) { setError(err.message); throw err }
   }
 
   const saveItem = async (formData, isEdit) => {

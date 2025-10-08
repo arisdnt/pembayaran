@@ -38,6 +38,15 @@ export function useWaliKelas() {
 
   const deleteItem = async (id) => {
     try {
+      // Preflight: cek relasi pada riwayat_wali_kelas
+      const { db } = await import('../../../offline/db')
+      const rwkCount = await db.riwayat_wali_kelas.where('id_wali_kelas').equals(id).count()
+      if (rwkCount > 0) {
+        const msg = `Wali kelas tidak dapat dihapus karena masih memiliki ${rwkCount} riwayat penugasan. ` +
+          `Hapus atau pindahkan riwayat penugasan terlebih dahulu.`
+        setError(msg)
+        throw new Error(msg)
+      }
       await enqueueDelete('wali_kelas', id)
     } catch (err) {
       setError(err.message)
