@@ -11,7 +11,7 @@
     "build": "vite build && tauri build",
     "build:web": "vite build",
     "build:windows": "vite build && tauri build --no-bundle --target x86_64-pc-windows-gnu",
-    "prepare:portable": "mkdir -p dist-windows && cp src-tauri/target/x86_64-pc-windows-gnu/release/app.exe dist-windows/artapay.exe && cp src-tauri/target/x86_64-pc-windows-gnu/release/WebView2Loader.dll dist-windows/",
+    "prepare:portable": "mkdir -p dist-windows && cp src-tauri/target/x86_64-pc-windows-gnu/release/artapay.exe dist-windows/artapay.exe && cp src-tauri/target/x86_64-pc-windows-gnu/release/WebView2Loader.dll dist-windows/",
     "sign:portable": "node -e \"if (process.platform==='win32'){require('child_process').spawn('cmd',['/c','dist-windows\\setup-sign-and-trust.cmd'],{stdio:'inherit'}).on('exit',c=>process.exit(c||0));} else {console.log('Skipping code signing (not Windows host)')}\"",
     "zip:portable": "zip -r artapay-portable-windows-x64.zip dist-windows/",
     "build:portable": "npm run build:windows && npm run prepare:portable && npm run sign:portable && npm run zip:portable",
