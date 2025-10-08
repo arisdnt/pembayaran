@@ -83,7 +83,7 @@ export function WaliKelasDetailModal({ open, onOpenChange, waliKelas }) {
         </div>
 
         {/* Content */}
-        <div className="overflow-auto bg-white p-6" style={{ maxHeight: 'calc(85vh - 80px)' }}>
+        <div className="overflow-auto bg-white p-6" style={{ maxHeight: 'calc(85vh - 140px)' }}>
           {/* Nama Lengkap & Status */}
           <div className="bg-slate-50 border-2 border-slate-300 p-4 mb-6">
             <div className="flex items-start justify-between gap-3">
@@ -158,6 +158,20 @@ export function WaliKelasDetailModal({ open, onOpenChange, waliKelas }) {
           </div>
         </div>
 
+        {/* Footer */}
+        <div className="flex items-center justify-end border-t-2 border-slate-300 bg-gradient-to-b from-slate-50 to-slate-100 px-5 py-3">
+          <button
+            type="button"
+            onClick={() => onOpenChange(false)}
+            className="px-5 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm font-semibold transition-colors shadow-sm hover:shadow border border-slate-400"
+            style={{ borderRadius: 0 }}
+          >
+            <span className="flex items-center gap-2">
+              <X className="h-4 w-4" />
+              Tutup
+            </span>
+          </button>
+        </div>
       </Dialog.Content>
     </Dialog.Root>
   )

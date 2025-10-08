@@ -54,15 +54,7 @@ function DashboardContent() {
       
       const uniqueTingkat = [...new Set(kelas.map(k => k.tingkat).filter(Boolean))].sort()
       
-      // Find active tahun ajaran and set as default filter
-      const tahunAktif = tahun.find(t => t.status_aktif === true)
-      
       setMasterData({ tahunAjaranList: tahun, kelasList: kelas, tingkatList: uniqueTingkat })
-      
-      // Set default tahun ajaran filter to active one
-      if (tahunAktif) {
-        setFilters(prev => ({ ...prev, tahunAjaran: tahunAktif.id }))
-      }
       
       // Mark master data as ready to trigger dashboard data fetch
       setMasterDataReady(true)

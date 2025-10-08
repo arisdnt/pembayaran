@@ -1,7 +1,66 @@
+import { useState, useEffect } from 'react'
 import { Text, Badge } from '@radix-ui/themes'
-import { BookOpen, Hash, FileText, TrendingUp, TrendingDown, Power, PowerOff, Users } from 'lucide-react'
+import { BookOpen, Hash, FileText, TrendingUp, TrendingDown, Power, PowerOff, Users, UserCheck } from 'lucide-react'
+import { db } from '../../../offline/db'
 
-export function DetailPanel({ selectedItem, isLoading = false, isRefreshing = false, selectedYearLabel = 'Semua Tahun Ajaran' }) {
+export function DetailPanel({ selectedItem, isLoading = false, isRefreshing = false, selectedYearLabel = 'Semua Tahun Ajaran', selectedYearId = null }) {
+  const [siswaList, setSiswaList] = useState([])
+  const [loadingSiswa, setLoadingSiswa] = useState(false)
+
+  useEffect(() => {
+    if (!selectedItem?.id) {
+      setSiswaList([])
+      return
+    }
+
+    const fetchSiswa = async () => {
+      setLoadingSiswa(true)
+      try {
+        // Get peminatan_siswa for this peminatan
+        let peminatanSiswaList = await db.peminatan_siswa
+          .where('id_peminatan')
+          .equals(selectedItem.id)
+          .toArray()
+
+        // Filter by tahun ajaran if selected
+        if (selectedYearId && selectedYearId !== 'all') {
+          peminatanSiswaList = peminatanSiswaList.filter(ps => 
+            ps.id_tahun_ajaran === selectedYearId
+          )
+        }
+
+        // Get siswa details
+        const siswaIds = peminatanSiswaList.map(ps => ps.id_siswa)
+        const siswaData = await db.siswa
+          .where('id')
+          .anyOf(siswaIds)
+          .toArray()
+
+        // Combine data
+        const combined = peminatanSiswaList.map(ps => {
+          const siswa = siswaData.find(s => s.id === ps.id_siswa)
+          return {
+            ...ps,
+            siswa
+          }
+        }).filter(item => item.siswa)
+
+        // Sort by nama
+        combined.sort((a, b) => 
+          (a.siswa?.nama_lengkap || '').localeCompare(b.siswa?.nama_lengkap || '')
+        )
+
+        setSiswaList(combined)
+      } catch (error) {
+        console.error('Error fetching siswa:', error)
+        setSiswaList([])
+      } finally {
+        setLoadingSiswa(false)
+      }
+    }
+
+    fetchSiswa()
+  }, [selectedItem?.id, selectedYearId])
   if (isLoading) {
     return (
       <div className="h-full flex flex-col border-2 border-slate-300 bg-white shadow-lg">
@@ -42,15 +101,12 @@ export function DetailPanel({ selectedItem, isLoading = false, isRefreshing = fa
 
       {/* Header */}
       <div className="border-b-2 border-slate-300 bg-gradient-to-b from-slate-50 to-slate-100 px-4 py-3">
-        <div className="flex items-center gap-2 mb-2">
+        <div className="flex items-center gap-2">
           <BookOpen className="h-5 w-5 text-indigo-600" />
           <Text size="2" weight="bold" className="text-slate-700 uppercase tracking-wider">
             Detail Peminatan
           </Text>
         </div>
-        <Text size="1" className="text-slate-600">
-          {schoolName}
-        </Text>
       </div>
 
       {/* Content */}
@@ -161,6 +217,60 @@ export function DetailPanel({ selectedItem, isLoading = false, isRefreshing = fa
                 )}
               </div>
             </div>
+          </div>
+
+          {/* List Siswa */}
+          <div className="p-3 bg-white border border-slate-300">
+            <div className="flex items-center gap-2 mb-2">
+              <UserCheck className="h-4 w-4 text-blue-500" />
+              <Text size="1" weight="medium" className="text-slate-600 uppercase tracking-wider">
+                Daftar Siswa ({siswaList.length})
+              </Text>
+            </div>
+            
+            {loadingSiswa ? (
+              <div className="space-y-2">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="h-12 bg-slate-100 animate-pulse" style={{ borderRadius: 0 }} />
+                ))}
+              </div>
+            ) : siswaList.length === 0 ? (
+              <div className="text-center py-4">
+                <Text size="2" className="text-slate-400">
+                  Belum ada siswa
+                </Text>
+              </div>
+            ) : (
+              <div className="space-y-1.5 max-h-[300px] overflow-auto excel-scrollbar">
+                {siswaList.map((item, index) => (
+                  <div 
+                    key={item.id || index}
+                    className="p-2 bg-slate-50 border border-slate-200 hover:bg-slate-100 transition-colors"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1 min-w-0">
+                        <Text size="2" weight="medium" className="text-slate-900 block truncate">
+                          {item.siswa?.nama_lengkap || '—'}
+                        </Text>
+                        {item.siswa?.nisn && (
+                          <Text size="1" className="text-slate-500 font-mono block mt-0.5">
+                            NISN: {item.siswa.nisn}
+                          </Text>
+                        )}
+                      </div>
+                      <Badge 
+                        color="blue" 
+                        variant="soft" 
+                        size="1"
+                        style={{ borderRadius: 0, flexShrink: 0 }}
+                      >
+                        Tingkat {item.tingkat || '—'}
+                      </Badge>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* ID */}

@@ -2,12 +2,14 @@ import { Text } from '@radix-ui/themes'
 import { DollarSign, ChevronRight } from 'lucide-react'
 
 export function JenisPembayaranDetailEmpty() {
+  const schoolName = import.meta.env.VITE_SCHOOL_NAME || 'Nama Sekolah'
+
   return (
-    <div className="relative flex h-full flex-col border border-slate-300 bg-white shadow-lg">
+    <div className="relative h-full flex flex-col border-2 border-slate-300 bg-white shadow-lg">
       {/* Header */}
-      <div className="border-b border-slate-300 bg-gradient-to-b from-slate-50 to-slate-100 px-4 py-3">
+      <div className="border-b-2 border-slate-300 bg-gradient-to-b from-slate-50 to-slate-100 px-4 py-3">
         <div className="flex items-center gap-2">
-          <DollarSign className="h-4 w-4 text-slate-600" />
+          <DollarSign className="h-5 w-5 text-indigo-600" />
           <Text size="2" weight="bold" className="text-slate-700 uppercase tracking-wider">
             Detail Jenis Pembayaran
           </Text>
@@ -28,6 +30,13 @@ export function JenisPembayaranDetailEmpty() {
             Pilih jenis pembayaran dari tabel untuk melihat detail
           </Text>
         </div>
+      </div>
+
+      {/* Footer */}
+      <div className="border-t-2 border-slate-300 bg-gradient-to-b from-slate-50 to-slate-100 px-4 py-2">
+        <Text size="1" className="text-slate-600 text-center block">
+          Data Jenis Pembayaran - {schoolName}
+        </Text>
       </div>
     </div>
   )

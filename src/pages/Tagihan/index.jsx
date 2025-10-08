@@ -7,7 +7,6 @@ import { AlertCircle } from 'lucide-react'
 import { useTagihan } from './hooks/useTagihan'
 import { TagihanTable } from './components/TagihanTable'
 import { DeleteConfirmDialog } from '../../components/common/DeleteConfirmDialog'
-import { DetailPanel } from './components/DetailPanel'
 import { TagihanDetailModal } from './components/TagihanDetailModal'
 
 function TagihanContent() {
@@ -91,31 +90,20 @@ function TagihanContent() {
           </div>
         ) : null}
 
-        {/* Layout 2 Kolom: 75% Tabel | 25% Detail */}
-        <div className="flex gap-3 flex-1 min-h-0">
-          {/* Kolom Kiri: Tabel (75%) */}
-          <div className="w-3/4 h-full">
-            <TagihanTable
-              data={data}
-              isLoading={loading}
-              onEdit={handleOpenEdit}
-              onDelete={handleOpenDelete}
-              onAdd={handleOpenCreate}
-              selectedItem={selectedItem}
-              onSelectItem={setSelectedItem}
-              onViewDetail={handleOpenDetail}
-              kelasList={kelasList}
-              tahunAjaranList={tahunAjaranList}
-            />
-          </div>
-
-          {/* Kolom Kanan: Detail Panel (25%) */}
-          <div className="w-1/4 h-full">
-            <DetailPanel
-              selectedItem={selectedItem}
-              isLoading={loading}
-            />
-          </div>
+        {/* Tabel Full Width */}
+        <div className="flex-1 min-h-0">
+          <TagihanTable
+            data={data}
+            isLoading={loading}
+            onEdit={handleOpenEdit}
+            onDelete={handleOpenDelete}
+            onAdd={handleOpenCreate}
+            selectedItem={selectedItem}
+            onSelectItem={setSelectedItem}
+            onViewDetail={handleOpenDetail}
+            kelasList={kelasList}
+            tahunAjaranList={tahunAjaranList}
+          />
         </div>
       </div>
 

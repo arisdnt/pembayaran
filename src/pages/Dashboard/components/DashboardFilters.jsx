@@ -47,7 +47,7 @@ export function DashboardFilters({
       <div className="flex items-center gap-2">
         <BookOpen className="h-3.5 w-3.5 text-blue-500" />
         <Select.Root
-          value={selectedTahunAjaran || undefined}
+          value={selectedTahunAjaran ? selectedTahunAjaran : '__all__'}
           onValueChange={(value) => onTahunAjaranChange(value === '__all__' ? '' : value)}
         >
           <Select.Trigger style={{ borderRadius: 0, width: '200px' }} placeholder="Tahun Ajaran" />

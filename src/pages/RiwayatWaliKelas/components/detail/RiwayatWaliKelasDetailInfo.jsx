@@ -1,23 +1,9 @@
 import { useState, useEffect } from 'react'
 import { Badge, Text } from '@radix-ui/themes'
-import { Calendar, Clock, FileText, Users } from 'lucide-react'
+import { Calendar, Clock, FileText, Users, UserCheck, School, BookOpen } from 'lucide-react'
 import { format, differenceInDays } from 'date-fns'
 import { id } from 'date-fns/locale'
 import { db } from '../../../../offline/db'
-
-const Section = ({ title, icon: Icon, children, className = '' }) => (
-  <div className={`border-b border-slate-200 pb-4 mb-4 ${className}`}>
-    <div className="flex items-center gap-1.5 mb-3">
-      {Icon && <Icon className="h-3.5 w-3.5 text-slate-500" />}
-      <Text size="1" weight="bold" className="text-slate-700 uppercase tracking-wider text-[0.65rem]">
-        {title}
-      </Text>
-    </div>
-    <div className="ml-5 space-y-2">
-      {children}
-    </div>
-  </div>
-)
 
 const studentStatusMeta = {
   aktif: { color: 'green', label: 'Aktif' },
@@ -117,90 +103,149 @@ export function RiwayatWaliKelasDetailInfo({ riwayat }) {
   const tahunAjaranName = riwayat.tahun_ajaran?.nama || '—'
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {/* Informasi Wali Kelas */}
-      <div className="bg-gradient-to-b from-slate-50 to-white border border-slate-200 p-4">
-        <Text size="1" className="text-slate-500 uppercase tracking-wider text-[0.65rem] mb-2 block">
-          Wali Kelas
-        </Text>
-        <Text size="4" weight="bold" className="text-slate-900 leading-tight">
+      <div className="p-3 bg-slate-50 border border-slate-300">
+        <div className="flex items-center gap-2 mb-2">
+          <UserCheck className="h-4 w-4 text-indigo-500" />
+          <Text size="1" weight="medium" className="text-slate-600 uppercase tracking-wider">
+            Wali Kelas
+          </Text>
+        </div>
+        <Text size="3" weight="bold" className="text-slate-900 mb-1">
           {waliKelasName}
         </Text>
         {riwayat.wali_kelas?.nip && (
-          <Text size="2" className="text-slate-500 block mt-1">
+          <Text size="1" className="text-slate-500 block">
             NIP: {riwayat.wali_kelas.nip}
           </Text>
         )}
-        <Text size="2" className="text-slate-600 block mt-2">
-          {tahunAjaranName} • Kelas {kelasName}
+      </div>
+
+      {/* Kelas & Tahun Ajaran */}
+      <div className="p-3 bg-white border border-slate-300">
+        <div className="flex items-center gap-2 mb-2">
+          <School className="h-4 w-4 text-blue-500" />
+          <Text size="1" weight="medium" className="text-slate-600 uppercase tracking-wider">
+            Kelas & Tahun Ajaran
+          </Text>
+        </div>
+        <Text size="2" className="text-slate-900 font-semibold">
+          Kelas {kelasName}
+        </Text>
+        <Text size="2" className="text-slate-600 block mt-1">
+          {tahunAjaranName}
         </Text>
       </div>
 
       {/* Periode Penugasan */}
-      <Section title="Periode Penugasan" icon={Calendar}>
-        <Text size="2" className="text-slate-800">
+      <div className="p-3 bg-white border border-slate-300">
+        <div className="flex items-center gap-2 mb-2">
+          <Calendar className="h-4 w-4 text-green-500" />
+          <Text size="1" weight="medium" className="text-slate-600 uppercase tracking-wider">
+            Periode Penugasan
+          </Text>
+        </div>
+        <Text size="2" className="text-slate-900 font-semibold">
           {formatDate(riwayat.tanggal_mulai)} - {riwayat.tanggal_selesai ? formatDate(riwayat.tanggal_selesai) : 'sekarang'}
         </Text>
         <Text size="1" className="text-slate-500 block mt-1">
           Durasi {calculateDuration(riwayat.tanggal_mulai, riwayat.tanggal_selesai)}
         </Text>
-      </Section>
+      </div>
 
       {/* Catatan */}
       {riwayat.catatan && (
-        <Section title="Catatan" icon={FileText}>
+        <div className="p-3 bg-white border border-slate-300">
+          <div className="flex items-center gap-2 mb-2">
+            <FileText className="h-4 w-4 text-amber-500" />
+            <Text size="1" weight="medium" className="text-slate-600 uppercase tracking-wider">
+              Catatan
+            </Text>
+          </div>
           <Text size="2" className="text-slate-700 leading-relaxed whitespace-pre-wrap">
             {riwayat.catatan}
           </Text>
-        </Section>
+        </div>
       )}
 
       {/* Daftar Siswa */}
-      <Section title="Daftar Siswa" icon={Users}>
-        <div>
+      <div className="p-3 bg-white border border-slate-300">
+        <div className="flex items-center gap-2 mb-2">
+          <Users className="h-4 w-4 text-blue-500" />
+          <Text size="1" weight="medium" className="text-slate-600 uppercase tracking-wider">
+            Daftar Siswa ({students.length})
+          </Text>
+        </div>
+
         {studentsLoading ? (
-          <Text size="2" className="text-slate-500">
-            Memuat daftar siswa...
-          </Text>
+          <div className="space-y-2">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="h-12 bg-slate-100 animate-pulse" style={{ borderRadius: 0 }} />
+            ))}
+          </div>
         ) : studentsError ? (
-          <Text size="2" className="text-red-600">
-            {studentsError}
-          </Text>
+          <div className="text-center py-4">
+            <Text size="2" className="text-red-600">
+              {studentsError}
+            </Text>
+          </div>
         ) : students.length === 0 ? (
-          <Text size="1" className="text-slate-500">
-            Tidak ada siswa yang terhubung dengan wali kelas ini pada tahun ajaran terpilih.
-          </Text>
+          <div className="text-center py-4">
+            <Text size="2" className="text-slate-400">
+              Belum ada siswa
+            </Text>
+          </div>
         ) : (
-          <div className="max-h-[500px] overflow-y-auto border border-slate-200">
+          <div className="space-y-1.5 max-h-[300px] overflow-auto excel-scrollbar">
             {students.map((item, index) => (
               <div
                 key={item.id}
-                className={`flex items-center gap-2 px-2 py-2 border-b border-slate-100 last:border-b-0 ${
-                  index % 2 === 0 ? 'bg-slate-50' : 'bg-white'
-                }`}
+                className="p-2 bg-slate-50 border border-slate-200 hover:bg-slate-100 transition-colors"
               >
-                <Text size="1" className="text-slate-500 font-mono w-6 shrink-0">
-                  {index + 1}.
-                </Text>
-                <div className="flex-1 min-w-0">
-                  <Text size="2" weight="medium" className="text-slate-900 truncate block">
-                    {item.siswa?.nama_lengkap || 'Tanpa nama'}
-                  </Text>
-                  {item.siswa?.nisn && (
-                    <Text size="1" className="text-slate-500 font-mono block mt-0.5">
-                      NISN: {item.siswa.nisn}
-                    </Text>
-                  )}
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <Text size="1" className="text-slate-500 font-mono shrink-0">
+                        {index + 1}.
+                      </Text>
+                      <Text size="2" weight="medium" className="text-slate-900 truncate">
+                        {item.siswa?.nama_lengkap || 'Tanpa nama'}
+                      </Text>
+                    </div>
+                    {item.siswa?.nisn && (
+                      <Text size="1" className="text-slate-500 font-mono block mt-0.5 ml-5">
+                        NISN: {item.siswa.nisn}
+                      </Text>
+                    )}
+                  </div>
+                  <Badge 
+                    color={getStudentMeta(item.status).color} 
+                    variant="soft" 
+                    size="1" 
+                    style={{ borderRadius: 0, flexShrink: 0 }}
+                  >
+                    {getStudentMeta(item.status).label}
+                  </Badge>
                 </div>
-                <Badge color={getStudentMeta(item.status).color} variant="soft" size="1" style={{ borderRadius: 0 }}>
-                  {getStudentMeta(item.status).label}
-                </Badge>
               </div>
             ))}
           </div>
         )}
+      </div>
+
+      {/* ID */}
+      <div className="p-3 bg-slate-50 border border-slate-300">
+        <div className="flex items-center gap-2 mb-1">
+          <BookOpen className="h-4 w-4 text-blue-500" />
+          <Text size="1" weight="medium" className="text-slate-600 uppercase tracking-wider">
+            ID
+          </Text>
         </div>
-      </Section>
+        <Text size="1" className="text-slate-500 font-mono break-all">
+          {riwayat.id}
+        </Text>
+      </div>
     </div>
   )
 }

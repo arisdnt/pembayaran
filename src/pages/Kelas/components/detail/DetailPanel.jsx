@@ -7,10 +7,6 @@ import { DetailPanelMetadata } from './DetailPanelMetadata'
 import { DetailPanelFooter } from './DetailPanelFooter'
 
 export function DetailPanel({ selectedItem, isLoading = false, isRefreshing = false, selectedYearLabel = '—' }) {
-  const schoolName = import.meta.env.VITE_SCHOOL_NAME || 'Nama Sekolah'
-  const schoolAddress = import.meta.env.VITE_SCHOOL_ADDRESS || ''
-  const footerInfo = import.meta.env.VITE_SCHOOL_FOOTER || ''
-
   if (isLoading) {
     return <DetailPanelSkeleton />
   }
@@ -25,21 +21,17 @@ export function DetailPanel({ selectedItem, isLoading = false, isRefreshing = fa
         <div className="pointer-events-none absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-transparent via-blue-500/70 to-transparent animate-pulse" />
       ) : null}
 
-      <DetailPanelHeader
-        selectedItem={selectedItem}
-        schoolName={schoolName}
-        schoolAddress={schoolAddress}
-      />
+      <DetailPanelHeader selectedItem={selectedItem} />
 
       <div className="flex-1 min-h-0 overflow-auto excel-scrollbar">
-        <div className="pt-4 space-y-3">
+        <div className="py-4 space-y-3">
           <DetailPanelInfoSection selectedItem={selectedItem} />
           <DetailPanelCapacity selectedItem={selectedItem} selectedYearLabel={selectedYearLabel} />
           <DetailPanelMetadata selectedItem={selectedItem} />
         </div>
       </div>
 
-      <DetailPanelFooter selectedItem={selectedItem} footerInfo={footerInfo} />
+      <DetailPanelFooter />
 
       {/* Excel-style scrollbar */}
       <style>{`

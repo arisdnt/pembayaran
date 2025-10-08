@@ -154,6 +154,7 @@ function PeminatanContent() {
               isLoading={loading}
               isRefreshing={isRefreshing}
               selectedYearLabel={selectedYearLabel}
+              selectedYearId={selectedYearId}
             />
           </div>
         </div>

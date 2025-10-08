@@ -73,33 +73,18 @@ export function useDashboardData(filters = {}) {
       }
       setError(null)
 
-      // Determine tahun ajaran to use
-      let tahunAjaranId = filters.tahunAjaran
-      if (!tahunAjaranId) {
-        // Load all tahun ajaran and filter in memory (status_aktif is boolean)
-        const allTahunAjaran = await db.tahun_ajaran.toArray()
-        const tahunAktif = allTahunAjaran.find(t => t.status_aktif === true)
-        if (!tahunAktif) {
-          throw new Error('Tidak ada tahun ajaran aktif. Silakan buat tahun ajaran terlebih dahulu.')
-        }
-        tahunAjaranId = tahunAktif.id
-      }
-
-      // Validate tahunAjaranId before querying
-      if (!tahunAjaranId) {
-        throw new Error('ID Tahun Ajaran tidak valid')
-      }
+      // Determine tahun ajaran to use ('' or null means "all years")
+      const tahunAjaranId = filters.tahunAjaran || null
 
       // Get date range filter
       const startDate = getDateRange(filters.timeRange || 'all')
 
       // OPTIMIZED: Load only critical data first using indexed queries
       const [allRks, kelas, siswa] = await Promise.all([
-        // Load all riwayat for the tahun ajaran (only if tahunAjaranId is valid)
-        db.riwayat_kelas_siswa
-          .where('id_tahun_ajaran')
-          .equals(tahunAjaranId)
-          .toArray(),
+        // If filtering by tahun ajaran, use indexed query; otherwise load all
+        tahunAjaranId
+          ? db.riwayat_kelas_siswa.where('id_tahun_ajaran').equals(tahunAjaranId).toArray()
+          : db.riwayat_kelas_siswa.toArray(),
         db.kelas.toArray(),
         db.siswa.toArray(),
       ])
@@ -117,10 +102,10 @@ export function useDashboardData(filters = {}) {
 
       // OPTIMIZED: Load secondary data only for filtered rks
       const [tagihan, rincianTagihan, pembayaran, rincianPembayaran] = await Promise.all([
-        db.tagihan
-          .where('id_riwayat_kelas_siswa')
-          .anyOf(Array.from(rksIdsFilter))
-          .toArray(),
+        // Guard against anyOf([]) which can error; return [] if no rks
+        rksIdsFilter.size > 0
+          ? db.tagihan.where('id_riwayat_kelas_siswa').anyOf(Array.from(rksIdsFilter)).toArray()
+          : Promise.resolve([]),
         db.rincian_tagihan.toArray(),
         db.pembayaran.toArray(),
         db.rincian_pembayaran.toArray(),

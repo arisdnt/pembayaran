@@ -4,7 +4,7 @@ import { format, formatDistanceToNow } from 'date-fns'
 import { id } from 'date-fns/locale'
 
 const FieldItem = ({ label, icon: Icon, children, className = '' }) => (
-  <div className={`border-b border-slate-200 pb-3 ${className}`}>
+  <div className={`border-b border-slate-200 pb-3 min-h-[80px] ${className}`}>
     <div className="flex items-center gap-2 mb-1.5">
       {Icon && <Icon className="h-3.5 w-3.5 text-slate-500" />}
       <Text size="1" className="text-slate-600 font-medium uppercase tracking-wide">
@@ -56,58 +56,83 @@ export function TagihanDetailInfo({ tagihan }) {
 
   return (
     <div className="space-y-4">
-      {/* Nomor Tagihan */}
-      <FieldItem label="Nomor Tagihan" icon={Receipt}>
-        <Text size="3" weight="bold" className="text-slate-900 font-mono leading-tight">
-          {tagihan.nomor_tagihan || '—'}
-        </Text>
-      </FieldItem>
+      {/* Layout 2 Kolom */}
+      <div className="grid grid-cols-2 gap-6">
+        {/* Kolom Kiri */}
+        <div className="space-y-4">
+          {/* Nomor Tagihan */}
+          <FieldItem label="Nomor Tagihan" icon={Receipt}>
+            <Text size="3" weight="bold" className="text-slate-900 font-mono leading-tight line-clamp-2">
+              {tagihan.nomor_tagihan || '—'}
+            </Text>
+          </FieldItem>
 
-      {/* Judul */}
-      <FieldItem label="Judul" icon={FileText}>
-        <Text size="2" weight="medium" className="text-slate-800">
-          {tagihan.judul || '—'}
-        </Text>
-      </FieldItem>
+          {/* Judul */}
+          <FieldItem label="Judul" icon={FileText}>
+            <Text size="2" weight="medium" className="text-slate-800 line-clamp-2">
+              {tagihan.judul || '—'}
+            </Text>
+          </FieldItem>
 
-      {/* Deskripsi */}
-      {tagihan.deskripsi && (
-        <FieldItem label="Deskripsi" icon={FileText}>
-          <Text size="2" className="text-slate-700 leading-relaxed">
-            {tagihan.deskripsi}
-          </Text>
-        </FieldItem>
-      )}
+          {/* Deskripsi */}
+          <FieldItem label="Deskripsi" icon={FileText}>
+            <Text size="2" className="text-slate-700 leading-relaxed line-clamp-2">
+              {tagihan.deskripsi || '—'}
+            </Text>
+          </FieldItem>
 
-      {/* Siswa */}
-      <FieldItem label="Siswa" icon={User}>
-        <Text size="2" weight="medium" className="text-slate-800">
-          {tagihan.riwayat_kelas_siswa?.siswa?.nama_lengkap || '—'}
-        </Text>
-        {tagihan.riwayat_kelas_siswa?.siswa?.nisn && (
-          <Text size="1" className="text-slate-500 mt-1 font-mono">
-            NISN: {tagihan.riwayat_kelas_siswa.siswa.nisn}
-          </Text>
-        )}
-      </FieldItem>
+          {/* Siswa */}
+          <FieldItem label="Siswa" icon={User}>
+            <Text size="2" weight="medium" className="text-slate-800 line-clamp-1">
+              {tagihan.riwayat_kelas_siswa?.siswa?.nama_lengkap || '—'}
+            </Text>
+            <Text size="1" className="text-slate-500 mt-1 font-mono line-clamp-1">
+              {tagihan.riwayat_kelas_siswa?.siswa?.nisn ? `NISN: ${tagihan.riwayat_kelas_siswa.siswa.nisn}` : '—'}
+            </Text>
+          </FieldItem>
+        </div>
 
-      {/* Kelas */}
-      <FieldItem label="Kelas" icon={School}>
-        <Text size="2" weight="medium" className="text-slate-800">
-          {tagihan.riwayat_kelas_siswa?.kelas
-            ? `${tagihan.riwayat_kelas_siswa.kelas.tingkat} ${tagihan.riwayat_kelas_siswa.kelas.nama_sub_kelas}`
-            : '—'}
-        </Text>
-      </FieldItem>
+        {/* Kolom Kanan */}
+        <div className="space-y-4">
+          {/* Kelas */}
+          <FieldItem label="Kelas" icon={School}>
+            <Text size="2" weight="medium" className="text-slate-800 line-clamp-2">
+              {tagihan.riwayat_kelas_siswa?.kelas
+                ? `${tagihan.riwayat_kelas_siswa.kelas.tingkat} ${tagihan.riwayat_kelas_siswa.kelas.nama_sub_kelas}`
+                : '—'}
+            </Text>
+          </FieldItem>
 
-      {/* Total Tagihan */}
-      <FieldItem label="Total Tagihan" icon={DollarSign}>
-        <Text size="4" weight="bold" className="text-emerald-700">
-          {formatCurrency(tagihan.total_tagihan)}
-        </Text>
-      </FieldItem>
+          {/* Tanggal Tagihan */}
+          <FieldItem label="Tanggal Tagihan" icon={Calendar}>
+            <Text size="2" className="text-slate-800 line-clamp-1">
+              {formatDate(tagihan.tanggal_tagihan)}
+            </Text>
+            <Text size="1" className="text-slate-500 block mt-1 line-clamp-1">
+              {tagihan.tanggal_tagihan ? getRelativeTime(tagihan.tanggal_tagihan) : '—'}
+            </Text>
+          </FieldItem>
 
-      {/* Rincian Tagihan */}
+          {/* Tanggal Jatuh Tempo */}
+          <FieldItem label="Tanggal Jatuh Tempo" icon={Calendar}>
+            <Text size="2" className="text-red-700 font-semibold line-clamp-1">
+              {formatDate(tagihan.tanggal_jatuh_tempo)}
+            </Text>
+            <Text size="1" className="text-red-600 block mt-1 line-clamp-1">
+              {tagihan.tanggal_jatuh_tempo ? getRelativeTime(tagihan.tanggal_jatuh_tempo) : '—'}
+            </Text>
+          </FieldItem>
+
+          {/* Total Tagihan */}
+          <FieldItem label="Total Tagihan" icon={DollarSign}>
+            <Text size="4" weight="bold" className="text-emerald-700 line-clamp-2">
+              {formatCurrency(tagihan.total_tagihan)}
+            </Text>
+          </FieldItem>
+        </div>
+      </div>
+
+      {/* Rincian Tagihan - Full Width */}
       {tagihan.rincian_tagihan && tagihan.rincian_tagihan.length > 0 && (
         <FieldItem label="Rincian Pembayaran" icon={List}>
           <div className="space-y-2">
@@ -132,31 +157,7 @@ export function TagihanDetailInfo({ tagihan }) {
         </FieldItem>
       )}
 
-      {/* Tanggal Tagihan */}
-      <FieldItem label="Tanggal Tagihan" icon={Calendar}>
-        <Text size="2" className="text-slate-800">
-          {formatDate(tagihan.tanggal_tagihan)}
-        </Text>
-        {tagihan.tanggal_tagihan && (
-          <Text size="1" className="text-slate-500 block mt-1">
-            {getRelativeTime(tagihan.tanggal_tagihan)}
-          </Text>
-        )}
-      </FieldItem>
-
-      {/* Tanggal Jatuh Tempo */}
-      <FieldItem label="Tanggal Jatuh Tempo" icon={Calendar}>
-        <Text size="2" className="text-slate-800">
-          {formatDate(tagihan.tanggal_jatuh_tempo)}
-        </Text>
-        {tagihan.tanggal_jatuh_tempo && (
-          <Text size="1" className="text-slate-500 block mt-1">
-            {getRelativeTime(tagihan.tanggal_jatuh_tempo)}
-          </Text>
-        )}
-      </FieldItem>
-
-      {/* Metadata */}
+      {/* Metadata - Full Width */}
       <div className="pt-4 mt-4 border-t-2 border-slate-200 space-y-2">
         <div className="flex items-center gap-2">
           <Clock className="h-3 w-3 text-slate-400" />

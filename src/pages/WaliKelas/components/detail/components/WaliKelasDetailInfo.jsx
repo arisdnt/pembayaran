@@ -1,47 +1,89 @@
 import { Text, Badge } from '@radix-ui/themes'
-import { Phone, Mail, Key, Hash, UserCheck } from 'lucide-react'
+import { Phone, Mail, Key, Hash, Power, PowerOff } from 'lucide-react'
 
 export function WaliKelasDetailInfo({ waliKelas }) {
-  // Field item component
-  const FieldItem = ({ label, icon: Icon, children, className = '' }) => (
-    <div className={`border-b border-slate-200 pb-3 ${className}`}>
-      <div className="flex items-center gap-1.5 mb-1.5">
-        {Icon && <Icon className="h-3.5 w-3.5 text-slate-400" />}
-        <Text size="1" weight="medium" className="text-slate-500 uppercase tracking-wider text-[0.65rem]">
-          {label}
-        </Text>
-      </div>
-      <div className="ml-5">
-        {children}
-      </div>
-    </div>
-  )
-
   return (
-    <div className="space-y-0">
+    <div className="space-y-3">
       {/* Nama & Status */}
-      <div className="bg-gradient-to-b from-slate-50 to-white border border-slate-200 p-3 mb-3">
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex-1 min-w-0">
-            <Text size="1" className="text-slate-500 uppercase tracking-wider text-[0.65rem] mb-1 block">
-              Nama Lengkap
-            </Text>
-            <Text size="3" weight="bold" className="text-slate-900 leading-tight">
-              {waliKelas.nama_lengkap}
-            </Text>
-          </div>
-          <Badge
-            variant="solid"
-            color={waliKelas.status_aktif ? 'green' : 'gray'}
-            size="1"
-            style={{ borderRadius: 0 }}
-            className="text-[0.65rem] font-semibold px-2 py-0.5 shrink-0"
-          >
-            {waliKelas.status_aktif ? '✓ Aktif' : '○ Nonaktif'}
-          </Badge>
+      <div className="p-3 bg-slate-50 border border-slate-300">
+        <Text size="1" weight="medium" className="text-slate-600 uppercase tracking-wider mb-2 block">
+          Informasi Utama
+        </Text>
+        <Text size="3" weight="bold" className="text-slate-900 mb-2 block">
+          {waliKelas.nama_lengkap}
+        </Text>
+        <div className="flex items-center gap-2">
+          {waliKelas.status_aktif ? (
+            <Badge color="green" variant="solid" style={{ borderRadius: 0 }}>
+              <Power className="h-3 w-3 mr-1" />
+              Aktif
+            </Badge>
+          ) : (
+            <Badge color="red" variant="solid" style={{ borderRadius: 0 }}>
+              <PowerOff className="h-3 w-3 mr-1" />
+              Non-Aktif
+            </Badge>
+          )}
         </div>
       </div>
 
+      {/* NIP */}
+      {waliKelas.nip && (
+        <div className="p-3 bg-white border border-slate-300">
+          <div className="flex items-center gap-2 mb-1">
+            <Key className="h-4 w-4 text-purple-500" />
+            <Text size="1" weight="medium" className="text-slate-600 uppercase tracking-wider">
+              NIP
+            </Text>
+          </div>
+          <Text size="2" className="text-slate-900 font-semibold">
+            {waliKelas.nip}
+          </Text>
+        </div>
+      )}
+
+      {/* Nomor Telepon */}
+      {waliKelas.nomor_telepon && (
+        <div className="p-3 bg-white border border-slate-300">
+          <div className="flex items-center gap-2 mb-1">
+            <Phone className="h-4 w-4 text-green-500" />
+            <Text size="1" weight="medium" className="text-slate-600 uppercase tracking-wider">
+              Nomor Telepon
+            </Text>
+          </div>
+          <Text size="2" className="text-slate-900 font-semibold">
+            {waliKelas.nomor_telepon}
+          </Text>
+        </div>
+      )}
+
+      {/* Email */}
+      {waliKelas.email && (
+        <div className="p-3 bg-white border border-slate-300">
+          <div className="flex items-center gap-2 mb-1">
+            <Mail className="h-4 w-4 text-amber-500" />
+            <Text size="1" weight="medium" className="text-slate-600 uppercase tracking-wider">
+              Email
+            </Text>
+          </div>
+          <Text size="2" className="text-slate-900">
+            {waliKelas.email}
+          </Text>
+        </div>
+      )}
+
+      {/* ID */}
+      <div className="p-3 bg-slate-50 border border-slate-300">
+        <div className="flex items-center gap-2 mb-1">
+          <Hash className="h-4 w-4 text-blue-500" />
+          <Text size="1" weight="medium" className="text-slate-600 uppercase tracking-wider">
+            ID
+          </Text>
+        </div>
+        <Text size="1" className="text-slate-500 font-mono break-all">
+          {waliKelas.id}
+        </Text>
+      </div>
     </div>
   )
 }

@@ -13,6 +13,7 @@ import {
   Wallet,
   Send,
   Info,
+  RefreshCw,
 } from 'lucide-react'
 
 export const menuSections = [
@@ -97,17 +98,22 @@ export const menuSections = [
     ],
   },
   {
-    title: 'Info',
+    title: 'Sync Status',
+    items: [
+      {
+        icon: RefreshCw,
+        label: 'Sync Status',
+        href: '/sync',
+      },
+    ],
+  },
+  {
+    title: 'About',
     items: [
       {
         icon: Info,
         label: 'About',
         href: '/about',
-      },
-      {
-        icon: Info,
-        label: 'Sync Status',
-        href: '/sync',
       },
     ],
   },

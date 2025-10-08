@@ -14,7 +14,8 @@ const sectionIconColors = {
   'Utama': 'text-blue-300',
   'Akademik': 'text-green-300',
   'Keuangan': 'text-amber-300',
-  'Info': 'text-cyan-300',
+  'Sync Status': 'text-cyan-300',
+  'About': 'text-purple-300',
 }
 
 export function NavbarMenu({ onAboutClick }) {
@@ -31,7 +32,7 @@ export function NavbarMenu({ onAboutClick }) {
           const Icon = item.icon
           const active = isActive(item.href)
           const iconColor = sectionIconColors[section.title] || 'text-white'
-          const isAboutMenu = item.href === '/about'
+          const isAboutMenu = section.title === 'About'
           
           return (
             <div key={section.title} className="flex items-center gap-4">
@@ -47,7 +48,7 @@ export function NavbarMenu({ onAboutClick }) {
                 }}
                 className={`text-white transition-all cursor-pointer font-semibold ${
                   isAboutMenu
-                    ? 'bg-gradient-to-r from-cyan-400/25 via-blue-400/25 to-purple-400/25 hover:from-cyan-400/35 hover:via-blue-400/35 hover:to-purple-400/35 border border-cyan-300/40 shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/30'
+                    ? 'bg-gradient-to-r from-purple-400/25 via-pink-400/25 to-purple-400/25 hover:from-purple-400/35 hover:via-pink-400/35 hover:to-purple-400/35 border border-purple-300/40 shadow-lg shadow-purple-500/20 hover:shadow-purple-500/30'
                     : active
                       ? 'bg-white/20 text-white hover:bg-white/10'
                       : 'hover:bg-white/10'
@@ -58,7 +59,7 @@ export function NavbarMenu({ onAboutClick }) {
                   WebkitAppRegion: 'no-drag'
                 } : { WebkitAppRegion: 'no-drag' }}
               >
-                <Icon className={`h-4 w-4 ${isAboutMenu ? 'text-cyan-200' : iconColor}`} />
+                <Icon className={`h-4 w-4 ${isAboutMenu ? 'text-purple-200' : iconColor}`} />
                 {item.label}
               </Button>
               {index < menuSections.length - 1 && (

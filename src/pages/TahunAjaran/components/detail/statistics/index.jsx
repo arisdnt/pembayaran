@@ -1,7 +1,6 @@
 import { Text } from '@radix-ui/themes'
 import { Users, Building2, UserCircle2, BookOpen } from 'lucide-react'
 import { useTahunAjaranStats } from '../../../hooks/useTahunAjaranStats'
-import { StatSection } from './StatSection'
 import { StatCard } from './StatCard'
 import { ProgressBar } from './ProgressBar'
 import { TingkatGroup } from './TingkatGroup'
@@ -15,17 +14,29 @@ export function TahunAjaranStatistics({ tahunAjaranId }) {
   }
 
   return (
-    <div className="space-y-1">
+    <div className="space-y-3">
       {/* Summary Cards */}
-      <StatSection title="Ringkasan" icon={BookOpen}>
+      <div className="p-3 bg-white border border-slate-300">
+        <div className="flex items-center gap-2 mb-2">
+          <BookOpen className="h-4 w-4 text-emerald-500" />
+          <Text size="1" weight="medium" className="text-slate-600 uppercase tracking-wider">
+            Ringkasan
+          </Text>
+        </div>
         <div className="grid grid-cols-2 gap-2">
           <StatCard label="Total Siswa" value={stats.totalSiswa} color="blue" />
           <StatCard label="Total Kelas" value={stats.totalKelas} color="green" />
         </div>
-      </StatSection>
+      </div>
 
       {/* Distribusi Gender */}
-      <StatSection title="Distribusi Jenis Kelamin" icon={UserCircle2}>
+      <div className="p-3 bg-white border border-slate-300">
+        <div className="flex items-center gap-2 mb-2">
+          <UserCircle2 className="h-4 w-4 text-purple-500" />
+          <Text size="1" weight="medium" className="text-slate-600 uppercase tracking-wider">
+            Distribusi Jenis Kelamin
+          </Text>
+        </div>
         <div className="space-y-2.5">
           <ProgressBar 
             label="Laki-laki" 
@@ -48,29 +59,30 @@ export function TahunAjaranStatistics({ tahunAjaranId }) {
             />
           )}
         </div>
-      </StatSection>
+      </div>
 
       {/* Distribusi Kelas */}
-      <StatSection 
-        title="Distribusi Per Kelas" 
-        icon={Building2} 
-        className="border-b-0 pb-0 mb-0"
-      >
+      <div className="p-3 bg-white border border-slate-300">
+        <div className="flex items-center gap-2 mb-2">
+          <Building2 className="h-4 w-4 text-indigo-500" />
+          <Text size="1" weight="medium" className="text-slate-600 uppercase tracking-wider">
+            Distribusi Per Kelas
+          </Text>
+        </div>
         {stats.distribusiKelas.length > 0 ? (
-          <div className="space-y-1.5">
+          <div className="space-y-1.5 max-h-[300px] overflow-auto excel-scrollbar">
             {stats.distribusiKelas.map((tingkatGroup) => (
               <TingkatGroup key={tingkatGroup.tingkat} tingkatGroup={tingkatGroup} />
             ))}
           </div>
         ) : (
-          <div className="border-2 border-dashed border-slate-300 bg-slate-50 px-3 py-6 text-center">
-            <Building2 className="h-8 w-8 text-slate-400 mx-auto mb-2" />
-            <Text size="1" className="text-slate-500">
+          <div className="text-center py-4">
+            <Text size="2" className="text-slate-400">
               Belum ada kelas dengan siswa aktif
             </Text>
           </div>
         )}
-      </StatSection>
+      </div>
     </div>
   )
 }

@@ -1,5 +1,5 @@
 import { Text, Badge } from '@radix-ui/themes'
-import { Clock, Calendar, Hash } from 'lucide-react'
+import { Clock, Calendar, Hash, BookOpen, Power, PowerOff } from 'lucide-react'
 
 function formatDateTime(dateStr) {
   if (!dateStr) return '—'
@@ -17,7 +17,7 @@ function formatDate(dateStr) {
   if (!dateStr) return '—'
   return new Date(dateStr).toLocaleDateString('id-ID', {
     day: '2-digit',
-    month: 'short',
+    month: 'long',
     year: 'numeric',
     timeZone: 'Asia/Jakarta',
   })
@@ -39,59 +39,91 @@ function calculateDuration(startDate, endDate) {
 }
 
 export function TahunAjaranDetailInfo({ tahunAjaran }) {
-  // Field item component
-  const FieldItem = ({ label, icon: Icon, children, className = '' }) => (
-    <div className={`border-b border-slate-200 pb-4 mb-4 ${className}`}>
-      <div className="flex items-center gap-1.5 mb-2">
-        {Icon && <Icon className="h-3.5 w-3.5 text-slate-400" />}
-        <Text size="1" weight="medium" className="text-slate-500 uppercase tracking-wider text-[0.65rem]">
-          {label}
-        </Text>
-      </div>
-      <div className="ml-5">
-        {children}
-      </div>
-    </div>
-  )
-
   return (
-    <div className="space-y-1">
+    <div className="space-y-3">
       {/* Nama & Status */}
-      <div className="bg-gradient-to-b from-slate-50 to-white border border-slate-200 p-3 mb-3">
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex-1 min-w-0">
-            <Text size="1" className="text-slate-500 uppercase tracking-wider text-[0.65rem] mb-1 block">
-              Nama Periode
-            </Text>
-            <Text size="3" weight="bold" className="text-slate-900 leading-tight">
-              {tahunAjaran.nama}
-            </Text>
-          </div>
-          <Badge
-            variant="solid"
-            color={tahunAjaran.status_aktif ? 'green' : 'gray'}
-            size="1"
-            style={{ borderRadius: 0 }}
-            className="text-[0.65rem] font-semibold px-2 py-0.5 shrink-0"
-          >
-            {tahunAjaran.status_aktif ? '✓ Aktif' : '○ Nonaktif'}
-          </Badge>
+      <div className="p-3 bg-slate-50 border border-slate-300">
+        <Text size="1" weight="medium" className="text-slate-600 uppercase tracking-wider mb-2 block">
+          Informasi Utama
+        </Text>
+        <Text size="3" weight="bold" className="text-slate-900 mb-2 block">
+          {tahunAjaran.nama}
+        </Text>
+        <div className="flex items-center gap-2">
+          {tahunAjaran.status_aktif ? (
+            <Badge color="green" variant="solid" style={{ borderRadius: 0 }}>
+              <Power className="h-3 w-3 mr-1" />
+              Aktif
+            </Badge>
+          ) : (
+            <Badge color="red" variant="solid" style={{ borderRadius: 0 }}>
+              <PowerOff className="h-3 w-3 mr-1" />
+              Non-Aktif
+            </Badge>
+          )}
         </div>
       </div>
 
-      {/* Durasi */}
-      {tahunAjaran.tanggal_mulai && tahunAjaran.tanggal_selesai && (
-        <FieldItem label="Durasi Periode" icon={Calendar} className="border-b-0 pb-0 mb-0">
-          <div className="space-y-0.5">
-            <Text size="2" weight="medium" className="text-slate-900">
-              {calculateDuration(tahunAjaran.tanggal_mulai, tahunAjaran.tanggal_selesai)}
-            </Text>
-            <Text size="1" className="text-slate-500 block">
-              Dari mulai hingga selesai
+      {/* Tanggal Mulai */}
+      {tahunAjaran.tanggal_mulai && (
+        <div className="p-3 bg-white border border-slate-300">
+          <div className="flex items-center gap-2 mb-1">
+            <Calendar className="h-4 w-4 text-green-500" />
+            <Text size="1" weight="medium" className="text-slate-600 uppercase tracking-wider">
+              Tanggal Mulai
             </Text>
           </div>
-        </FieldItem>
+          <Text size="2" className="text-slate-900 font-semibold">
+            {formatDate(tahunAjaran.tanggal_mulai)}
+          </Text>
+        </div>
       )}
+
+      {/* Tanggal Selesai */}
+      {tahunAjaran.tanggal_selesai && (
+        <div className="p-3 bg-white border border-slate-300">
+          <div className="flex items-center gap-2 mb-1">
+            <Calendar className="h-4 w-4 text-red-500" />
+            <Text size="1" weight="medium" className="text-slate-600 uppercase tracking-wider">
+              Tanggal Selesai
+            </Text>
+          </div>
+          <Text size="2" className="text-slate-900 font-semibold">
+            {formatDate(tahunAjaran.tanggal_selesai)}
+          </Text>
+        </div>
+      )}
+
+      {/* Durasi */}
+      {tahunAjaran.tanggal_mulai && tahunAjaran.tanggal_selesai && (
+        <div className="p-3 bg-white border border-slate-300">
+          <div className="flex items-center gap-2 mb-1">
+            <Clock className="h-4 w-4 text-blue-500" />
+            <Text size="1" weight="medium" className="text-slate-600 uppercase tracking-wider">
+              Durasi Periode
+            </Text>
+          </div>
+          <Text size="2" weight="bold" className="text-slate-900">
+            {calculateDuration(tahunAjaran.tanggal_mulai, tahunAjaran.tanggal_selesai)}
+          </Text>
+          <Text size="1" className="text-slate-500 block mt-1">
+            Dari mulai hingga selesai
+          </Text>
+        </div>
+      )}
+
+      {/* ID */}
+      <div className="p-3 bg-slate-50 border border-slate-300">
+        <div className="flex items-center gap-2 mb-1">
+          <Hash className="h-4 w-4 text-blue-500" />
+          <Text size="1" weight="medium" className="text-slate-600 uppercase tracking-wider">
+            ID
+          </Text>
+        </div>
+        <Text size="1" className="text-slate-500 font-mono break-all">
+          {tahunAjaran.id}
+        </Text>
+      </div>
     </div>
   )
 }

@@ -1,171 +1,174 @@
-import { Text } from '@radix-ui/themes'
-import { School, Users, BookOpen, User as UserIcon } from 'lucide-react'
+import { Text, Badge } from '@radix-ui/themes'
+import { School, Users, BookOpen } from 'lucide-react'
 import { useWaliKelasAmpu } from '../../../hooks/useWaliKelasAmpu'
 
 export function WaliKelasAmpuSection({ waliKelasId }) {
   const { kelasList, siswaList, summary, loading } = useWaliKelasAmpu(waliKelasId)
 
-  // Section component
-  const Section = ({ title, icon: Icon, children, className = '' }) => (
-    <div className={`border-b border-slate-200 pb-4 mb-4 ${className}`}>
-      <div className="flex items-center gap-1.5 mb-3">
-        {Icon && <Icon className="h-3.5 w-3.5 text-slate-500" />}
-        <Text size="1" weight="bold" className="text-slate-700 uppercase tracking-wider text-[0.65rem]">
-          {title}
-        </Text>
-      </div>
-      <div className="ml-5 space-y-2">
-        {children}
-      </div>
-    </div>
-  )
-
-  // Stat card component
-  const StatCard = ({ label, value, icon: Icon, color = 'blue' }) => {
-    const colorClasses = {
-      blue: 'bg-blue-50 border-blue-200 text-blue-900',
-      green: 'bg-green-50 border-green-200 text-green-900',
-      purple: 'bg-purple-50 border-purple-200 text-purple-900',
-    }
-
-    return (
-      <div className={`border-2 ${colorClasses[color]} px-3 py-2`}>
-        <div className="flex items-center gap-1 mb-1">
-          {Icon && <Icon className="h-3 w-3" />}
-          <Text size="1" className="uppercase tracking-wide text-[0.65rem]">
-            {label}
-          </Text>
-        </div>
-        <Text size="3" weight="bold" className="leading-none font-mono">
-          {value}
-        </Text>
-      </div>
-    )
-  }
-
   if (loading) {
     return (
-      <div className="space-y-4 animate-pulse">
-        <div className="h-20 bg-slate-200" />
-        <div className="h-32 bg-slate-200" />
-        <div className="h-48 bg-slate-200" />
+      <div className="space-y-3">
+        {[1, 2, 3].map(i => (
+          <div key={i} className="h-20 bg-slate-100 animate-pulse border border-slate-300" style={{ borderRadius: 0 }} />
+        ))}
       </div>
     )
   }
 
   return (
-    <div className="space-y-1">
+    <div className="space-y-3">
       {/* Ringkasan */}
-      <Section title="Ringkasan Kelas Diampu" icon={BookOpen}>
-        <div className="grid grid-cols-2 gap-2">
-          <StatCard 
-            label="Total Kelas" 
-            value={summary.totalKelas} 
-            color="blue"
-            icon={School}
-          />
-          <StatCard 
-            label="Total Siswa" 
-            value={summary.totalSiswa} 
-            color="green"
-            icon={Users}
-          />
+      <div className="p-3 bg-white border border-slate-300">
+        <div className="flex items-center gap-2 mb-2">
+          <BookOpen className="h-4 w-4 text-emerald-500" />
+          <Text size="1" weight="medium" className="text-slate-600 uppercase tracking-wider">
+            Ringkasan Kelas Diampu
+          </Text>
         </div>
-      </Section>
+        <div className="grid grid-cols-2 gap-2">
+          <div className="p-2 bg-blue-50 border border-blue-200">
+            <div className="flex items-center gap-1 mb-1">
+              <School className="h-3 w-3 text-blue-700" />
+              <Text size="1" className="text-blue-700 uppercase tracking-wide">
+                Total Kelas
+              </Text>
+            </div>
+            <Text size="3" weight="bold" className="text-blue-900 font-mono">
+              {summary.totalKelas}
+            </Text>
+          </div>
+          <div className="p-2 bg-green-50 border border-green-200">
+            <div className="flex items-center gap-1 mb-1">
+              <Users className="h-3 w-3 text-green-700" />
+              <Text size="1" className="text-green-700 uppercase tracking-wide">
+                Total Siswa
+              </Text>
+            </div>
+            <Text size="3" weight="bold" className="text-green-900 font-mono">
+              {summary.totalSiswa}
+            </Text>
+          </div>
+        </div>
+      </div>
 
       {/* Daftar Kelas */}
-      <Section title="Daftar Kelas" icon={School}>
+      <div className="p-3 bg-white border border-slate-300">
+        <div className="flex items-center gap-2 mb-2">
+          <School className="h-4 w-4 text-indigo-500" />
+          <Text size="1" weight="medium" className="text-slate-600 uppercase tracking-wider">
+            Daftar Kelas ({kelasList.length})
+          </Text>
+        </div>
+        
         {kelasList.length > 0 ? (
-          <div className="space-y-2">
+          <div className="space-y-1.5 max-h-[250px] overflow-auto excel-scrollbar">
             {kelasList.map((kelas) => (
               <div
                 key={kelas.id}
-                className="border-2 border-indigo-200 bg-indigo-50 hover:bg-indigo-100 transition-colors"
+                className="p-2 bg-slate-50 border border-slate-200 hover:bg-slate-100 transition-colors"
               >
-                <div className="px-3 py-2 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center justify-center w-8 h-8 bg-indigo-600 border border-indigo-700">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <div className="flex items-center justify-center w-7 h-7 bg-indigo-600 border border-indigo-700 shrink-0">
                       <Text size="1" weight="bold" className="text-white font-mono">
                         {kelas.tingkat}
                       </Text>
                     </div>
-                    <div>
-                      <Text size="2" weight="bold" className="text-indigo-900">
+                    <div className="min-w-0 flex-1">
+                      <Text size="2" weight="medium" className="text-slate-900 truncate block">
                         Kelas {kelas.tingkat} {kelas.namaSubKelas}
                       </Text>
                       {kelas.kapasitasMaksimal && (
-                        <Text size="1" className="text-indigo-600 block mt-0.5">
-                          Kapasitas {kelas.jumlahSiswa}/{kelas.kapasitasMaksimal}
+                        <Text size="1" className="text-slate-500 block mt-0.5">
+                          {kelas.jumlahSiswa}/{kelas.kapasitasMaksimal} siswa
                         </Text>
                       )}
                     </div>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <Users className="h-3.5 w-3.5 text-indigo-600" />
-                    <Text size="2" weight="bold" className="text-indigo-900 font-mono">
-                      {kelas.jumlahSiswa}
-                    </Text>
-                  </div>
+                  <Badge 
+                    color="blue" 
+                    variant="soft" 
+                    size="1"
+                    style={{ borderRadius: 0, flexShrink: 0 }}
+                  >
+                    <Users className="h-3 w-3 mr-1" />
+                    {kelas.jumlahSiswa}
+                  </Badge>
                 </div>
               </div>
             ))}
           </div>
         ) : (
-          <div className="border-2 border-dashed border-slate-300 bg-slate-50 px-3 py-6 text-center">
-            <School className="h-8 w-8 text-slate-400 mx-auto mb-2" />
-            <Text size="1" className="text-slate-500">
-              Tidak ada kelas yang diampu di tahun ajaran aktif
+          <div className="text-center py-4">
+            <Text size="2" className="text-slate-400">
+              Tidak ada kelas yang diampu
             </Text>
           </div>
         )}
-      </Section>
+      </div>
 
       {/* Daftar Siswa */}
-      <Section title="Daftar Siswa" icon={Users} className="border-b-0 pb-0 mb-0">
+      <div className="p-3 bg-white border border-slate-300">
+        <div className="flex items-center gap-2 mb-2">
+          <Users className="h-4 w-4 text-blue-500" />
+          <Text size="1" weight="medium" className="text-slate-600 uppercase tracking-wider">
+            Daftar Siswa ({siswaList.length})
+          </Text>
+        </div>
+        
         {siswaList.length > 0 ? (
-          <div className="max-h-80 overflow-y-auto">
+          <div className="space-y-1.5 max-h-[300px] overflow-auto excel-scrollbar">
             {siswaList.map((siswa, index) => (
               <div
                 key={siswa.id}
-                className={`flex items-center gap-2 px-2 py-1 ${
-                  index % 2 === 0 ? 'bg-slate-50' : 'bg-white'
-                }`}
+                className="p-2 bg-slate-50 border border-slate-200 hover:bg-slate-100 transition-colors"
               >
-                <Text size="1" className="text-slate-500 font-mono w-6 shrink-0">
-                  {index + 1}.
-                </Text>
-                <Text size="2" weight="medium" className="text-slate-900 truncate">
-                  {siswa.namaLengkap}
-                </Text>
-                {siswa.nisn && (
-                  <>
-                    <span className="text-slate-400">•</span>
-                    <Text size="1" className="text-red-600 font-mono">
-                      {siswa.nisn}
-                    </Text>
-                  </>
-                )}
-                <span className="text-slate-400">•</span>
-                <Text size="1" className="text-slate-600">
-                  {siswa.kelasLabel}
-                </Text>
-                {siswa.jenisKelamin && (
-                  <>
-                    <span className="text-slate-400">•</span>
-                    <Text size="1" className="text-slate-600">
-                      {siswa.jenisKelamin === 'Laki-laki' ? 'L' : siswa.jenisKelamin === 'Perempuan' ? 'P' : '?'}
-                    </Text>
-                  </>
-                )}
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <Text size="1" className="text-slate-500 font-mono shrink-0">
+                        {index + 1}.
+                      </Text>
+                      <Text size="2" weight="medium" className="text-slate-900 truncate">
+                        {siswa.namaLengkap}
+                      </Text>
+                    </div>
+                    <div className="flex items-center gap-2 ml-5 mt-0.5">
+                      {siswa.nisn && (
+                        <Text size="1" className="text-slate-500 font-mono">
+                          NISN: {siswa.nisn}
+                        </Text>
+                      )}
+                      {siswa.jenisKelamin && (
+                        <>
+                          <span className="text-slate-400">•</span>
+                          <Text size="1" className="text-slate-500">
+                            {siswa.jenisKelamin === 'Laki-laki' ? 'L' : siswa.jenisKelamin === 'Perempuan' ? 'P' : '?'}
+                          </Text>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                  <Badge 
+                    color="indigo" 
+                    variant="soft" 
+                    size="1"
+                    style={{ borderRadius: 0, flexShrink: 0 }}
+                  >
+                    {siswa.kelasLabel}
+                  </Badge>
+                </div>
               </div>
             ))}
           </div>
         ) : (
-          <Text size="1" className="text-slate-500">
-            Tidak ada siswa yang diampu di tahun ajaran aktif
-          </Text>
+          <div className="text-center py-4">
+            <Text size="2" className="text-slate-400">
+              Belum ada siswa
+            </Text>
+          </div>
         )}
-      </Section>
+      </div>
     </div>
   )
 }

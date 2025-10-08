@@ -15,151 +15,198 @@ function formatDateTime(dateStr) {
 }
 
 export function JenisPembayaranDetailInfo({ jenisPembayaran }) {
-  // Field item component
-  const FieldItem = ({ label, icon: Icon, children, className = '' }) => (
-    <div className={`border-b border-slate-200 pb-3 ${className}`}>
-      <div className="flex items-center gap-1.5 mb-1.5">
-        {Icon && <Icon className="h-3.5 w-3.5 text-slate-400" />}
-        <Text size="1" weight="medium" className="text-slate-500 uppercase tracking-wider text-[0.65rem]">
-          {label}
-        </Text>
-      </div>
-      <div className="ml-5">
-        {children}
-      </div>
-    </div>
-  )
-
   return (
-    <div className="space-y-0">
-      {/* Nama & Status */}
-      <div className="bg-gradient-to-b from-slate-50 to-white border border-slate-200 p-3 mb-3">
+    <>
+      {/* Informasi Utama */}
+      <div className="p-3 bg-slate-50 border border-slate-300 mx-4">
+        <Text size="1" weight="medium" className="text-slate-600 uppercase tracking-wider mb-2 block">
+          Nama Jenis Pembayaran
+        </Text>
         <div className="flex items-start justify-between gap-2">
-          <div className="flex-1 min-w-0">
-            <Text size="1" className="text-slate-500 uppercase tracking-wider text-[0.65rem] mb-1 block">
-              Nama Jenis Pembayaran
-            </Text>
-            <Text size="3" weight="bold" className="text-slate-900 leading-tight">
-              {jenisPembayaran.nama}
-            </Text>
-          </div>
+          <Text size="4" weight="bold" className="text-slate-900">
+            {jenisPembayaran.nama}
+          </Text>
           <Badge
             variant="solid"
             color={jenisPembayaran.status_aktif ? 'green' : 'gray'}
             size="1"
             style={{ borderRadius: 0 }}
-            className="text-[0.65rem] font-semibold px-2 py-0.5 shrink-0"
+            className="shrink-0"
           >
             {jenisPembayaran.status_aktif ? '✓ Aktif' : '○ Nonaktif'}
           </Badge>
         </div>
       </div>
 
-      {/* ID */}
-      <FieldItem label="ID Jenis Pembayaran" icon={Hash}>
-        <Text size="1" className="text-slate-700 font-mono bg-slate-50 px-2 py-1 border border-slate-200 block text-[0.7rem]">
-          {jenisPembayaran.id}
-        </Text>
-      </FieldItem>
-
       {/* Kode */}
-      <FieldItem label="Kode" icon={Hash}>
-        <Text size="2" weight="medium" className="text-slate-900 font-mono uppercase">
+      <div className="p-3 bg-white border border-slate-300 mx-4">
+        <div className="flex items-center gap-2 mb-1">
+          <Hash className="h-4 w-4 text-blue-500" />
+          <Text size="1" weight="medium" className="text-slate-600 uppercase tracking-wider">
+            Kode
+          </Text>
+        </div>
+        <Text size="2" weight="bold" className="text-slate-900 font-mono uppercase">
           {jenisPembayaran.kode}
         </Text>
-      </FieldItem>
+      </div>
 
       {/* Deskripsi */}
       {jenisPembayaran.deskripsi && (
-        <FieldItem label="Deskripsi" icon={FileText}>
+        <div className="p-3 bg-white border border-slate-300 mx-4">
+          <div className="flex items-center gap-2 mb-1">
+            <FileText className="h-4 w-4 text-indigo-500" />
+            <Text size="1" weight="medium" className="text-slate-600 uppercase tracking-wider">
+              Deskripsi
+            </Text>
+          </div>
           <Text size="2" className="text-slate-700 leading-snug">
             {jenisPembayaran.deskripsi}
           </Text>
-        </FieldItem>
+        </div>
       )}
 
       {/* Jumlah Default */}
-      <FieldItem label="Jumlah Default" icon={DollarSign}>
-        <div className="space-y-0.5">
-          <Text size="2" weight="medium" className="text-slate-900 font-mono">
-            {formatCurrency(jenisPembayaran.jumlah_default)}
-          </Text>
-          <Text size="1" className="text-slate-500 block">
-            Nominal pembayaran default
+      <div className="p-3 bg-green-50 border border-green-300 mx-4">
+        <div className="flex items-center gap-2 mb-1">
+          <DollarSign className="h-4 w-4 text-green-600" />
+          <Text size="1" weight="medium" className="text-green-700 uppercase tracking-wider">
+            Jumlah Default
           </Text>
         </div>
-      </FieldItem>
-
-
+        <Text size="4" weight="bold" className="text-green-900 font-mono block">
+          {formatCurrency(jenisPembayaran.jumlah_default)}
+        </Text>
+        <Text size="1" className="text-slate-500 block mt-0.5">
+          Nominal standar pembayaran
+        </Text>
+      </div>
 
       {/* Tahun Ajaran */}
       {jenisPembayaran.tahun_ajaran && (
-        <FieldItem label="Tahun Ajaran" icon={Calendar}>
-          <Text size="2" weight="medium" className="text-slate-900">
+        <div className="p-3 bg-white border border-slate-300 mx-4">
+          <div className="flex items-center gap-2 mb-1">
+            <Calendar className="h-4 w-4 text-purple-500" />
+            <Text size="1" weight="medium" className="text-slate-600 uppercase tracking-wider">
+              Tahun Ajaran
+            </Text>
+          </div>
+          <Text size="2" weight="bold" className="text-slate-900">
             {jenisPembayaran.tahun_ajaran.nama}
           </Text>
-        </FieldItem>
+        </div>
       )}
 
       {/* Tingkat */}
-      <FieldItem label="Tingkat Kelas" icon={Tag}>
-        <Text size="2" weight="medium" className="text-slate-900">
+      <div className="p-3 bg-white border border-slate-300 mx-4">
+        <div className="flex items-center gap-2 mb-1">
+          <Tag className="h-4 w-4 text-orange-500" />
+          <Text size="1" weight="medium" className="text-slate-600 uppercase tracking-wider">
+            Tingkat Kelas
+          </Text>
+        </div>
+        <Text size="2" weight="bold" className="text-slate-900">
           {jenisPembayaran.tingkat ? `Kelas ${jenisPembayaran.tingkat}` : 'Semua Tingkat'}
         </Text>
-      </FieldItem>
+      </div>
 
       {/* Kelas Spesifik */}
-      <FieldItem label="Kelas Spesifik" icon={Tag}>
-        <Text size="2" weight="medium" className="text-slate-900">
+      <div className="p-3 bg-white border border-slate-300 mx-4">
+        <div className="flex items-center gap-2 mb-1">
+          <Tag className="h-4 w-4 text-teal-500" />
+          <Text size="1" weight="medium" className="text-slate-600 uppercase tracking-wider">
+            Kelas Spesifik
+          </Text>
+        </div>
+        <Text size="2" weight="bold" className="text-slate-900">
           {jenisPembayaran.kelas 
             ? `Kelas ${jenisPembayaran.kelas.tingkat} ${jenisPembayaran.kelas.nama_sub_kelas}` 
             : 'Semua Kelas'}
         </Text>
-      </FieldItem>
+      </div>
 
       {/* Peminatan */}
-      <FieldItem label="Peminatan" icon={Tag}>
-        <Text size="2" weight="medium" className="text-slate-900">
+      <div className="p-3 bg-white border border-slate-300 mx-4">
+        <div className="flex items-center gap-2 mb-1">
+          <Tag className="h-4 w-4 text-pink-500" />
+          <Text size="1" weight="medium" className="text-slate-600 uppercase tracking-wider">
+            Peminatan
+          </Text>
+        </div>
+        <Text size="2" weight="bold" className="text-slate-900">
           {jenisPembayaran.peminatan 
             ? `${jenisPembayaran.peminatan.kode} - ${jenisPembayaran.peminatan.nama}` 
             : 'Semua Peminatan'}
         </Text>
-      </FieldItem>
+      </div>
 
       {/* Status Wajib */}
-      <FieldItem label="Status Pembayaran" icon={jenisPembayaran.wajib ? CheckCircle : AlertCircle}>
+      <div className="p-3 bg-white border border-slate-300 mx-4">
+        <div className="flex items-center gap-2 mb-1">
+          {jenisPembayaran.wajib ? (
+            <CheckCircle className="h-4 w-4 text-red-500" />
+          ) : (
+            <AlertCircle className="h-4 w-4 text-slate-400" />
+          )}
+          <Text size="1" weight="medium" className="text-slate-600 uppercase tracking-wider">
+            Status Pembayaran
+          </Text>
+        </div>
         <div className="flex items-center gap-2">
           <Badge 
             variant="soft" 
             color={jenisPembayaran.wajib ? 'red' : 'gray'}
-            size="1" 
+            size="2" 
             style={{ borderRadius: 0 }}
-            className="text-[0.7rem]"
           >
             {jenisPembayaran.wajib ? 'Wajib' : 'Opsional'}
           </Badge>
-          <Text size="1" className={jenisPembayaran.wajib ? 'text-red-600' : 'text-slate-500'}>
+          <Text size="2" className={jenisPembayaran.wajib ? 'text-red-600' : 'text-slate-500'}>
             {jenisPembayaran.wajib ? 'Harus dibayar' : 'Tidak wajib'}
           </Text>
         </div>
-      </FieldItem>
-
-      {/* Metadata Section */}
-      <div className="pt-3 mt-3 border-t-2 border-slate-300 space-y-3">
-        <FieldItem label="Dibuat Pada" icon={Clock} className="border-b-0 pb-2">
-          <Text size="1" className="text-slate-600 font-sans">
-            {formatDateTime(jenisPembayaran.dibuat_pada)}
-          </Text>
-        </FieldItem>
-
-        {jenisPembayaran.diperbarui_pada && (
-          <FieldItem label="Diperbarui" icon={Clock} className="border-b-0 pb-0">
-            <Text size="1" className="text-slate-600 font-sans">
-              {formatDateTime(jenisPembayaran.diperbarui_pada)}
-            </Text>
-          </FieldItem>
-        )}
       </div>
-    </div>
+
+      {/* Dibuat Pada */}
+      <div className="p-3 bg-white border border-slate-300 mx-4">
+        <div className="flex items-center gap-2 mb-1">
+          <Clock className="h-4 w-4 text-blue-500" />
+          <Text size="1" weight="medium" className="text-slate-600 uppercase tracking-wider">
+            Dibuat Pada
+          </Text>
+        </div>
+        <Text size="2" className="text-slate-900">
+          {formatDateTime(jenisPembayaran.dibuat_pada)}
+        </Text>
+      </div>
+
+      {/* Diperbarui Pada */}
+      {jenisPembayaran.diperbarui_pada && (
+        <div className="p-3 bg-white border border-slate-300 mx-4">
+          <div className="flex items-center gap-2 mb-1">
+            <Clock className="h-4 w-4 text-purple-500" />
+            <Text size="1" weight="medium" className="text-slate-600 uppercase tracking-wider">
+              Diperbarui Pada
+            </Text>
+          </div>
+          <Text size="2" className="text-slate-900">
+            {formatDateTime(jenisPembayaran.diperbarui_pada)}
+          </Text>
+        </div>
+      )}
+
+      {/* ID */}
+      <div className="p-3 bg-slate-50 border border-slate-300 mx-4">
+        <div className="flex items-center gap-2 mb-1">
+          <Hash className="h-4 w-4 text-blue-500" />
+          <Text size="1" weight="medium" className="text-slate-600 uppercase tracking-wider">
+            ID
+          </Text>
+        </div>
+        <Text size="1" className="text-slate-500 font-mono break-all">
+          {jenisPembayaran.id}
+        </Text>
+      </div>
+    </>
   )
 }

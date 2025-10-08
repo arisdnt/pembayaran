@@ -1,7 +1,7 @@
 import { Text } from '@radix-ui/themes'
-import { ArrowLeft, User, MessageCircle } from 'lucide-react'
+import { ArrowLeft, User, MessageCircle, Printer } from 'lucide-react'
 
-export function DetailHeader({ statusAktif, onBack, onSendMessage, hasWhatsApp }) {
+export function DetailHeader({ statusAktif, onBack, onSendMessage, onPrint, hasWhatsApp }) {
   return (
     <div className="shrink-0 bg-white px-2 py-2">
       <div className="flex items-center justify-between">
@@ -46,6 +46,17 @@ export function DetailHeader({ statusAktif, onBack, onSendMessage, hasWhatsApp }
             <MessageCircle className="h-4 w-4" />
             <Text size="2" weight="medium" className="text-white">
               Kirim Pesan
+            </Text>
+          </button>
+          <button
+            onClick={onPrint}
+            className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white transition-colors"
+            type="button"
+            title="Cetak riwayat pembayaran siswa"
+          >
+            <Printer className="h-4 w-4" />
+            <Text size="2" weight="medium" className="text-white">
+              Cetak Riwayat
             </Text>
           </button>
           {statusAktif ? (

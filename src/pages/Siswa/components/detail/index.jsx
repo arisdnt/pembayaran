@@ -2,7 +2,7 @@ import { PageLayout } from '../../../../layout/PageLayout'
 import { DetailHeader } from './DetailHeader'
 import { DetailContent } from './DetailContent'
 
-export function DetailSiswaLayout({ siswa, riwayatKelas, peminatan, tagihanData, onBack, onSendMessage }) {
+export function DetailSiswaLayout({ siswa, riwayatKelas, peminatan, tagihanData, onBack, onSendMessage, onPrint }) {
   const hasWhatsApp = Boolean(siswa?.nomor_whatsapp_wali)
 
   return (
@@ -12,6 +12,7 @@ export function DetailSiswaLayout({ siswa, riwayatKelas, peminatan, tagihanData,
           statusAktif={siswa.status_aktif} 
           onBack={onBack}
           onSendMessage={onSendMessage}
+          onPrint={onPrint}
           hasWhatsApp={hasWhatsApp}
         />
         <DetailContent
