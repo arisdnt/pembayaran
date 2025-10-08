@@ -2,10 +2,9 @@ import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { PageLayout } from '../../layout/PageLayout'
 import { Text, Button } from '@radix-ui/themes'
-import { ArrowLeft, Printer, Receipt } from 'lucide-react'
+import { ArrowLeft, Printer } from 'lucide-react'
 import { db } from '../../offline/db'
 import { PaymentInvoiceDocument } from './components/documents/PaymentInvoiceDocument'
-import { RincianTransaksiTable } from './components/table/RincianTransaksiTable'
 
 function buildInvoiceData(pembayaran) {
   if (!pembayaran) return null
@@ -164,34 +163,10 @@ function DetailPembayaranContent() {
         </div>
 
         <div className="flex-1 overflow-auto bg-white px-4 py-6">
-          <div className="max-w-[1200px] mx-auto space-y-6">
-            {/* Rincian Transaksi - Tidak akan tercetak */}
-            <div className="print:hidden">
-              <div className="bg-white border-2 border-slate-300 shadow-lg">
-                <div className="border-b-2 border-slate-300 bg-gradient-to-b from-blue-100 to-blue-50 px-5 py-3">
-                  <div className="flex items-center gap-2">
-                    <Receipt className="h-5 w-5 text-blue-600" />
-                    <Text size="3" weight="bold" className="text-slate-800 uppercase tracking-wider">
-                      Rincian Transaksi Pembayaran
-                    </Text>
-                  </div>
-                </div>
-                <div className="p-4">
-                  <RincianTransaksiTable
-                    items={pembayaran?.rincian_pembayaran || []}
-                    onEdit={() => {}}
-                    onDelete={() => {}}
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Invoice Document - Untuk cetak */}
-            <div className="relative max-w-[900px] mx-auto">
-              <div className="absolute inset-0 translate-y-3 scale-[0.99] bg-slate-900/5 blur-xl opacity-60 pointer-events-none print:hidden" aria-hidden="true" />
-              <div className="relative bg-white border border-slate-100 p-6 sm:p-10 shadow-[0_12px_32px_rgba(15,23,42,0.07)] print:shadow-none print:border-none print:p-0">
-                <PaymentInvoiceDocument paymentData={invoiceData} contentId="invoice-page-content" />
-              </div>
+          <div className="max-w-[900px] mx-auto relative">
+            <div className="absolute inset-0 translate-y-3 scale-[0.99] bg-slate-900/5 blur-xl opacity-60 pointer-events-none print:hidden" aria-hidden="true" />
+            <div className="relative bg-white border border-slate-100 p-6 sm:p-10 shadow-[0_12px_32px_rgba(15,23,42,0.07)] print:shadow-none print:border-none print:p-0">
+              <PaymentInvoiceDocument paymentData={invoiceData} contentId="invoice-page-content" />
             </div>
           </div>
         </div>
