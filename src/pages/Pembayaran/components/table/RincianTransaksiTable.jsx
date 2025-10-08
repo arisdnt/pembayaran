@@ -1,6 +1,8 @@
+import { useState } from 'react'
 import { Text, IconButton } from '@radix-ui/themes'
-import { Edit2, Trash2, FileText, ExternalLink } from 'lucide-react'
+import { Edit2, Trash2, FileText, Image as ImageIcon } from 'lucide-react'
 import { formatCurrency } from '../../utils/currencyHelpers'
+import { BuktiPembayaranModal } from '../modals/BuktiPembayaranModal'
 
 function formatDate(dateStr) {
   if (!dateStr) return '-'
@@ -23,7 +25,44 @@ function getMetodePembayaranLabel(metode) {
   return labels[metode] || metode || '-'
 }
 
+function getFileNameFromUrl(url) {
+  if (!url) return ''
+  try {
+    const urlObj = new URL(url)
+    const pathParts = urlObj.pathname.split('/')
+    const fileName = pathParts[pathParts.length - 1]
+    // Remove timestamp prefix (format: {timestamp}_{filename})
+    const parts = fileName.split('_')
+    if (parts.length > 1 && /^\d+$/.test(parts[0])) {
+      return decodeURIComponent(parts.slice(1).join('_'))
+    }
+    return decodeURIComponent(fileName)
+  } catch {
+    return 'bukti_pembayaran'
+  }
+}
+
+function getFileTypeFromUrl(url) {
+  if (!url) return null
+  const extension = url.split('.').pop()?.toLowerCase()
+  if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'].includes(extension)) {
+    return 'image'
+  } else if (extension === 'pdf') {
+    return 'pdf'
+  }
+  return 'file'
+}
+
 export function RincianTransaksiTable({ items, onEdit, onDelete }) {
+  const [modalOpen, setModalOpen] = useState(false)
+  const [selectedBukti, setSelectedBukti] = useState(null)
+  const [selectedNomor, setSelectedNomor] = useState(null)
+
+  const handleViewBukti = (buktiUrl, nomorTransaksi) => {
+    setSelectedBukti(buktiUrl)
+    setSelectedNomor(nomorTransaksi)
+    setModalOpen(true)
+  }
   if (items.length === 0) {
     return (
       <div className="text-center py-8 text-slate-400">
@@ -121,25 +160,30 @@ export function RincianTransaksiTable({ items, onEdit, onDelete }) {
                 </Text>
               </td>
               <td className="px-3 py-3">
-                <div className="flex items-center justify-center">
-                  {item.bukti_pembayaran_url ? (
-                    <a
-                      href={item.bukti_pembayaran_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-blue-100 hover:bg-blue-200 text-blue-700 border border-blue-300 transition-colors"
-                      title="Lihat bukti pembayaran"
-                    >
-                      <FileText className="h-3 w-3" />
-                      <span>Lihat</span>
-                      <ExternalLink className="h-2.5 w-2.5" />
-                    </a>
-                  ) : (
-                    <Text size="1" className="text-slate-400">
-                      -
-                    </Text>
-                  )}
-                </div>
+                {item.bukti_pembayaran_url ? (
+                  <button
+                    onClick={() => handleViewBukti(item.bukti_pembayaran_url, item.nomor_transaksi)}
+                    className="flex items-center gap-2 w-full text-left hover:bg-blue-50 transition-colors px-2 py-1 rounded group"
+                  >
+                    {getFileTypeFromUrl(item.bukti_pembayaran_url) === 'image' ? (
+                      <ImageIcon className="h-4 w-4 text-blue-600 shrink-0" />
+                    ) : (
+                      <FileText className="h-4 w-4 text-blue-600 shrink-0" />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <Text size="1" className="text-blue-700 group-hover:text-blue-800 font-medium block truncate">
+                        {getFileNameFromUrl(item.bukti_pembayaran_url)}
+                      </Text>
+                      <Text size="1" className="text-slate-500 block">
+                        Klik untuk preview
+                      </Text>
+                    </div>
+                  </button>
+                ) : (
+                  <Text size="1" className="text-slate-400 text-center block">
+                    -
+                  </Text>
+                )}
               </td>
               <td className="px-3 py-3">
                 <div className="flex items-center justify-center gap-1">
@@ -169,6 +213,14 @@ export function RincianTransaksiTable({ items, onEdit, onDelete }) {
           ))}
         </tbody>
       </table>
+
+      {/* Modal Preview Bukti Pembayaran */}
+      <BuktiPembayaranModal
+        open={modalOpen}
+        onOpenChange={setModalOpen}
+        buktiUrl={selectedBukti}
+        nomorTransaksi={selectedNomor}
+      />
     </div>
   )
 }
