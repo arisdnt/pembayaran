@@ -1,6 +1,7 @@
 import { useLogin } from '../hooks/useLogin'
 import { SchoolIdentity } from '../components/SchoolIdentity'
 import { LoginForm } from '../components/LoginForm'
+import { ErrorModal } from '../../../components/modals/ErrorModal'
 import { X } from 'lucide-react'
 import { getCurrentWindow } from '@tauri-apps/api/window'
 
@@ -12,6 +13,8 @@ export function Login() {
     setPassword,
     error,
     loading,
+    errorModalOpen,
+    setErrorModalOpen,
     handleSubmit,
     handleMagicLink,
   } = useLogin()
@@ -57,6 +60,15 @@ export function Login() {
         loading={loading}
         onSubmit={handleSubmit}
         onMagicLink={handleMagicLink}
+      />
+
+      <ErrorModal
+        open={errorModalOpen}
+        onOpenChange={setErrorModalOpen}
+        title={error?.title}
+        message={error?.message}
+        details={error?.details}
+        variant={error?.variant}
       />
     </div>
   )

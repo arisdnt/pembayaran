@@ -31,12 +31,7 @@ export function LoginForm({
                 setPassword={setPassword}
               />
 
-              <LoginFormActions
-                loading={loading}
-                email={email}
-                error={error}
-                onMagicLink={onMagicLink}
-              />
+              <LoginFormActions loading={loading} />
             </Flex>
           </form>
         </Flex>

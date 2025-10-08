@@ -76,10 +76,10 @@ export const StudentPaymentHistoryDocument = forwardRef(function StudentPaymentH
   const profile = SCHOOL_IDENTITY.profile
 
   return (
-    <div id={contentId} ref={ref} className="bg-white print:p-0" style={{ minHeight: '297mm' }}>
-      <div className="p-8 print:p-12 max-w-[210mm] mx-auto">
+    <div id={contentId} ref={ref} className="bg-white print:p-0">
+      <div className="p-8 print:pt-2 print:px-6 print:pb-6 max-w-[210mm] mx-auto">
         {/* Header Sekolah - 3 Kolom */}
-        <div className="grid grid-cols-[auto_1fr_1fr] gap-4 border-b-2 border-slate-800 pb-3 mb-3">
+        <div className="grid grid-cols-[auto_1fr_1fr] gap-4 border-b-2 border-slate-800 pb-3 mb-3" style={{ breakInside: 'avoid', pageBreakInside: 'avoid' }}>
           {/* Logo */}
           <div className="flex-shrink-0">
             <img
@@ -113,7 +113,7 @@ export const StudentPaymentHistoryDocument = forwardRef(function StudentPaymentH
         </div>
 
         {/* Identitas Siswa & Judul - 2 Kolom */}
-        <div className="grid grid-cols-2 gap-4 border-b-2 border-slate-800 pb-3 mb-4">
+        <div className="grid grid-cols-2 gap-4 border-b-2 border-slate-800 pb-3 mb-4" style={{ breakInside: 'avoid', pageBreakInside: 'avoid' }}>
           {/* Kiri: Identitas Siswa */}
           <div>
             <div className="text-xs grid grid-cols-[auto_auto_1fr] gap-x-2 gap-y-0.5">
@@ -142,7 +142,7 @@ export const StudentPaymentHistoryDocument = forwardRef(function StudentPaymentH
           </div>
         </div>
 
-        <div className="mb-4 bg-slate-100 border-2 border-slate-300 p-3 flex justify-between items-center">
+        <div className="mb-4 bg-slate-100 border-2 border-slate-300 p-3 flex justify-between items-center" style={{ breakInside: 'avoid', pageBreakInside: 'avoid' }}>
           <Text size="2" weight="bold" className="text-slate-800">
             RINGKASAN
           </Text>
@@ -164,7 +164,7 @@ export const StudentPaymentHistoryDocument = forwardRef(function StudentPaymentH
         ) : (
           <div className="mb-4 font-mono text-xs leading-relaxed">
             {/* Ledger Header */}
-            <div className="border-y-2 border-slate-800 py-1.5 mb-2 font-bold text-slate-800 flex">
+            <div className="border-y-2 border-slate-800 py-1.5 mb-2 font-bold text-slate-800 flex" style={{ breakInside: 'avoid', pageBreakInside: 'avoid' }}>
               <div style={{ width: '80px' }}>TANGGAL</div>
               <div style={{ width: '360px' }}>KETERANGAN</div>
               <div style={{ width: '120px' }} className="text-right">DEBIT</div>
@@ -183,7 +183,7 @@ export const StudentPaymentHistoryDocument = forwardRef(function StudentPaymentH
                   const statusTextColor = entry.sisaTagihan <= 0 ? 'text-green-800' : 'text-red-800'
 
                   return (
-                    <div key={index} className={`${statusBg} ${statusTextColor} border-y border-slate-400 py-1.5 px-2 mb-2 font-bold flex justify-between`}>
+                    <div key={index} className={`${statusBg} ${statusTextColor} border-y border-slate-400 py-1.5 px-2 mb-2 font-bold flex justify-between`} style={{ breakInside: 'avoid', pageBreakInside: 'avoid' }}>
                       <span>STATUS: {entry.namaTagihan}</span>
                       <span>{statusText}</span>
                     </div>
@@ -193,7 +193,7 @@ export const StudentPaymentHistoryDocument = forwardRef(function StudentPaymentH
                 // Tagihan Row (Header Tagihan)
                 if (entry.type === 'tagihan') {
                   return (
-                    <div key={index} className="bg-blue-50 border-t border-blue-200 py-1.5 flex font-bold">
+                    <div key={index} className="bg-blue-50 border-t border-blue-200 py-1.5 flex font-bold" style={{ breakInside: 'avoid', pageBreakInside: 'avoid' }}>
                       <div style={{ width: '80px' }} className="text-slate-700">
                         {formatDate(entry.tanggal)}
                       </div>
@@ -219,7 +219,7 @@ export const StudentPaymentHistoryDocument = forwardRef(function StudentPaymentH
                 // Rincian Tagihan Row (Breakdown)
                 if (entry.type === 'rincian_tagihan') {
                   return (
-                    <div key={index} className="py-0.5 flex text-[0.7rem] text-indigo-700">
+                    <div key={index} className="py-0.5 flex text-[0.7rem] text-indigo-700" style={{ breakInside: 'avoid', pageBreakInside: 'avoid' }}>
                       <div style={{ width: '80px' }}>
                         
                       </div>
@@ -243,7 +243,7 @@ export const StudentPaymentHistoryDocument = forwardRef(function StudentPaymentH
                 // Pembayaran Row
                 if (entry.type === 'pembayaran') {
                   return (
-                    <div key={index} className="bg-green-50 py-1.5 flex">
+                    <div key={index} className="bg-green-50 py-1.5 flex" style={{ breakInside: 'avoid', pageBreakInside: 'avoid' }}>
                       <div style={{ width: '80px' }} className="text-slate-700">
                         {formatDate(entry.tanggal)}
                       </div>
@@ -271,7 +271,7 @@ export const StudentPaymentHistoryDocument = forwardRef(function StudentPaymentH
             </div>
 
             {/* Ledger Footer - Grand Total */}
-            <div className="border-t-2 border-slate-800 mt-4 pt-2 space-y-1">
+            <div className="border-t-2 border-slate-800 mt-4 pt-2 space-y-1" style={{ breakInside: 'avoid', pageBreakInside: 'avoid' }}>
               <div className="flex font-bold text-slate-800">
                 <div style={{ width: '440px' }} className="text-right pr-4">
                   TOTAL TAGIHAN:
@@ -317,7 +317,7 @@ export const StudentPaymentHistoryDocument = forwardRef(function StudentPaymentH
               )}
             </div>
 
-            <div className="mt-6 mb-4 border-2 border-slate-300 p-3 bg-slate-50">
+            <div className="mt-6 mb-4 border-2 border-slate-300 p-3 bg-slate-50" style={{ breakInside: 'avoid', pageBreakInside: 'avoid' }}>
               <Text size="2" className="text-slate-700 font-sans">
                 Terbilang: <span className="font-semibold text-slate-900 italic">
                   {angkaTerbilang(grandTotal.totalDibayar || 0)}
@@ -327,7 +327,7 @@ export const StudentPaymentHistoryDocument = forwardRef(function StudentPaymentH
           </div>
         )}
 
-        <div className="flex justify-end mb-8">
+        <div className="flex justify-end mb-8" style={{ breakInside: 'avoid', pageBreakInside: 'avoid' }}>
           <div className="w-64">
             <div className="text-center mb-1">
               <Text size="2" className="text-slate-600 block mb-1">
@@ -345,7 +345,7 @@ export const StudentPaymentHistoryDocument = forwardRef(function StudentPaymentH
           </div>
         </div>
 
-        <div className="text-center pt-4 border-t border-slate-300">
+        <div className="text-center pt-4 border-t border-slate-300" style={{ breakInside: 'avoid', pageBreakInside: 'avoid' }}>
           <Text size="1" className="text-slate-500 italic">
             Dokumen ini dicetak otomatis dan sah tanpa tanda tangan basah.
           </Text>

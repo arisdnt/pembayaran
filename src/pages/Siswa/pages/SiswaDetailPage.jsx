@@ -260,32 +260,56 @@ export function DetailSiswa() {
   if (showPrintView) {
     return (
       <div className="bg-white">
-        <div className="max-w-[900px] mx-auto relative py-6">
+        <div className="max-w-[900px] mx-auto relative py-6 print:py-0">
           <StudentPaymentHistoryDocument historyData={historyData} contentId="student-history-print" />
         </div>
         
         <style>{`
           @media print {
+            /* Reveal only the print content but keep normal flow */
             body * {
-              visibility: hidden;
+              visibility: hidden !important;
             }
 
             #student-history-print,
             #student-history-print * {
-              visibility: visible;
+              visibility: visible !important;
             }
 
-            #student-history-print {
-              position: absolute;
-              left: 0;
-              top: 0;
-              width: 100%;
+            /* Ensure containers don't clip content when printing */
+            html, body, #root {
+              height: auto !important;
+              overflow: visible !important;
             }
+
+            .route-container {
+              height: auto !important;
+              overflow: visible !important;
+            }
+
+            /* Override Tailwind viewport-constrained utilities during print */
+            .h-screen { height: auto !important; }
+            .w-screen { width: auto !important; }
+            .overflow-hidden { overflow: visible !important; }
+
+            /* Keep the print target in normal document flow */
+            #student-history-print {
+              position: static !important;
+              width: auto !important;
+              max-width: 210mm !important;
+              margin: 0 auto !important;
+            }
+
+            /* Optional helper to hide non-print items */
+            .print\\:hidden { display: none !important; }
 
             @page {
               size: A4;
-              margin: 0;
+              margin: 6mm 12mm 12mm 12mm; /* reduce top margin further on first page */
             }
+
+            /* Remove user-agent default margins on body when printing */
+            body { margin: 0 !important; }
           }
         `}</style>
       </div>

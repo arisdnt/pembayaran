@@ -16,6 +16,7 @@ export function LoginFormFields({ email, setEmail, password, setPassword }) {
           value={email}
           onChange={(event) => setEmail(event.target.value)}
           style={{ borderRadius: 0, border: '1px solid #cbd5e1' }}
+          autoComplete="off"
         >
           <TextField.Slot>
             <EnvelopeClosedIcon className="text-blue-600" />
@@ -35,6 +36,7 @@ export function LoginFormFields({ email, setEmail, password, setPassword }) {
           value={password}
           onChange={(event) => setPassword(event.target.value)}
           style={{ borderRadius: 0, border: '1px solid #cbd5e1' }}
+          autoComplete="off"
         >
           <TextField.Slot>
             <LockClosedIcon className="text-blue-600" />

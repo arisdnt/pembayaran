@@ -9,8 +9,9 @@ export function useLogin() {
   const { user } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
+  const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [errorModalOpen, setErrorModalOpen] = useState(false)
 
   const redirectPath = location.state?.from?.pathname ?? '/dashboard'
 
@@ -22,35 +23,80 @@ export function useLogin() {
 
   async function handleSubmit(event) {
     event.preventDefault()
-    setError('')
+    setError(null)
     setLoading(true)
 
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
+    try {
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
 
-    if (signInError) {
-      setError(signInError.message)
-    } else {
-      navigate(redirectPath, { replace: true })
+      if (signInError) {
+        let errorMessage = 'Login gagal. Silakan coba lagi.'
+        let errorDetails = signInError.message
+
+        if (signInError.message.includes('Invalid login credentials')) {
+          errorMessage = 'Email atau password salah'
+          errorDetails = 'Pastikan email dan password yang Anda masukkan sudah benar.'
+        } else if (signInError.message.includes('Email not confirmed')) {
+          errorMessage = 'Email belum diverifikasi'
+          errorDetails = 'Silakan cek email Anda untuk verifikasi akun.'
+        }
+
+        setError({
+          title: 'Login Gagal',
+          message: errorMessage,
+          details: errorDetails
+        })
+        setErrorModalOpen(true)
+      } else {
+        navigate(redirectPath, { replace: true })
+      }
+    } catch (err) {
+      setError({
+        title: 'Masalah Koneksi',
+        message: 'Tidak dapat terhubung ke server',
+        details: 'Periksa koneksi internet Anda dan coba lagi.'
+      })
+      setErrorModalOpen(true)
     }
 
     setLoading(false)
   }
 
   async function handleMagicLink() {
-    setError('')
+    setError(null)
     setLoading(true)
 
-    const { error: magicError } = await supabase.auth.signInWithOtp({
-      email,
-    })
+    try {
+      const { error: magicError } = await supabase.auth.signInWithOtp({
+        email,
+      })
 
-    if (magicError) {
-      setError(magicError.message)
-    } else {
-      setError('Kami telah mengirim tautan login ke email Anda.')
+      if (magicError) {
+        setError({
+          title: 'Magic Link Gagal',
+          message: 'Gagal mengirim link login',
+          details: magicError.message
+        })
+        setErrorModalOpen(true)
+      } else {
+        setError({
+          title: 'Berhasil',
+          message: 'Kami telah mengirim tautan login ke email Anda.',
+          details: 'Silakan cek inbox email Anda dan klik tautan untuk masuk.',
+          variant: 'success'
+        })
+        setErrorModalOpen(true)
+      }
+    } catch (err) {
+      setError({
+        title: 'Masalah Koneksi',
+        message: 'Tidak dapat terhubung ke server',
+        details: 'Periksa koneksi internet Anda dan coba lagi.'
+      })
+      setErrorModalOpen(true)
     }
 
     setLoading(false)
@@ -63,6 +109,8 @@ export function useLogin() {
     setPassword,
     error,
     loading,
+    errorModalOpen,
+    setErrorModalOpen,
     handleSubmit,
     handleMagicLink,
   }
