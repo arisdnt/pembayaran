@@ -1,5 +1,5 @@
 import { db, getUpdatedAtColumn, isFullLoadOnly, syncRegistry } from './db'
-import { enqueueInsert, enqueueUpdate, enqueueDelete } from './outbox'
+import { enqueueInsert, enqueueUpdate, enqueueDelete, retryAllErrorOutbox } from './outbox'
 import { supabase } from '../lib/supabaseClient'
 import { processPendingUploads } from '../lib/fileUploadHelper'
 
@@ -8,6 +8,10 @@ const PAGE_SIZE = 1000
 let channels = []
 let channelStates = new Map()
 let outboxTimer = null
+let onlineHandlersAttached = false
+let onlineHandlerFn = null
+let offlineHandlerFn = null
+let reconcileTimer = null
 let status = {
   realtime: 'disconnected',
   syncing: false,
@@ -95,6 +99,20 @@ async function hydrateTable(table) {
     state.last_incremental_at = max || new Date().toISOString()
     await db.sync_state.put(state)
   }
+}
+
+async function reconcileAllTables() {
+  // Skip when clearly offline
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) return
+  const tables = Object.keys(syncRegistry)
+  for (const table of tables) {
+    try {
+      await hydrateTable(table)
+    } catch (err) {
+      console.warn(`[SyncEngine] Reconcile failed for ${table}:`, err?.message || err)
+    }
+  }
+  status.lastSyncAt = new Date().toISOString()
 }
 
 function onRealtimeEvent(table) {
@@ -202,6 +220,48 @@ function scheduleOutboxProcessor() {
   }, 4000)
 }
 
+function attachOnlineHandlers() {
+  if (onlineHandlersAttached) return
+  if (typeof window === 'undefined') return
+
+  onlineHandlerFn = async () => {
+    try {
+      console.log('[SyncEngine] Online detected → triggering immediate outbox retry')
+      // Reset any error items to pending to auto-retry
+      await retryAllErrorOutbox()
+      // Process uploads first, then outbox
+      try { await processPendingUploads() } catch (e) { console.warn('[Outbox] upload on-online error', e) }
+      await processOutboxOnce()
+      // Reconcile IndexedDB with cloud incrementals
+      await reconcileAllTables()
+      // Ensure periodic processor is running
+      if (!outboxTimer) scheduleOutboxProcessor()
+      // Ensure realtime subscriptions are active
+      try { await startRealtime() } catch (e) { console.warn('[Realtime] restart on-online error', e) }
+    } catch (err) {
+      console.error('[SyncEngine] on-online handler error', err)
+    }
+  }
+
+  offlineHandlerFn = () => {
+    console.log('[SyncEngine] Offline detected')
+  }
+
+  window.addEventListener('online', onlineHandlerFn)
+  window.addEventListener('offline', offlineHandlerFn)
+  onlineHandlersAttached = true
+}
+
+function detachOnlineHandlers() {
+  if (!onlineHandlersAttached) return
+  if (typeof window === 'undefined') return
+  try {
+    if (onlineHandlerFn) window.removeEventListener('online', onlineHandlerFn)
+    if (offlineHandlerFn) window.removeEventListener('offline', offlineHandlerFn)
+  } catch {}
+  onlineHandlersAttached = false
+}
+
 export async function startBackgroundSync() {
   status.syncing = true
   try {
@@ -231,6 +291,12 @@ export async function startBackgroundSync() {
     // Start realtime immediately after critical tables
     await startRealtime()
     scheduleOutboxProcessor()
+    attachOnlineHandlers()
+    // Schedule periodic reconcile to guard against missed realtime events
+    if (reconcileTimer) clearInterval(reconcileTimer)
+    reconcileTimer = setInterval(() => {
+      reconcileAllTables().catch((e) => console.warn('[SyncEngine] periodic reconcile error', e))
+    }, 120000) // every 2 minutes
     status.lastSyncAt = new Date().toISOString()
     status.lastError = null
 
@@ -263,4 +329,7 @@ export function stopBackgroundSync() {
   channels = []
   if (outboxTimer) clearInterval(outboxTimer)
   outboxTimer = null
+  detachOnlineHandlers()
+  if (reconcileTimer) clearInterval(reconcileTimer)
+  reconcileTimer = null
 }

@@ -38,9 +38,14 @@ export function useSyncStatusData() {
     const timer = setInterval(() => {
       if (!disposed) load()
     }, 4000)
+    const handleOnline = () => { if (!disposed) load() }
+    try {
+      window.addEventListener('online', handleOnline)
+    } catch {}
     return () => {
       disposed = true
       clearInterval(timer)
+       try { window.removeEventListener('online', handleOnline) } catch {}
     }
   }, [load])
 
