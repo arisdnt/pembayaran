@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Dialog, TextField, Text, Button, Select, TextArea } from '@radix-ui/themes'
-import { DollarSign, X, Plus, Calendar, CreditCard, Hash, FileText, AlertCircle } from 'lucide-react'
+import { DollarSign, X, Plus, Calendar, CreditCard, Hash, FileText, AlertCircle, Upload, Image as ImageIcon } from 'lucide-react'
 
 function formatCurrency(amount) {
   return new Intl.NumberFormat('id-ID', {
@@ -26,9 +26,12 @@ export function PaymentInputModal({ open, onOpenChange, onSubmit, tagihan, summa
     metode_pembayaran: 'tunai',
     referensi_pembayaran: '',
     catatan: '',
+    bukti_file: null,
   })
   const [displayAmount, setDisplayAmount] = useState('')
   const [error, setError] = useState('')
+  const [filePreview, setFilePreview] = useState(null)
+  const [fileName, setFileName] = useState('')
 
   useEffect(() => {
     if (open) {
@@ -38,9 +41,12 @@ export function PaymentInputModal({ open, onOpenChange, onSubmit, tagihan, summa
         metode_pembayaran: 'tunai',
         referensi_pembayaran: '',
         catatan: '',
+        bukti_file: null,
       })
       setDisplayAmount(sisaAmount ? formatNumber(sisaAmount) : '')
       setError('')
+      setFilePreview(null)
+      setFileName('')
     }
   }, [open, summary])
 
@@ -62,6 +68,46 @@ export function PaymentInputModal({ open, onOpenChange, onSubmit, tagihan, summa
         setError('')
       }
     }
+  }
+
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Validate file
+    const MAX_SIZE = 5 * 1024 * 1024 // 5MB
+    const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'application/pdf']
+
+    if (file.size > MAX_SIZE) {
+      setError('Ukuran file maksimal 5MB')
+      return
+    }
+
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      setError('Format file harus JPG, PNG, WEBP, atau PDF')
+      return
+    }
+
+    setError('')
+    setFormData({ ...formData, bukti_file: file })
+    setFileName(file.name)
+
+    // Create preview for images
+    if (file.type.startsWith('image/')) {
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setFilePreview(reader.result)
+      }
+      reader.readAsDataURL(file)
+    } else {
+      setFilePreview(null) // PDF or other
+    }
+  }
+
+  const handleRemoveFile = () => {
+    setFormData({ ...formData, bukti_file: null })
+    setFilePreview(null)
+    setFileName('')
   }
 
   const handleSubmit = (e) => {
@@ -309,9 +355,75 @@ export function PaymentInputModal({ open, onOpenChange, onSubmit, tagihan, summa
                       placeholder="Catatan tambahan (opsional)"
                       value={formData.catatan}
                       onChange={(e) => setFormData({ ...formData, catatan: e.target.value })}
-                      style={{ borderRadius: 0, minHeight: '80px' }}
+                      style={{ borderRadius: 0, minHeight: '60px' }}
                     />
                   </label>
+                </div>
+
+                {/* Bukti Pembayaran - Full Width */}
+                <div>
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <Upload className="h-4 w-4 text-blue-600" />
+                    <Text size="2" weight="medium">Bukti Pembayaran (Opsional)</Text>
+                  </div>
+                  
+                  {!formData.bukti_file ? (
+                    <label className="block w-full border-2 border-dashed border-slate-300 hover:border-blue-500 bg-slate-50 hover:bg-blue-50 p-4 cursor-pointer transition-colors">
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/jpg,image/png,image/webp,application/pdf"
+                        onChange={handleFileChange}
+                        className="hidden"
+                      />
+                      <div className="flex flex-col items-center gap-2 text-center">
+                        <Upload className="h-6 w-6 text-slate-400" />
+                        <div>
+                          <Text size="2" weight="medium" className="text-slate-700 block">
+                            Klik untuk upload bukti
+                          </Text>
+                          <Text size="1" className="text-slate-500">
+                            JPG, PNG, WEBP, atau PDF (Max 5MB)
+                          </Text>
+                        </div>
+                      </div>
+                    </label>
+                  ) : (
+                    <div className="border-2 border-blue-500 bg-blue-50 p-3">
+                      <div className="flex items-start gap-3">
+                        {filePreview ? (
+                          <div className="flex-shrink-0">
+                            <img 
+                              src={filePreview} 
+                              alt="Preview" 
+                              className="w-16 h-16 object-cover border border-slate-300"
+                            />
+                          </div>
+                        ) : (
+                          <div className="flex-shrink-0 w-16 h-16 bg-slate-200 border border-slate-300 flex items-center justify-center">
+                            <FileText className="h-8 w-8 text-slate-500" />
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <Text size="2" weight="medium" className="text-slate-900 block truncate">
+                            {fileName}
+                          </Text>
+                          <Text size="1" className="text-slate-600 block mt-1">
+                            {formData.bukti_file ? (formData.bukti_file.size / 1024).toFixed(1) : '0'} KB
+                          </Text>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleRemoveFile}
+                          className="flex-shrink-0 p-1.5 hover:bg-red-100 text-red-600 border border-red-300"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  <Text size="1" className="text-slate-500 mt-1.5 block">
+                    💡 Bukti akan disimpan secara offline dan otomatis terupload saat online
+                  </Text>
                 </div>
               </div>
             </div>

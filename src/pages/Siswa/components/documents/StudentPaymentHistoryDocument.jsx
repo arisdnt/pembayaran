@@ -69,20 +69,6 @@ function getMetodeLabel(metode) {
   return labels[metode] || metode || '-'
 }
 
-function getMetodeLabel(metode) {
-  const labels = {
-    tunai: 'Tunai',
-    non_tunai: 'Non Tunai',
-    cash: 'Tunai',
-    transfer: 'Transfer',
-    qris: 'QRIS',
-    'e-wallet': 'E-Wallet',
-    kartu_debit: 'Debit',
-    kartu_kredit: 'Kredit',
-  }
-  return labels[metode] || metode || '-'
-}
-
 export const StudentPaymentHistoryDocument = forwardRef(function StudentPaymentHistoryDocument({ historyData, contentId = 'student-history-content' }, ref) {
   if (!historyData) return null
 
@@ -92,84 +78,68 @@ export const StudentPaymentHistoryDocument = forwardRef(function StudentPaymentH
   return (
     <div id={contentId} ref={ref} className="bg-white print:p-0" style={{ minHeight: '297mm' }}>
       <div className="p-8 print:p-12 max-w-[210mm] mx-auto">
-        <div className="grid grid-cols-2 gap-6 border-b-4 border-slate-800 pb-4 mb-6">
-          <div className="flex items-start gap-3">
-            <div className="flex-shrink-0">
-              <img
-                src="/logo.svg"
-                alt="Logo Sekolah"
-                className="h-20 w-20 object-contain"
-              />
-            </div>
+        {/* Header Sekolah - 3 Kolom */}
+        <div className="grid grid-cols-[auto_1fr_1fr] gap-4 border-b-2 border-slate-800 pb-3 mb-3">
+          {/* Logo */}
+          <div className="flex-shrink-0">
+            <img
+              src="/logo.svg"
+              alt="Logo Sekolah"
+              className="h-16 w-16 object-contain"
+            />
+          </div>
 
-            <div className="flex-1 text-left">
-              <Text size="5" weight="bold" className="text-slate-900 block uppercase tracking-wide leading-tight mb-2 underline">
+          {/* Nama Sekolah */}
+          <div className="flex items-center">
+            <div>
+              <Text size="4" weight="bold" className="text-slate-900 uppercase tracking-wide leading-tight block">
                 {profile.name}
               </Text>
-              <div className="space-y-0.5">
-                <Text size="1" className="text-slate-600 block leading-tight">
-                  {profile.address.street}, {profile.address.village}, {profile.address.district}
-                </Text>
-                <Text size="1" className="text-slate-600 block leading-tight">
-                  {profile.address.city}, {profile.address.province} {profile.address.postalCode}
-                </Text>
-                <Text size="1" className="text-slate-600 block mt-1.5 leading-tight">
-                  Telp: {profile.phone} | Email: {profile.email}
-                </Text>
+              <Text size="1" className="text-slate-600 mt-1 block">
+                NSS: {profile.nss} | NPSN: {profile.npsn}
+              </Text>
+            </div>
+          </div>
+
+          {/* Alamat Sekolah */}
+          <div className="flex items-center text-xs leading-tight text-slate-600 text-right">
+            <div className="w-full">
+              {profile.address.street}, {profile.address.village}, {profile.address.district}, {profile.address.city}, {profile.address.province} {profile.address.postalCode}
+              <div className="mt-1">
+                Telp: {profile.phone} | Email: {profile.email}
               </div>
             </div>
           </div>
-
-          <div className="text-right pl-6">
-            <table className="w-full text-sm">
-              <tbody>
-                <tr>
-                  <td className="py-0 pr-3 text-right" style={{ width: '100px' }}>
-                    <Text size="1" className="text-slate-600 leading-tight">Nama</Text>
-                  </td>
-                  <td className="py-0 pr-2 text-right">:</td>
-                  <td className="py-0 text-right">
-                    <Text size="1" weight="bold" className="text-slate-900 leading-tight">
-                      {siswaInfo?.nama_lengkap || '-'}
-                    </Text>
-                  </td>
-                </tr>
-                <tr>
-                  <td className="py-0 pr-3 text-right">
-                    <Text size="1" className="text-slate-600 leading-tight">NISN</Text>
-                  </td>
-                  <td className="py-0 pr-2 text-right">:</td>
-                  <td className="py-0 text-right">
-                    <Text size="1" className="font-mono text-slate-900 leading-tight">
-                      {siswaInfo?.nisn || '-'}
-                    </Text>
-                  </td>
-                </tr>
-                <tr>
-                  <td className="py-0 pr-3 text-right">
-                    <Text size="1" className="text-slate-600 leading-tight">Kelas</Text>
-                  </td>
-                  <td className="py-0 pr-2 text-right">:</td>
-                  <td className="py-0 text-right">
-                    <Text size="1" className="text-slate-900 leading-tight">
-                      {siswaInfo?.kelas || '-'}
-                    </Text>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
         </div>
 
-        <div className="text-center mb-4">
-          <div className="inline-block bg-slate-800 text-white px-8 py-3">
-            <Text size="5" weight="bold" className="uppercase tracking-wider">
+        {/* Identitas Siswa & Judul - 2 Kolom */}
+        <div className="grid grid-cols-2 gap-4 border-b-2 border-slate-800 pb-3 mb-4">
+          {/* Kiri: Identitas Siswa */}
+          <div>
+            <div className="text-xs grid grid-cols-[auto_auto_1fr] gap-x-2 gap-y-0.5">
+              <span className="text-slate-600">Nama</span>
+              <span className="text-slate-600">:</span>
+              <span className="text-slate-900"><strong>{siswaInfo?.nama_lengkap || '-'}</strong></span>
+              
+              <span className="text-slate-600">NISN</span>
+              <span className="text-slate-600">:</span>
+              <span className="text-slate-900 font-mono">{siswaInfo?.nisn || '-'}</span>
+              
+              <span className="text-slate-600">Kelas</span>
+              <span className="text-slate-600">:</span>
+              <span className="text-slate-900">{siswaInfo?.kelas || '-'}</span>
+            </div>
+          </div>
+
+          {/* Kanan: Judul & Tanggal Cetak */}
+          <div className="text-right flex flex-col justify-center">
+            <Text size="4" weight="bold" className="text-slate-900 uppercase tracking-wider block">
               LEDGER RIWAYAT PEMBAYARAN
             </Text>
+            <Text size="1" className="text-slate-600 mt-1 block">
+              Tanggal Cetak: {formatDate(timestamp)}
+            </Text>
           </div>
-          <Text size="2" className="text-slate-500 mt-2 block">
-            Tanggal Cetak: {formatDate(timestamp)}
-          </Text>
         </div>
 
         <div className="mb-4 bg-slate-100 border-2 border-slate-300 p-3 flex justify-between items-center">
@@ -192,129 +162,169 @@ export const StudentPaymentHistoryDocument = forwardRef(function StudentPaymentH
             </Text>
           </div>
         ) : (
-          <>
-            {tagihanData.map((tagihan, tagihanIndex) => (
-              <div key={tagihanIndex} className="mb-6 break-inside-avoid">
-                <div className="bg-slate-100 border-2 border-slate-300 p-3 mb-2">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <Text size="3" weight="bold" className="text-slate-900 block">
-                        {tagihan.judul || '-'}
-                      </Text>
-                      <div className="flex gap-4 mt-1">
-                        <Text size="1" className="text-slate-600">
-                          No. Tagihan: <span className="font-mono">{tagihan.nomor_tagihan || '-'}</span>
-                        </Text>
-                        <Text size="1" className="text-slate-600">
-                          Tahun Ajaran: {tagihan.tahun_ajaran || '-'}
-                        </Text>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <Text size="1" className="text-slate-600 block">Total Tagihan</Text>
-                      <Text size="3" weight="bold" className="text-slate-900 font-mono">
-                        {formatCurrency(tagihan.total_tagihan)}
-                      </Text>
-                    </div>
-                  </div>
-                </div>
-
-                <table className="w-full text-sm border-2 border-slate-300 mb-4">
-                  <thead>
-                    <tr className="bg-slate-700 text-white">
-                      <th className="py-2 px-3 text-left border-r border-slate-600" style={{ width: '40px' }}>
-                        <Text size="2" weight="bold">No</Text>
-                      </th>
-                      <th className="py-2 px-3 text-left border-r border-slate-600" style={{ width: '120px' }}>
-                        <Text size="2" weight="bold">Tanggal</Text>
-                      </th>
-                      <th className="py-2 px-3 text-center border-r border-slate-600" style={{ width: '80px' }}>
-                        <Text size="2" weight="bold">Cicilan</Text>
-                      </th>
-                      <th className="py-2 px-3 text-center border-r border-slate-600" style={{ width: '120px' }}>
-                        <Text size="2" weight="bold">Metode</Text>
-                      </th>
-                      <th className="py-2 px-3 text-right" style={{ width: '150px' }}>
-                        <Text size="2" weight="bold">Jumlah</Text>
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {tagihan.pembayaran.map((pembayaran, index) => (
-                      <tr key={index} className="border-b border-slate-300">
-                        <td className="py-2 px-3 border-r border-slate-300 text-center">
-                          <Text size="2" className="text-slate-700">{index + 1}</Text>
-                        </td>
-                        <td className="py-2 px-3 border-r border-slate-300">
-                          <Text size="2" className="text-slate-700">
-                            {formatDateTime(pembayaran.tanggal_bayar)}
-                          </Text>
-                        </td>
-                        <td className="py-2 px-3 border-r border-slate-300 text-center">
-                          <Text size="2" className="text-slate-700">
-                            {pembayaran.cicilan_ke || '-'}
-                          </Text>
-                        </td>
-                        <td className="py-2 px-3 border-r border-slate-300 text-center">
-                          <Text size="2" className="text-slate-700">
-                            {getMetodeLabel(pembayaran.metode_pembayaran)}
-                          </Text>
-                        </td>
-                        <td className="py-2 px-3 text-right">
-                          <Text size="2" weight="bold" className="font-mono text-slate-900">
-                            {formatCurrency(pembayaran.jumlah_dibayar)}
-                          </Text>
-                        </td>
-                      </tr>
-                    ))}
-                    <tr className="bg-slate-100">
-                      <td colSpan="4" className="py-2 px-3 text-right">
-                        <Text size="2" weight="bold" className="text-slate-900">
-                          Total Dibayar
-                        </Text>
-                      </td>
-                      <td className="py-2 px-3 text-right bg-slate-200">
-                        <Text size="3" weight="bold" className="font-mono text-slate-900">
-                          {formatCurrency(tagihan.total_dibayar)}
-                        </Text>
-                      </td>
-                    </tr>
-                    <tr className={tagihan.status_lunas ? 'bg-green-50' : 'bg-red-50'}>
-                      <td colSpan="4" className="py-2 px-3 text-right">
-                        <Text size="2" weight="bold" className={tagihan.status_lunas ? 'text-green-700' : 'text-red-700'}>
-                          {tagihan.status_lunas ? 'Status: LUNAS' : 'Sisa Tagihan'}
-                        </Text>
-                      </td>
-                      <td className="py-2 px-3 text-right">
-                        <Text size="3" weight="bold" className={`font-mono ${tagihan.status_lunas ? 'text-green-700' : 'text-red-700'}`}>
-                          {formatCurrency(tagihan.sisa_tagihan)}
-                        </Text>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            ))}
-
-            <div className="border-t-4 border-slate-800 pt-4 mb-8">
-              <div className="flex justify-between items-center bg-slate-800 text-white p-4">
-                <Text size="4" weight="bold" className="uppercase">
-                  Total Seluruh Pembayaran
-                </Text>
-                <Text size="5" weight="bold" className="font-mono">
-                  {formatCurrency(totalAmount)}
-                </Text>
-              </div>
+          <div className="mb-4 font-mono text-xs leading-relaxed">
+            {/* Ledger Header */}
+            <div className="border-y-2 border-slate-800 py-1.5 mb-2 font-bold text-slate-800 flex">
+              <div style={{ width: '80px' }}>TANGGAL</div>
+              <div style={{ width: '360px' }}>KETERANGAN</div>
+              <div style={{ width: '120px' }} className="text-right">DEBIT</div>
+              <div style={{ width: '120px' }} className="text-right">KREDIT</div>
+              <div style={{ width: '120px' }} className="text-right">SALDO</div>
             </div>
 
-            <div className="mb-8 border-2 border-slate-300 p-3">
-              <Text size="2" className="text-slate-600">
+            {/* Ledger Entries */}
+            <div className="space-y-0">
+              {ledgerEntries.map((entry, index) => {
+                // Status Pembayaran Row
+                if (entry.type === 'status_pembayaran') {
+                  const statusText = entry.sisaTagihan <= 0 ? '✓ LUNAS' :
+                                     entry.sisaTagihan > 0 ? `KURANG BAYAR ${formatCurrency(entry.sisaTagihan)}` : ''
+                  const statusBg = entry.sisaTagihan <= 0 ? 'bg-green-100' : 'bg-red-100'
+                  const statusTextColor = entry.sisaTagihan <= 0 ? 'text-green-800' : 'text-red-800'
+
+                  return (
+                    <div key={index} className={`${statusBg} ${statusTextColor} border-y border-slate-400 py-1.5 px-2 mb-2 font-bold flex justify-between`}>
+                      <span>STATUS: {entry.namaTagihan}</span>
+                      <span>{statusText}</span>
+                    </div>
+                  )
+                }
+
+                // Tagihan Row (Header Tagihan)
+                if (entry.type === 'tagihan') {
+                  return (
+                    <div key={index} className="bg-blue-50 border-t border-blue-200 py-1.5 flex font-bold">
+                      <div style={{ width: '80px' }} className="text-slate-700">
+                        {formatDate(entry.tanggal)}
+                      </div>
+                      <div style={{ width: '360px' }} className="text-slate-900">
+                        <div className="uppercase">{entry.namaTagihan}</div>
+                        <div className="text-[0.65rem] text-slate-600 font-normal">
+                          {entry.tahunAjaran} • Kelas {entry.kelas} • Ref: {entry.referensi}
+                        </div>
+                      </div>
+                      <div style={{ width: '120px' }} className="text-left pl-2 text-blue-700">
+                        {formatCurrency(entry.nominalTagihan)}
+                      </div>
+                      <div style={{ width: '120px' }} className="text-right">
+                        
+                      </div>
+                      <div style={{ width: '120px' }} className="text-right text-red-700">
+                        {formatCurrency(Math.abs(entry.saldo))}
+                      </div>
+                    </div>
+                  )
+                }
+
+                // Rincian Tagihan Row (Breakdown)
+                if (entry.type === 'rincian_tagihan') {
+                  return (
+                    <div key={index} className="py-0.5 flex text-[0.7rem] text-indigo-700">
+                      <div style={{ width: '80px' }}>
+                        
+                      </div>
+                      <div style={{ width: '480px' }} className="pl-6 flex items-center">
+                        <span className="whitespace-nowrap">↳ {entry.jenisPembayaran}</span>
+                        {entry.deskripsi && <span className="text-slate-500 whitespace-nowrap"> • {entry.deskripsi}</span>}
+                        {entry.referensi && <span className="text-slate-500 whitespace-nowrap"> [{entry.referensi}]</span>}
+                        <span className="flex-1 border-b border-dotted border-slate-400 mx-2 min-w-[20px]"></span>
+                        <span className="whitespace-nowrap">{formatCurrency(entry.nominalJenis)}</span>
+                      </div>
+                      <div style={{ width: '120px' }} className="text-right">
+                        
+                      </div>
+                      <div style={{ width: '120px' }} className="text-right">
+                        
+                      </div>
+                    </div>
+                  )
+                }
+
+                // Pembayaran Row
+                if (entry.type === 'pembayaran') {
+                  return (
+                    <div key={index} className="bg-green-50 py-1.5 flex">
+                      <div style={{ width: '80px' }} className="text-slate-700">
+                        {formatDate(entry.tanggal)}
+                      </div>
+                      <div style={{ width: '480px' }} className="text-slate-900 flex items-center">
+                        <div className="whitespace-nowrap">
+                          <div>Pembayaran: {entry.namaTagihan}</div>
+                          <div className="text-[0.65rem] text-slate-600">
+                            Ref: {entry.referensi} • {entry.metode ? getMetodeLabel(entry.metode) : '-'}
+                          </div>
+                        </div>
+                        <span className="flex-1 border-b border-dotted border-slate-400 mx-2 min-w-[20px]"></span>
+                        <span className="whitespace-nowrap text-green-700 font-bold">{formatCurrency(entry.nominalBayar)}</span>
+                      </div>
+                      <div style={{ width: '120px' }} className={`text-right font-bold ${
+                        entry.saldo > 0 ? 'text-red-700' : entry.saldo === 0 ? 'text-slate-700' : 'text-green-700'
+                      }`}>
+                        {formatCurrency(Math.abs(entry.saldo))}
+                      </div>
+                    </div>
+                  )
+                }
+
+                return null
+              })}
+            </div>
+
+            {/* Ledger Footer - Grand Total */}
+            <div className="border-t-2 border-slate-800 mt-4 pt-2 space-y-1">
+              <div className="flex font-bold text-slate-800">
+                <div style={{ width: '440px' }} className="text-right pr-4">
+                  TOTAL TAGIHAN:
+                </div>
+                <div style={{ width: '120px' }} className="text-right text-blue-700">
+                  {formatCurrency(grandTotal.totalTagihan || 0)}
+                </div>
+                <div style={{ width: '120px' }} className="text-right">
+                  
+                </div>
+                <div style={{ width: '120px' }} className="text-right">
+                  
+                </div>
+              </div>
+              <div className="flex font-bold text-slate-800">
+                <div style={{ width: '440px' }} className="text-right pr-4">
+                  TOTAL DIBAYAR:
+                </div>
+                <div style={{ width: '120px' }} className="text-right">
+                  
+                </div>
+                <div style={{ width: '120px' }} className="text-right text-green-700">
+                  {formatCurrency(grandTotal.totalDibayar || 0)}
+                </div>
+                <div style={{ width: '120px' }} className="text-right">
+                  
+                </div>
+              </div>
+              <div className={`flex font-bold text-lg ${
+                grandTotal.sisaTagihan > 0 ? 'text-red-700' : grandTotal.sisaTagihan === 0 ? 'text-green-700' : 'text-slate-700'
+              }`}>
+                <div style={{ width: '560px' }} className="text-right pr-4">
+                  SALDO AKHIR:
+                </div>
+                <div style={{ width: '120px' }} className="text-right">
+                  {grandTotal.sisaTagihan > 0 ? '- ' : ''}{formatCurrency(Math.abs(grandTotal.sisaTagihan || 0))}
+                </div>
+              </div>
+              {grandTotal.sisaTagihan <= 0 && (
+                <div className="text-center text-green-700 font-bold text-sm pt-2">
+                  ✓ SEMUA TAGIHAN LUNAS
+                </div>
+              )}
+            </div>
+
+            <div className="mt-6 mb-4 border-2 border-slate-300 p-3 bg-slate-50">
+              <Text size="2" className="text-slate-700 font-sans">
                 Terbilang: <span className="font-semibold text-slate-900 italic">
-                  # {angkaTerbilang(totalAmount)} #
+                  {angkaTerbilang(grandTotal.totalDibayar || 0)}
                 </span>
               </Text>
             </div>
-          </>
+          </div>
         )}
 
         <div className="flex justify-end mb-8">

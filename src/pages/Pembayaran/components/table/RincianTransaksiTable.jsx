@@ -1,5 +1,5 @@
 import { Text, IconButton } from '@radix-ui/themes'
-import { Edit2, Trash2 } from 'lucide-react'
+import { Edit2, Trash2, FileText, ExternalLink } from 'lucide-react'
 import { formatCurrency } from '../../utils/currencyHelpers'
 
 function formatDate(dateStr) {
@@ -69,6 +69,11 @@ export function RincianTransaksiTable({ items, onEdit, onDelete }) {
             </th>
             <th className="px-3 py-2 text-center">
               <Text size="1" weight="bold" className="text-slate-700 uppercase tracking-wider">
+                Bukti
+              </Text>
+            </th>
+            <th className="px-3 py-2 text-center">
+              <Text size="1" weight="bold" className="text-slate-700 uppercase tracking-wider">
                 Aksi
               </Text>
             </th>
@@ -114,6 +119,27 @@ export function RincianTransaksiTable({ items, onEdit, onDelete }) {
                 <Text size="2" className="text-slate-600 font-mono text-xs">
                   {item.referensi_pembayaran || '-'}
                 </Text>
+              </td>
+              <td className="px-3 py-3">
+                <div className="flex items-center justify-center">
+                  {item.bukti_pembayaran_url ? (
+                    <a
+                      href={item.bukti_pembayaran_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-blue-100 hover:bg-blue-200 text-blue-700 border border-blue-300 transition-colors"
+                      title="Lihat bukti pembayaran"
+                    >
+                      <FileText className="h-3 w-3" />
+                      <span>Lihat</span>
+                      <ExternalLink className="h-2.5 w-2.5" />
+                    </a>
+                  ) : (
+                    <Text size="1" className="text-slate-400">
+                      -
+                    </Text>
+                  )}
+                </div>
               </td>
               <td className="px-3 py-3">
                 <div className="flex items-center justify-center gap-1">

@@ -1,6 +1,7 @@
 import { db, getUpdatedAtColumn, isFullLoadOnly, syncRegistry } from './db'
 import { enqueueInsert, enqueueUpdate, enqueueDelete } from './outbox'
 import { supabase } from '../lib/supabaseClient'
+import { processPendingUploads } from '../lib/fileUploadHelper'
 
 const PAGE_SIZE = 1000
 
@@ -157,6 +158,14 @@ async function processOutboxOnce() {
   if (typeof navigator !== 'undefined' && navigator.onLine === false) {
     return
   }
+  
+  // Process pending file uploads first
+  try {
+    await processPendingUploads()
+  } catch (error) {
+    console.error('[Outbox] Error processing file uploads:', error)
+  }
+  
   const pending = await db.outbox.where('status').equals('pending').sortBy('created_at')
   for (const item of pending) {
     try {

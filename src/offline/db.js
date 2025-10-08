@@ -123,6 +123,43 @@ export class ArtapayDB extends Dexie {
     }).upgrade(tx => {
       console.log('[DB] Upgrading to v5 with app_settings table')
     })
+
+    // Version 6: Add file_uploads table for offline file storage
+    this.version(6).stores({
+      // Master data
+      wali_kelas: 'id, diperbarui_pada, nama_lengkap, status_aktif',
+      kelas: 'id, diperbarui_pada, tingkat, nama_sub_kelas',
+      siswa: 'id, diperbarui_pada, nisn, nama_lengkap, status_aktif',
+      tahun_ajaran: 'id, diperbarui_pada, nama, tanggal_mulai, status_aktif',
+      peminatan: 'id, kode, aktif',
+      peminatan_siswa: 'id, id_siswa, id_peminatan, id_tahun_ajaran, tanggal_mulai',
+
+      // Relational/history
+      riwayat_kelas_siswa: 'id, diperbarui_pada, id_siswa, id_kelas, id_tahun_ajaran, status, tanggal_masuk',
+      riwayat_wali_kelas: 'id, diperbarui_pada, id_wali_kelas, id_kelas, id_tahun_ajaran, status, tanggal_mulai',
+
+      // Billing/payment
+      jenis_pembayaran: 'id, diperbarui_pada, kode, status_aktif, tingkat',
+      tagihan: 'id, tanggal_diperbarui, id_riwayat_kelas_siswa, tanggal_tagihan, tanggal_jatuh_tempo',
+      rincian_tagihan: 'id, id_tagihan, id_jenis_pembayaran, urutan',
+      pembayaran: 'id, diperbarui_pada, id_tagihan, nomor_pembayaran',
+      rincian_pembayaran: 'id, diperbarui_pada, id_pembayaran, nomor_transaksi, cicilan_ke, status',
+
+      // WhatsApp messaging
+      kirim_pesan: 'id, tanggal_dibuat, nomor_whatsapp, status, tanggal_terkirim',
+
+      // WhatsApp settings
+      pengaturan_whatsapp: 'id, key, kategori, is_active, diperbarui_pada',
+
+      // File uploads - Store files locally when offline, upload when online
+      file_uploads: 'id, reference_table, reference_id, status, created_at, uploaded_at',
+
+      // Sync housekeeping
+      sync_state: 'table',
+      outbox: 'id, table, pk, status, updated_at, created_at',
+    }).upgrade(tx => {
+      console.log('[DB] Upgrading to v6 with file_uploads table for offline file support')
+    })
   }
 }
 
