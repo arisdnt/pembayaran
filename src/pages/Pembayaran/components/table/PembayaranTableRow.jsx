@@ -101,6 +101,58 @@ export function PembayaranTableRow({ item, index, onEdit, onDelete, onViewDetail
           {formatCurrency(item.total_dibayar)}
         </Text>
       </td>
+
+      {/* Total Tagihan */}
+      <td className="px-4 py-3 border-r border-slate-200">
+        <Text size="2" weight="medium" className="text-slate-800">
+          {formatCurrency(item.total_tagihan || 0)}
+        </Text>
+      </td>
+
+      {/* Sudah Dibayar (Historis) */}
+      <td className="px-4 py-3 border-r border-slate-200">
+        <div className="space-y-1">
+          {item.total_dibayar_sebelumnya > 0 && (
+            <Text size="1" className="text-slate-500 block">
+              Sebelumnya: {formatCurrency(item.total_dibayar_sebelumnya)}
+            </Text>
+          )}
+          <Text size="2" weight="bold" className="text-blue-700 block">
+            {formatCurrency(item.total_dibayar_sampai_ini || 0)}
+          </Text>
+          {item.total_dibayar > 0 && (
+            <Text size="1" className="text-green-600 block">
+              +{formatCurrency(item.total_dibayar)} (ini)
+            </Text>
+          )}
+        </div>
+      </td>
+
+      {/* Sisa Tagihan */}
+      <td className="px-4 py-3 border-r border-slate-200">
+        <div className="space-y-1">
+          <Text 
+            size="2" 
+            weight="bold" 
+            className={
+              item.sisa_tagihan <= 0 
+                ? "text-green-700" 
+                : item.sisa_tagihan < (item.total_tagihan || 0) / 2 
+                  ? "text-orange-600" 
+                  : "text-red-600"
+            }
+          >
+            {formatCurrency(item.sisa_tagihan || 0)}
+          </Text>
+          {item.sisa_tagihan <= 0 && (
+            <Text size="1" className="text-green-600 block font-medium">
+              ✓ LUNAS
+            </Text>
+          )}
+        </div>
+      </td>
+
+      {/* Bukti Pembayaran */}
       <td className="px-4 py-3 border-r border-slate-200">
         {(() => {
           // Get first rincian with bukti_pembayaran_url
