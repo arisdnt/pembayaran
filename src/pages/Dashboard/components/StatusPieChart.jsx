@@ -26,10 +26,11 @@ export const StatusPieChart = memo(function StatusPieChart({ data, loading }) {
         <div className="space-y-4 w-full">
           {(data || []).map((item, index) => {
             const percentage = total > 0 ? ((item.value / total) * 100).toFixed(1) : 0
-            const config = STATUS_CONFIG[item.name] || { label: item.name, color: 'bg-gray-500' }
+            const label = item.label || item.name || '-'
+            const config = STATUS_CONFIG[item.name] || { label, color: 'bg-gray-500' }
 
             return (
-              <div key={item.name || index} className="space-y-2">
+              <div key={label || index} className="space-y-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className={`w-3 h-3 ${config.color}`} />

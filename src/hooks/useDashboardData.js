@@ -77,7 +77,8 @@ export function useDashboardData(filters = {}) {
       const tahunAjaranId = filters.tahunAjaran || null
 
       // Get date range filter
-      const startDate = getDateRange(filters.timeRange || 'all')
+      let startDate = getDateRange(filters.timeRange || 'all')
+      let endDate = null
 
       // OPTIMIZED: Load only critical data first using indexed queries
       const [allRks, kelas, siswa] = await Promise.all([
@@ -89,12 +90,37 @@ export function useDashboardData(filters = {}) {
         db.siswa.toArray(),
       ])
 
-      // Filter active status in memory (compound index needs string values)
-      const rksActive = allRks.filter(r => (r.status || '').toLowerCase() === 'aktif')
+      // If viewing "Semua Waktu" for a specific tahun ajaran, align the chart window
+      // to the academic year (12 months starting from tanggal_mulai)
+      let academicWindow = null
+      if ((filters.timeRange || 'all') === 'all' && tahunAjaranId) {
+        try {
+          const taRow = await db.tahun_ajaran.get(tahunAjaranId)
+          if (taRow?.tanggal_mulai) {
+            const s = new Date(taRow.tanggal_mulai)
+            const startOfMonth = new Date(s.getFullYear(), s.getMonth(), 1)
+            const endOfWindow = new Date(startOfMonth)
+            endOfWindow.setMonth(endOfWindow.getMonth() + 12)
+            endOfWindow.setDate(0) // last day of the previous month (12 months window)
+            academicWindow = {
+              start: startOfMonth.toISOString(),
+              end: endOfWindow.toISOString(),
+            }
+            startDate = academicWindow.start
+            endDate = academicWindow.end
+          }
+        } catch (_) { /* ignore */ }
+      }
+
+      // Scope riwayat_kelas_siswa by status only when NOT filtering by a specific tahun ajaran.
+      // If a tahun ajaran is selected, include all rows for that tahun (historical data should be visible).
+      const rksScoped = tahunAjaranId
+        ? allRks
+        : allRks.filter(r => (r.status || '').toLowerCase() === 'aktif')
 
       // Filter by kelas/tingkat if needed
       const kelasMap = new Map(kelas.map(k => [k.id, k]))
-      const rksFiltered = rksActive
+      const rksFiltered = rksScoped
         .filter(r => (filters.kelas ? r.id_kelas === filters.kelas : true))
         .filter(r => (filters.tingkat ? (kelasMap.get(r.id_kelas)?.tingkat === filters.tingkat) : true))
 
@@ -116,6 +142,7 @@ export function useDashboardData(filters = {}) {
       // Tagihan already filtered by rks from indexed query, just apply date filter
       const tagihanFiltered = tagihan
         .filter(t => (startDate ? (new Date(t.tanggal_tagihan) >= new Date(startDate)) : true))
+        .filter(t => (endDate ? (new Date(t.tanggal_tagihan) <= new Date(endDate)) : true))
       const totalTagihan = tagihanFiltered.length
 
       const rincianByTagihan = new Map(
@@ -139,6 +166,7 @@ export function useDashboardData(filters = {}) {
       const pembayaranFiltered = pembayaran
         .filter(p => rksIdsFilter.has(tagihan.find(t => t.id === p.id_tagihan)?.id_riwayat_kelas_siswa))
         .filter(p => (startDate ? (new Date(p.diperbarui_pada) >= new Date(startDate)) : true))
+        .filter(p => (endDate ? (new Date(p.diperbarui_pada) <= new Date(endDate)) : true))
       const totalPembayaran = pembayaranFiltered.reduce(
         (sum, p) => sum + (rpByPembayaran.get(p.id) || []).reduce((s, r) => s + Number(r.jumlah_dibayar || 0), 0),
         0
@@ -153,6 +181,7 @@ export function useDashboardData(filters = {}) {
       // Chart - pembayaran per bulan
       const pembayaranPerBulanRaw = rincianPembayaran
         .filter(r => (startDate ? (new Date(r.tanggal_bayar) >= new Date(startDate)) : true))
+        .filter(r => (endDate ? (new Date(r.tanggal_bayar) <= new Date(endDate)) : true))
         .filter(r => {
           const p = pembayaran.find(p => p.id === r.id_pembayaran)
           const t = p && tagihan.find(t => t.id === p.id_tagihan)
@@ -165,43 +194,52 @@ export function useDashboardData(filters = {}) {
           return acc
         }, {})
 
-      // Generate consistent month keys based on timeRange
-      const now = new Date()
-      let monthsToShow = 6 // default
-      
-      switch (filters.timeRange) {
-        case 'today':
-        case 'week':
-          monthsToShow = 1
-          break
-        case 'month':
-          monthsToShow = 2
-          break
-        case 'quarter':
-          monthsToShow = 3
-          break
-        case 'semester':
-          monthsToShow = 6
-          break
-        case 'year':
-          monthsToShow = 12
-          break
-        case 'all':
-          monthsToShow = 12 // show last 12 months for "all"
-          break
+      // Generate month keys based on current filters
+      const timeRange = filters.timeRange || 'all'
+      let monthKeys = []
+      if (timeRange === 'all') {
+        const keys = Object.keys(pembayaranPerBulanRaw).sort()
+        if (keys.length > 0) {
+          const [startYear, startMonth] = keys[0].split('-').map(Number)
+          const [endYear, endMonth] = keys[keys.length - 1].split('-').map(Number)
+          const start = new Date(startYear, startMonth - 1, 1)
+          const end = new Date(endYear, endMonth - 1, 1)
+          let cur = new Date(start)
+          while (cur <= end) {
+            const key = `${cur.getFullYear()}-${String(cur.getMonth() + 1).padStart(2, '0')}`
+            monthKeys.push(key)
+            cur.setMonth(cur.getMonth() + 1)
+          }
+        }
+      } else {
+        const now = new Date()
+        let monthsToShow = 6
+        switch (timeRange) {
+          case 'today':
+          case 'week':
+            monthsToShow = 1
+            break
+          case 'month':
+            monthsToShow = 2
+            break
+          case 'quarter':
+            monthsToShow = 3
+            break
+          case 'semester':
+            monthsToShow = 6
+            break
+          case 'year':
+            monthsToShow = 12
+            break
+        }
+        for (let i = monthsToShow - 1; i >= 0; i--) {
+          const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
+          const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+          monthKeys.push(key)
+        }
       }
 
-      const monthKeys = []
-      for (let i = monthsToShow - 1; i >= 0; i--) {
-        const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
-        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
-        monthKeys.push(key)
-      }
-
-      const pembayaranPerBulan = monthKeys.reduce((acc, key) => {
-        acc[key] = pembayaranPerBulanRaw[key] || 0
-        return acc
-      }, {})
+      const pembayaranPerBulanArr = monthKeys.map(key => ({ bulan: key, total: pembayaranPerBulanRaw[key] || 0 }))
 
       // Status pembayaran (lunas vs belum) berdasarkan total vs paid
       const statusPembayaran = tagihanFiltered.map(t => {
@@ -224,7 +262,7 @@ export function useDashboardData(filters = {}) {
           judul: t.judul,
           tanggal_tagihan: t.tanggal_tagihan,
           riwayat_kelas_siswa: (() => {
-            const rRow = rksActive.find(r => r.id === t.id_riwayat_kelas_siswa)
+            const rRow = rksScoped.find(r => r.id === t.id_riwayat_kelas_siswa)
             const sRow = siswa.find(s => s.id === rRow?.id_siswa)
             const kRow = kelasMap.get(rRow?.id_kelas)
             return {
@@ -240,11 +278,12 @@ export function useDashboardData(filters = {}) {
         .filter(r => {
           const p = pembayaran.find(p => p.id === r.id_pembayaran)
           const t = p && tagihan.find(t => t.id === p.id_tagihan)
-          const rRow = t && rksActive.find(x => x.id === t.id_riwayat_kelas_siswa)
+          const rRow = t && rksScoped.find(x => x.id === t.id_riwayat_kelas_siswa)
           if (!rRow) return false
           if (filters.kelas && rRow.id_kelas !== filters.kelas) return false
           if (filters.tingkat && kelasMap.get(rRow.id_kelas)?.tingkat !== filters.tingkat) return false
           if (startDate && new Date(r.tanggal_bayar) < new Date(startDate)) return false
+          if (endDate && new Date(r.tanggal_bayar) > new Date(endDate)) return false
           return true
         })
         .sort((a, b) => new Date(b.tanggal_bayar) - new Date(a.tanggal_bayar))
@@ -252,7 +291,7 @@ export function useDashboardData(filters = {}) {
         .map(r => {
           const p = pembayaran.find(p => p.id === r.id_pembayaran)
           const t = p && tagihan.find(t => t.id === p.id_tagihan)
-          const rRow = t && rksActive.find(x => x.id === t.id_riwayat_kelas_siswa)
+          const rRow = t && rksScoped.find(x => x.id === t.id_riwayat_kelas_siswa)
           const sRow = rRow && siswa.find(s => s.id === rRow.id_siswa)
           return {
             id: r.id,
@@ -288,7 +327,7 @@ export function useDashboardData(filters = {}) {
           }).length
         },
         chartData: {
-          pembayaranPerBulan: Object.entries(pembayaranPerBulan).map(([bulan, total]) => ({ bulan, total })),
+          pembayaranPerBulan: pembayaranPerBulanArr,
           statusPembayaran: [
             { label: 'Lunas', value: lunasCount },
             { label: 'Belum Lunas', value: belumCount },
