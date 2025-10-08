@@ -9,18 +9,15 @@ export function TableToolbar({
   setSearchQuery,
   filterStatus,
   setFilterStatus,
-  filterTahunAjaran,
-  setFilterTahunAjaran,
+  filterTahunId,
+  setFilterTahunId,
   filterTingkat,
   setFilterTingkat,
-  filterKelas,
-  setFilterKelas,
-  tahunAjaranOptions,
-  tingkatOptions,
-  kelasOptions,
+  tahunList,
+  tingkatList,
   stats,
   hasActiveFilters,
-  onClearFilters,
+  handleClearFilters,
   onAdd,
 }) {
   return (
@@ -45,15 +42,12 @@ export function TableToolbar({
           <FilterControls
             filterStatus={filterStatus}
             setFilterStatus={setFilterStatus}
-            filterTahunAjaran={filterTahunAjaran}
-            setFilterTahunAjaran={setFilterTahunAjaran}
+            filterTahunId={filterTahunId}
+            setFilterTahunId={setFilterTahunId}
             filterTingkat={filterTingkat}
             setFilterTingkat={setFilterTingkat}
-            filterKelas={filterKelas}
-            setFilterKelas={setFilterKelas}
-            tahunAjaranOptions={tahunAjaranOptions}
-            tingkatOptions={tingkatOptions}
-            kelasOptions={kelasOptions}
+            tahunList={tahunList}
+            tingkatList={tingkatList}
             columnIndex={0}
           />
         </div>
@@ -63,15 +57,12 @@ export function TableToolbar({
           <FilterControls
             filterStatus={filterStatus}
             setFilterStatus={setFilterStatus}
-            filterTahunAjaran={filterTahunAjaran}
-            setFilterTahunAjaran={setFilterTahunAjaran}
+            filterTahunId={filterTahunId}
+            setFilterTahunId={setFilterTahunId}
             filterTingkat={filterTingkat}
             setFilterTingkat={setFilterTingkat}
-            filterKelas={filterKelas}
-            setFilterKelas={setFilterKelas}
-            tahunAjaranOptions={tahunAjaranOptions}
-            tingkatOptions={tingkatOptions}
-            kelasOptions={kelasOptions}
+            tahunList={tahunList}
+            tingkatList={tingkatList}
             columnIndex={1}
           />
         </div>
@@ -81,47 +72,26 @@ export function TableToolbar({
           <FilterControls
             filterStatus={filterStatus}
             setFilterStatus={setFilterStatus}
-            filterTahunAjaran={filterTahunAjaran}
-            setFilterTahunAjaran={setFilterTahunAjaran}
+            filterTahunId={filterTahunId}
+            setFilterTahunId={setFilterTahunId}
             filterTingkat={filterTingkat}
             setFilterTingkat={setFilterTingkat}
-            filterKelas={filterKelas}
-            setFilterKelas={setFilterKelas}
-            tahunAjaranOptions={tahunAjaranOptions}
-            tingkatOptions={tingkatOptions}
-            kelasOptions={kelasOptions}
+            tahunList={tahunList}
+            tingkatList={tingkatList}
             columnIndex={2}
           />
         </div>
 
-        {/* Kolom 5 (10%): Filter Kelas */}
-        <div style={{ gridColumn: 'span 1' }} className="min-w-0 overflow-hidden">
-          <FilterControls
-            filterStatus={filterStatus}
-            setFilterStatus={setFilterStatus}
-            filterTahunAjaran={filterTahunAjaran}
-            setFilterTahunAjaran={setFilterTahunAjaran}
-            filterTingkat={filterTingkat}
-            setFilterTingkat={setFilterTingkat}
-            filterKelas={filterKelas}
-            setFilterKelas={setFilterKelas}
-            tahunAjaranOptions={tahunAjaranOptions}
-            tingkatOptions={tingkatOptions}
-            kelasOptions={kelasOptions}
-            columnIndex={3}
-          />
-        </div>
-
-        {/* Kolom 6 (10%): Reset Button */}
+        {/* Kolom 5 (10%): Reset Button */}
         <div style={{ gridColumn: 'span 1' }} className="min-w-0 overflow-hidden">
           <Button
-            onClick={onClearFilters}
+            onClick={handleClearFilters}
             size="2"
             style={{ 
               borderRadius: 0, 
               height: '36px', 
-              backgroundColor: '#dc2626', /* red-600 */
-              border: '1px solid #b91c1c'   /* red-700 */
+              backgroundColor: '#dc2626',
+              border: '1px solid #b91c1c'
             }}
             disabled={!hasActiveFilters}
             className={`cursor-pointer text-white hover:brightness-95 transition-colors w-full truncate ${!hasActiveFilters ? 'opacity-50' : ''}`}
@@ -131,8 +101,8 @@ export function TableToolbar({
           </Button>
         </div>
 
-        {/* Kolom 7-8 (20%): Reserved */}
-        <div style={{ gridColumn: 'span 2' }} className="min-w-0 overflow-hidden" aria-hidden="true" />
+        {/* Kolom 6-8 (30%): Reserved */}
+        <div style={{ gridColumn: 'span 3' }} className="min-w-0 overflow-hidden" aria-hidden="true" />
 
         {/* Kolom 9 (10%): Stats Display */}
         <div style={{ gridColumn: 'span 1' }} className="min-w-0 overflow-hidden">

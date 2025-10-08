@@ -138,37 +138,29 @@ export default function KirimPesan() {
           {/* Left Column - Message Table (75%) */}
           <div className="col-span-9 flex flex-col overflow-hidden min-h-0">
             <Card className="p-4 flex flex-col h-full overflow-hidden" style={{ borderRadius: 0 }}>
-              <FilterControls
-                tahunAjaranList={tahunAjaranList}
-                tingkatList={tingkatList}
-                filteredKelas={filteredKelas}
-                selectedTA={selectedTA}
-                selectedTingkat={selectedTingkat}
-                selectedKelas={selectedKelas}
-                rateMs={rateMs}
-                loading={loading}
-                sending={sending}
-                onTAChange={setSelectedTA}
-                onTingkatChange={setSelectedTingkat}
-                onKelasChange={setSelectedKelas}
-                onRateMsChange={setRateMs}
-                onGenerate={handleGenerate}
-                onKirim={handleSendMessages}
-                onCancel={cancelSending}
-                onSettings={handleOpenSettings}
-                messageCount={kirimPesanData.length}
-              />
-
-              <RadixText weight="bold" className="mb-2 block flex-shrink-0">
-                Preview ({kirimPesanData.length})
-              </RadixText>
-              
               {/* Table with flex-1 to fill remaining space */}
               <div className="flex-1 min-h-0">
                 <MessageTable 
                   data={kirimPesanData} 
                   loading={kirimPesanLoading}
-                  onDelete={handleDeleteRow} 
+                  onDelete={handleDeleteRow}
+                  // Toolbar props
+                  tahunAjaranList={tahunAjaranList}
+                  tingkatList={tingkatList}
+                  filteredKelas={filteredKelas}
+                  selectedTA={selectedTA}
+                  selectedTingkat={selectedTingkat}
+                  selectedKelas={selectedKelas}
+                  loadingGenerate={loading}
+                  sending={sending}
+                  messageCount={kirimPesanData.length}
+                  onTAChange={setSelectedTA}
+                  onTingkatChange={setSelectedTingkat}
+                  onKelasChange={setSelectedKelas}
+                  onGenerate={handleGenerate}
+                  onKirim={handleSendMessages}
+                  onCancel={cancelSending}
+                  onSettings={handleOpenSettings}
                 />
               </div>
             </Card>

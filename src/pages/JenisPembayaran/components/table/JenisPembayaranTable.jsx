@@ -1,6 +1,6 @@
 import { Text } from '@radix-ui/themes'
 import { useJenisPembayaranFilters } from '../../hooks/useJenisPembayaranFilters'
-import { JenisPembayaranFilters } from '../JenisPembayaranFilters'
+import { TableToolbar } from '../toolbar/TableToolbar'
 import { JenisPembayaranTableRow } from './JenisPembayaranTableRow'
 import { JenisPembayaranEmptyState } from '../JenisPembayaranEmptyState'
 import { JenisPembayaranTableSkeleton } from './JenisPembayaranTableSkeleton'
@@ -18,7 +18,7 @@ export function JenisPembayaranTable({ data, isLoading, isRefreshing, onEdit, on
   return (
     <div className="h-full flex flex-col">
       <div className="h-full flex flex-col border border-slate-300 bg-white shadow-lg relative">
-        <JenisPembayaranFilters
+        <TableToolbar
           searchQuery={filters.searchQuery}
           setSearchQuery={filters.setSearchQuery}
           filterStatus={filters.filterStatus}
@@ -29,10 +29,10 @@ export function JenisPembayaranTable({ data, isLoading, isRefreshing, onEdit, on
           setFilterTingkat={filters.setFilterTingkat}
           tahunList={filters.tahunList}
           tingkatList={filters.tingkatList}
+          stats={stats}
           hasActiveFilters={filters.hasActiveFilters}
           handleClearFilters={filters.handleClearFilters}
           onAdd={onAdd}
-          stats={stats}
         />
 
         <div className="flex-1 overflow-auto min-h-0">

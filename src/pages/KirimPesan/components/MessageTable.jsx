@@ -1,8 +1,30 @@
 import { CheckCircle2, Clock, XCircle } from 'lucide-react'
 import { IconButton } from '@radix-ui/themes'
 import { TrashIcon } from '@radix-ui/react-icons'
+import { TableToolbar } from './toolbar/TableToolbar'
 
-export default function MessageTable({ data, loading, onDelete }) {
+export default function MessageTable({ 
+  data, 
+  loading, 
+  onDelete,
+  // Toolbar props
+  tahunAjaranList,
+  tingkatList,
+  filteredKelas,
+  selectedTA,
+  selectedTingkat,
+  selectedKelas,
+  loadingGenerate,
+  sending,
+  messageCount,
+  onTAChange,
+  onTingkatChange,
+  onKelasChange,
+  onGenerate,
+  onKirim,
+  onCancel,
+  onSettings,
+}) {
   const sortedData = [...data].sort((a, b) => {
     const aDate = a.tanggal_dibuat ? new Date(a.tanggal_dibuat).getTime() : 0
     const bDate = b.tanggal_dibuat ? new Date(b.tanggal_dibuat).getTime() : 0
@@ -15,9 +37,29 @@ export default function MessageTable({ data, loading, onDelete }) {
   const nextPendingIndex = sortedData.findIndex((item) => (item.status || '').toLowerCase() === 'pending')
 
   return (
-    <div className="h-full overflow-auto border">
-      <table className="w-full text-sm" style={{ tableLayout: 'fixed' }}>
-        <thead className="bg-slate-100 sticky top-0 z-10">
+    <div className="h-full flex flex-col">
+      <TableToolbar
+        tahunAjaranList={tahunAjaranList}
+        tingkatList={tingkatList}
+        filteredKelas={filteredKelas}
+        selectedTA={selectedTA}
+        selectedTingkat={selectedTingkat}
+        selectedKelas={selectedKelas}
+        loading={loadingGenerate}
+        sending={sending}
+        messageCount={messageCount}
+        onTAChange={onTAChange}
+        onTingkatChange={onTingkatChange}
+        onKelasChange={onKelasChange}
+        onGenerate={onGenerate}
+        onKirim={onKirim}
+        onCancel={onCancel}
+        onSettings={onSettings}
+      />
+
+      <div className="flex-1 overflow-auto border min-h-0">
+        <table className="w-full text-sm" style={{ tableLayout: 'fixed' }}>
+          <thead className="bg-slate-100 sticky top-0 z-10">
           <tr>
             <th className="px-2 py-2 text-left font-semibold border-b bg-slate-100" style={{ width: '9%' }}>Nomor</th>
             <th className="px-2 py-2 text-left font-semibold border-b bg-slate-100" style={{ width: '11%' }}>Tahun Ajaran</th>
@@ -139,7 +181,8 @@ export default function MessageTable({ data, loading, onDelete }) {
             </tr>
           )}
         </tbody>
-      </table>
+        </table>
+      </div>
     </div>
   )
 }

@@ -1,4 +1,5 @@
 import { Text } from '@radix-ui/themes'
+import { useMemo } from 'react'
 import { useTagihanFilters } from './hooks/useTagihanFilters'
 import { FilterToolbar } from './table-components/FilterToolbar'
 import { TableRow } from './table-components/TableRow'
@@ -32,6 +33,7 @@ export function TagihanTable({
   } = useTagihanFilters(data)
 
   const isEmpty = filteredData.length === 0
+  const stats = useMemo(() => ({ total: data.length, filtered: filteredData.length }), [data, filteredData])
 
   return (
     <div className="h-full flex flex-col border border-slate-300 bg-white shadow-lg">
@@ -47,6 +49,9 @@ export function TagihanTable({
         tahunAjaranList={tahunAjaranList}
         tingkatKelasOptions={tingkatKelasOptions}
         judulOptions={judulOptions}
+        hasActiveFilters={hasActiveFilters}
+        onClearFilters={handleClearFilters}
+        stats={stats}
         onAdd={onAdd}
       />
 

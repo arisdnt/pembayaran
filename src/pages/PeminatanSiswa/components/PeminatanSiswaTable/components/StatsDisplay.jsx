@@ -1,16 +1,14 @@
-export function StatsDisplay({ total, filtered, hasActiveFilters }) {
+export function StatsDisplay({ total, filtered /*, hasActiveFilters */ }) {
   return (
-    <div className="ml-auto flex items-center gap-1.5 text-xs font-medium">
-      <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-300 shadow-sm">
-        <span className="text-slate-600">Total:</span>
-        <span className="font-bold text-slate-900">{total}</span>
-      </div>
-      {hasActiveFilters && (
-        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 border border-emerald-300 shadow-sm">
-          <span className="text-emerald-700">Tampil:</span>
-          <span className="font-bold text-emerald-900">{filtered}</span>
+    <div className="w-full min-w-0">
+      <div className="grid grid-cols-2 items-center border border-slate-300 shadow-sm overflow-hidden" style={{ borderRadius: 0, height: '36px' }}>
+        <div className="flex items-center justify-center px-2 min-w-0">
+          <span className="text-slate-800 text-xs font-semibold tracking-wide truncate">T : {total}</span>
         </div>
-      )}
+        <div className="flex items-center justify-center px-2 min-w-0 border-l border-slate-300">
+          <span className="text-emerald-700 text-xs font-semibold tracking-wide truncate">A : {filtered}</span>
+        </div>
+      </div>
     </div>
   )
 }

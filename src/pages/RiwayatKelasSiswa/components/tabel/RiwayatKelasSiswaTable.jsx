@@ -3,6 +3,7 @@ import { FilterToolbar } from './components/FilterToolbar'
 import { TableRow } from './components/TableRow'
 import { EmptyState } from './components/EmptyState'
 import { SkeletonRow } from './components/SkeletonRow'
+import { useMemo } from 'react'
 
 export function RiwayatKelasSiswaTable({
   data,
@@ -31,6 +32,11 @@ export function RiwayatKelasSiswaTable({
   } = useTableFilters(data)
 
   const isEmpty = !isLoading && filteredData.length === 0
+  const stats = useMemo(() => ({
+    total: data.length,
+    active: data.filter(x => (x.status || '').toLowerCase() === 'aktif').length,
+    filtered: filteredData.length,
+  }), [data, filteredData])
 
   return (
     <div className="h-full flex flex-col">
@@ -49,6 +55,7 @@ export function RiwayatKelasSiswaTable({
           hasActiveFilters={hasActiveFilters}
           onClearFilters={handleClearFilters}
           onAdd={onAdd}
+          stats={stats}
         />
 
         <div className="relative flex-1 min-h-0">

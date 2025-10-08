@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Text } from '@radix-ui/themes'
 import { usePembayaranFilters } from '../../hooks/usePembayaranFilters'
-import { PembayaranTableHeader } from './PembayaranTableHeader'
+import { TableToolbar } from '../toolbar/TableToolbar'
 import { PembayaranTableRow } from './PembayaranTableRow'
 import { PembayaranEmptyState } from './PembayaranEmptyState'
 import { BuktiPembayaranModal } from '../modals/BuktiPembayaranModal'
@@ -36,7 +36,7 @@ export function PembayaranTable({ data, isLoading, isRefreshing, onEdit, onDelet
   return (
     <div className="h-full flex flex-col">
       <div className="h-full flex flex-col border border-slate-300 bg-white shadow-lg">
-        <PembayaranTableHeader
+        <TableToolbar
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
           selectedTahunAjaran={selectedTahunAjaran}

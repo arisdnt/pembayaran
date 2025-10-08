@@ -1,7 +1,7 @@
 import { useKelasFilters } from '../../hooks/useKelasFilters'
 import { KelasTableRow } from './KelasTableRow'
 import { KelasEmptyState } from './KelasEmptyState'
-import { Plus, Search, X } from 'lucide-react'
+import { Plus, Search, X, Calendar, GraduationCap } from 'lucide-react'
 import { TextField, Button, Select } from '@radix-ui/themes'
 
 export function KelasTable({
@@ -38,9 +38,17 @@ export function KelasTable({
         
         {/* Toolbar Section - Excel-inspired ribbon */}
         <div className="border-b border-slate-300 bg-gradient-to-b from-slate-50 to-slate-100">
-          <div className="flex flex-wrap items-center gap-3 px-4 py-2.5">
-            {/* Search */}
-            <div className="flex-1 min-w-[240px] max-w-xs">
+          <div
+            className="grid items-center gap-2 px-4 py-2.5"
+            style={{
+              gridTemplateColumns: 'repeat(10, calc((100% - (9 * 0.5rem)) / 10))',
+              gap: '0.5rem',
+              whiteSpace: 'nowrap',
+              boxSizing: 'border-box'
+            }}
+          >
+            {/* Kolom 1: Search */}
+            <div style={{ gridColumn: 'span 1' }} className="min-w-0 overflow-hidden">
               <TextField.Root
                 placeholder="Cari kelas..."
                 value={searchQuery}
@@ -49,9 +57,10 @@ export function KelasTable({
                 style={{
                   borderRadius: 0,
                   border: '1px solid #cbd5e1',
-                  backgroundColor: '#ffffff'
+                  backgroundColor: '#ffffff',
+                  height: '36px'
                 }}
-                className="font-sans"
+                className="font-sans w-full"
               >
                 <TextField.Slot>
                   <Search className="h-4 w-4" />
@@ -60,7 +69,7 @@ export function KelasTable({
                   <TextField.Slot>
                     <button
                       onClick={() => setSearchQuery('')}
-                      className="cursor-pointer text-slate-400 hover:text-slate-700 transition-colors"
+                      className="cursor-pointer text-slate-400 hover:text-slate-700 transition-colors flex-shrink-0"
                     >
                       <X className="h-4 w-4" />
                     </button>
@@ -69,44 +78,47 @@ export function KelasTable({
               </TextField.Root>
             </div>
 
-            {/* Filter Tingkat */}
-            <div className="flex items-center gap-2">
+            {/* Kolom 2: Filter Tingkat */}
+            <div style={{ gridColumn: 'span 1' }} className="min-w-0 overflow-hidden">
               <Select.Root value={filterTingkat} onValueChange={setFilterTingkat}>
                 <Select.Trigger 
                   style={{ 
                     borderRadius: 0, 
-                    minWidth: '140px',
                     border: '1px solid #cbd5e1',
-                    backgroundColor: '#ffffff'
+                    backgroundColor: '#ffffff',
+                    width: '100%',
+                    height: '36px'
                   }}
-                  className="cursor-pointer font-sans"
+                  className="cursor-pointer font-sans truncate text-sm px-2"
                 />
                 <Select.Content 
                   position="popper"
                   side="bottom"
                   align="start"
                   sideOffset={4}
-                  style={{ borderRadius: 0 }}
+                  style={{ borderRadius: 0, minWidth: 'var(--radix-select-trigger-width)', width: 'max-content', maxHeight: '300px' }}
                   className="border-2 border-slate-300 shadow-lg bg-white z-50"
                 >
                   <Select.Item value="all" style={{ borderRadius: 0 }} className="hover:bg-blue-50 cursor-pointer px-3 py-2">
-                    📚 Semua Tingkat
+                    <span className="flex items-center gap-2">
+                      <GraduationCap className="h-3.5 w-3.5 text-indigo-600" aria-hidden="true" />
+                      <span>Semua Tingkat</span>
+                    </span>
                   </Select.Item>
-                  <Select.Item value="10" style={{ borderRadius: 0 }} className="hover:bg-blue-50 cursor-pointer px-3 py-2">
-                    🔟 Tingkat 10
-                  </Select.Item>
-                  <Select.Item value="11" style={{ borderRadius: 0 }} className="hover:bg-blue-50 cursor-pointer px-3 py-2">
-                    1️⃣1️⃣ Tingkat 11
-                  </Select.Item>
-                  <Select.Item value="12" style={{ borderRadius: 0 }} className="hover:bg-blue-50 cursor-pointer px-3 py-2">
-                    🎓 Tingkat 12
-                  </Select.Item>
+                  {['10','11','12'].map((tingkat) => (
+                    <Select.Item key={tingkat} value={tingkat} style={{ borderRadius: 0 }} className="hover:bg-blue-50 cursor-pointer px-3 py-2">
+                      <span className="flex items-center gap-2">
+                        <GraduationCap className="h-3.5 w-3.5 text-indigo-600" aria-hidden="true" />
+                        <span>Tingkat {tingkat}</span>
+                      </span>
+                    </Select.Item>
+                  ))}
                 </Select.Content>
               </Select.Root>
             </div>
 
-            {/* Filter Tahun Ajaran */}
-            <div className="flex items-center gap-2">
+            {/* Kolom 3: Filter Tahun Ajaran */}
+            <div style={{ gridColumn: 'span 1' }} className="min-w-0 overflow-hidden">
               <Select.Root
                 value={yearValue}
                 onValueChange={(value) => {
@@ -119,18 +131,19 @@ export function KelasTable({
                   placeholder="Tahun ajaran"
                   style={{
                     borderRadius: 0,
-                    minWidth: '180px',
                     border: '1px solid #cbd5e1',
-                    backgroundColor: '#ffffff'
+                    backgroundColor: '#ffffff',
+                    width: '100%',
+                    height: '36px'
                   }}
-                  className="cursor-pointer font-sans"
+                  className="cursor-pointer font-sans truncate text-sm px-2"
                 />
                 <Select.Content
                   position="popper"
                   side="bottom"
                   align="start"
                   sideOffset={4}
-                  style={{ borderRadius: 0 }}
+                  style={{ borderRadius: 0, minWidth: 'var(--radix-select-trigger-width)', width: 'max-content', maxHeight: '300px' }}
                   className="border-2 border-slate-300 shadow-lg bg-white z-50"
                 >
                   {tahunAjaranOptions.length === 0 ? (
@@ -145,8 +158,10 @@ export function KelasTable({
                         style={{ borderRadius: 0 }}
                         className="hover:bg-blue-50 cursor-pointer px-3 py-2"
                       >
-                        {option.nama}
-                        {option.status_aktif ? ' • Aktif' : ''}
+                        <span className="flex items-center gap-2">
+                          <Calendar className="h-3.5 w-3.5 text-blue-600" aria-hidden="true" />
+                          <span>{option.nama}{option.status_aktif ? ' • Aktif' : ''}</span>
+                        </span>
                       </Select.Item>
                     ))
                   )}
@@ -154,35 +169,50 @@ export function KelasTable({
               </Select.Root>
             </div>
 
-            {/* Reset Filter */}
-            {hasActiveFilters && (
+            {/* Kolom 4: Reset (sebelah filter terakhir) */}
+            <div style={{ gridColumn: 'span 1' }} className="min-w-0 overflow-hidden">
               <Button
                 onClick={handleClearFilters}
-                variant="soft"
-                color="gray"
                 size="2"
-                style={{ borderRadius: 0 }}
-                className="cursor-pointer hover:bg-slate-200 transition-colors"
+                style={{ borderRadius: 0, height: '36px', backgroundColor: '#dc2626', border: '1px solid #b91c1c' }}
+                disabled={!hasActiveFilters}
+                className={`cursor-pointer text-white hover:brightness-95 transition-colors w-full truncate ${!hasActiveFilters ? 'opacity-50' : ''}`}
               >
-                <X className="h-4 w-4" />
-                Reset
+                <X className="h-4 w-4 flex-shrink-0 text-white" />
+                <span className="truncate">Reset</span>
               </Button>
-            )}
+            </div>
 
-            {/* Button Tambah Baru - Excel-style button */}
-            <div className="ml-auto">
+            {/* Kolom 5-8: Reserved */}
+            <div style={{ gridColumn: 'span 4' }} className="min-w-0 overflow-hidden" aria-hidden="true" />
+
+            {/* Kolom 9: Statcard (T & F) */}
+            <div style={{ gridColumn: 'span 1' }} className="min-w-0 overflow-hidden">
+              <div className="grid grid-cols-2 items-center border border-slate-300 shadow-sm overflow-hidden" style={{ borderRadius: 0, height: '36px' }}>
+                <div className="flex items-center justify-center px-2 min-w-0">
+                  <span className="text-slate-800 text-xs font-semibold tracking-wide truncate">T : {data.length}</span>
+                </div>
+                <div className="flex items-center justify-center px-2 min-w-0 border-l border-slate-300">
+                  <span className="text-emerald-700 text-xs font-semibold tracking-wide truncate">A : {filteredData.length}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Kolom 10: Tambah */}
+            <div style={{ gridColumn: 'span 1' }} className="min-w-0 overflow-hidden">
               <Button
                 onClick={onAdd}
-                className="cursor-pointer text-white font-medium shadow-sm hover:shadow transition-all"
+                className="cursor-pointer text-white font-medium shadow-sm hover:shadow transition-all w-full truncate"
                 size="2"
                 style={{ 
                   borderRadius: 0,
                   backgroundColor: '#0066cc',
-                  border: '1px solid #0052a3'
+                  border: '1px solid #0052a3',
+                  height: '36px'
                 }}
               >
-                <Plus className="h-4 w-4" />
-                Tambah Baru
+                <Plus className="h-4 w-4 flex-shrink-0" />
+                <span className="truncate">Tambah</span>
               </Button>
             </div>
           </div>

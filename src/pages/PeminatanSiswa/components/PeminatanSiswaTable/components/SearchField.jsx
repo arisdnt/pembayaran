@@ -3,7 +3,7 @@ import { Search, X } from 'lucide-react'
 
 export function SearchField({ value, onChange, placeholder = "Cari..." }) {
   return (
-    <div className="flex-1 min-w-[240px] max-w-xs">
+    <div className="min-w-0 w-full">
       <TextField.Root
         placeholder={placeholder}
         value={value}
@@ -12,9 +12,10 @@ export function SearchField({ value, onChange, placeholder = "Cari..." }) {
         style={{
           borderRadius: 0,
           border: '1px solid #cbd5e1',
-          backgroundColor: '#ffffff'
+          backgroundColor: '#ffffff',
+          height: '36px'
         }}
-        className="font-sans"
+        className="font-sans w-full"
       >
         <TextField.Slot>
           <Search className="h-4 w-4" />
