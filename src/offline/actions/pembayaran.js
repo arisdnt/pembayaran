@@ -12,6 +12,8 @@ export async function createPembayaranWithRincian(header, rincianItems) {
     let fileId = item.file_id || null
     
     if (item.bukti_file) {
+      console.log('[Pembayaran] File detected, uploading:', item.bukti_file.name, 'for', item.nomor_transaksi)
+      
       const uploadResult = await handleFileUpload(
         item.bukti_file,
         'rincian_pembayaran',
@@ -21,9 +23,17 @@ export async function createPembayaranWithRincian(header, rincianItems) {
       if (uploadResult.success) {
         fileId = uploadResult.fileId
         buktiUrl = uploadResult.publicUrl || null // Will be null if offline
+        
+        if (uploadResult.offline) {
+          console.log('[Pembayaran] File stored offline, will upload when online. FileID:', fileId)
+        } else {
+          console.log('[Pembayaran] File uploaded successfully. URL:', buktiUrl)
+        }
       } else {
         console.error('[Pembayaran] File upload failed:', uploadResult.error)
       }
+    } else {
+      console.log('[Pembayaran] No file provided for', item.nomor_transaksi)
     }
     
     await enqueueInsert('rincian_pembayaran', {
@@ -55,6 +65,8 @@ export async function updatePembayaranWithRincian(id, headerPatch, rincianItems)
     let fileId = item.file_id || null
     
     if (item.bukti_file) {
+      console.log('[Pembayaran] File detected for update, uploading:', item.bukti_file.name, 'for', item.nomor_transaksi)
+      
       const uploadResult = await handleFileUpload(
         item.bukti_file,
         'rincian_pembayaran',
@@ -64,8 +76,14 @@ export async function updatePembayaranWithRincian(id, headerPatch, rincianItems)
       if (uploadResult.success) {
         fileId = uploadResult.fileId
         buktiUrl = uploadResult.publicUrl || null
+        
+        if (uploadResult.offline) {
+          console.log('[Pembayaran] File stored offline (update), will upload when online. FileID:', fileId)
+        } else {
+          console.log('[Pembayaran] File uploaded successfully (update). URL:', buktiUrl)
+        }
       } else {
-        console.error('[Pembayaran] File upload failed:', uploadResult.error)
+        console.error('[Pembayaran] File upload failed (update):', uploadResult.error)
       }
     }
     

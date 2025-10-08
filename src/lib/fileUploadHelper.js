@@ -283,6 +283,9 @@ export async function processPendingUploads() {
         })
 
         console.log(`[FileUpload] Successfully uploaded: ${fileRecord.file_name}`)
+
+        // IMPORTANT: Update rincian_pembayaran with the public URL
+        await updateRincianPembayaranUrl(fileRecord.reference_id, upload.publicUrl)
       } else {
         await db.file_uploads.update(fileRecord.id, {
           status: 'error',
@@ -298,6 +301,42 @@ export async function processPendingUploads() {
         error_message: error.message || 'Upload failed',
       })
     }
+  }
+}
+
+/**
+ * Update rincian_pembayaran with bukti URL after successful upload
+ */
+async function updateRincianPembayaranUrl(nomorTransaksi, publicUrl) {
+  try {
+    // Import here to avoid circular dependency
+    const { enqueueUpdate } = await import('../offline/outbox')
+    
+    // Find rincian_pembayaran by nomor_transaksi
+    const rincian = await db.rincian_pembayaran
+      .filter(r => r.nomor_transaksi === nomorTransaksi)
+      .first()
+
+    if (rincian) {
+      console.log(`[FileUpload] Updating rincian_pembayaran ${rincian.id} with URL: ${publicUrl}`)
+      
+      // Update local IndexedDB
+      await db.rincian_pembayaran.update(rincian.id, {
+        bukti_pembayaran_url: publicUrl,
+        diperbarui_pada: new Date().toISOString(),
+      })
+
+      // Enqueue update to sync to server
+      await enqueueUpdate('rincian_pembayaran', rincian.id, {
+        bukti_pembayaran_url: publicUrl,
+      })
+
+      console.log(`[FileUpload] Successfully updated rincian_pembayaran with bukti URL`)
+    } else {
+      console.warn(`[FileUpload] Rincian pembayaran not found for nomor_transaksi: ${nomorTransaksi}`)
+    }
+  } catch (error) {
+    console.error('[FileUpload] Error updating rincian_pembayaran URL:', error)
   }
 }
 

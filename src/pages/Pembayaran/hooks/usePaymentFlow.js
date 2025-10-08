@@ -258,6 +258,7 @@ export function usePaymentFlow() {
             tanggal_bayar: timestamp,
             metode_pembayaran: item.payment.metode_pembayaran,
             referensi_pembayaran: item.payment.referensi_pembayaran || null,
+            bukti_file: item.payment.bukti_file || null, // Pass file for upload
             catatan: item.payment.catatan || null,
             cicilan_ke: maxCicilan + 1,
           }]
