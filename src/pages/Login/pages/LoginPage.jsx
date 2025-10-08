@@ -1,6 +1,6 @@
-import { useLogin } from './Login/hooks/useLogin'
-import { SchoolIdentity } from './Login/components/SchoolIdentity'
-import { LoginForm } from './Login/components/LoginForm'
+import { useLogin } from '../hooks/useLogin'
+import { SchoolIdentity } from '../components/SchoolIdentity'
+import { LoginForm } from '../components/LoginForm'
 import { X } from 'lucide-react'
 import { getCurrentWindow } from '@tauri-apps/api/window'
 

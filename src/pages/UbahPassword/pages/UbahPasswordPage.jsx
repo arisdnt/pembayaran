@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { PageLayout } from '../layout/PageLayout'
+import { PageLayout } from '../../../layout/PageLayout'
 import { Text, Button, TextField } from '@radix-ui/themes'
 import { Lock, ArrowLeft, Eye, EyeOff, CheckCircle, AlertCircle, Key } from 'lucide-react'
-import { supabase } from '../lib/supabaseClient'
-import { useAuth } from '../contexts/AuthContext'
+import { supabase } from '../../../lib/supabaseClient'
+import { useAuth } from '../../../contexts/AuthContext'
 
 export function UbahPassword() {
   const navigate = useNavigate()
