@@ -1,8 +1,7 @@
 import { Text, IconButton } from '@radix-ui/themes'
 import { Pencil1Icon, TrashIcon } from '@radix-ui/react-icons'
-import { Eye, FileText, Image as ImageIcon, Copy } from 'lucide-react'
+import { Eye, FileText, Image as ImageIcon } from 'lucide-react'
 import { formatDateTime } from '../../utils/dateHelpers'
-import { useState } from 'react'
 
 function formatCurrency(amount) {
   return new Intl.NumberFormat('id-ID', {
@@ -41,17 +40,6 @@ function getFileTypeFromUrl(url) {
 
 export function PembayaranTableRow({ item, index, onEdit, onDelete, onViewDetail, onViewBukti }) {
   const isEven = index % 2 === 0
-  const [copiedBukti, setCopiedBukti] = useState(false)
-
-  const handleCopyBukti = async (buktiUrl) => {
-    try {
-      await navigator.clipboard.writeText(buktiUrl)
-      setCopiedBukti(true)
-      setTimeout(() => setCopiedBukti(false), 2000)
-    } catch (err) {
-      console.error('Failed to copy:', err)
-    }
-  }
 
   return (
     <tr
@@ -169,30 +157,21 @@ export function PembayaranTableRow({ item, index, onEdit, onDelete, onViewDetail
           const fileName = getFileNameFromUrl(buktiUrl)
 
           return (
-            <div className="flex items-center gap-1">
-              <button
-                onClick={() => onViewBukti(buktiUrl, nomorTransaksi)}
-                className="flex items-center gap-2 hover:bg-blue-50 transition-colors px-2 py-1 rounded group flex-1 min-w-0"
-              >
-                {fileType === 'image' ? (
-                  <ImageIcon className="h-3.5 w-3.5 text-blue-600 shrink-0" />
-                ) : (
-                  <FileText className="h-3.5 w-3.5 text-blue-600 shrink-0" />
-                )}
-                <div className="flex-1 min-w-0 text-left">
-                  <Text size="1" className="text-blue-700 group-hover:text-blue-800 font-medium block truncate">
-                    {fileName}
-                  </Text>
-                </div>
-              </button>
-              <button
-                onClick={() => handleCopyBukti(buktiUrl)}
-                className="p-1 hover:bg-slate-100 rounded transition-colors"
-                title={copiedBukti ? "Tersalin!" : "Salin link"}
-              >
-                <Copy className={`h-3.5 w-3.5 ${copiedBukti ? 'text-green-600' : 'text-slate-600'}`} />
-              </button>
-            </div>
+            <button
+              onClick={() => onViewBukti(buktiUrl, nomorTransaksi)}
+              className="flex items-center gap-2 hover:bg-blue-50 transition-colors px-2 py-1 rounded group max-w-full"
+            >
+              {fileType === 'image' ? (
+                <ImageIcon className="h-3.5 w-3.5 text-blue-600 shrink-0" />
+              ) : (
+                <FileText className="h-3.5 w-3.5 text-blue-600 shrink-0" />
+              )}
+              <div className="flex-1 min-w-0 text-left">
+                <Text size="1" className="text-blue-700 group-hover:text-blue-800 font-medium block truncate">
+                  {fileName}
+                </Text>
+              </div>
+            </button>
           )
         })()}
       </td>

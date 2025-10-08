@@ -1,5 +1,5 @@
-import { Dialog, Text, Button } from '@radix-ui/themes'
-import { X, FileText, Download, ExternalLink } from 'lucide-react'
+import { Dialog, Text, Button, IconButton } from '@radix-ui/themes'
+import { X, FileText, Download } from 'lucide-react'
 import { useState, useEffect } from 'react'
 
 export function BuktiPembayaranModal({ open, onOpenChange, buktiUrl, nomorTransaksi }) {
@@ -40,8 +40,32 @@ export function BuktiPembayaranModal({ open, onOpenChange, buktiUrl, nomorTransa
     }
   }, [open, buktiUrl])
 
-  const handleDownload = () => {
-    window.open(buktiUrl, '_blank')
+  const handleDownload = async () => {
+    try {
+      // Fetch file sebagai blob
+      const response = await fetch(buktiUrl)
+      const blob = await response.blob()
+      
+      // Buat URL object dari blob
+      const blobUrl = window.URL.createObjectURL(blob)
+      
+      // Buat anchor element untuk trigger download
+      const link = document.createElement('a')
+      link.href = blobUrl
+      link.download = fileName || 'bukti_pembayaran'
+      
+      // Trigger download
+      document.body.appendChild(link)
+      link.click()
+      
+      // Cleanup
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(blobUrl)
+    } catch (error) {
+      console.error('Error downloading file:', error)
+      // Fallback ke window.open jika fetch gagal
+      window.open(buktiUrl, '_blank')
+    }
   }
 
   const handleImageError = () => {
@@ -56,11 +80,11 @@ export function BuktiPembayaranModal({ open, onOpenChange, buktiUrl, nomorTransa
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Content
-        style={{ maxWidth: '900px', width: '90vw', padding: 0, borderRadius: 0 }}
-        className="border-2 border-slate-300 shadow-2xl"
+        style={{ maxWidth: '900px', width: '90vw', padding: 0, borderRadius: 0, maxHeight: '90vh' }}
+        className="border-2 border-slate-300 shadow-2xl flex flex-col"
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b-2 border-slate-300 bg-gradient-to-b from-blue-600 to-blue-700 px-5 py-4">
+        <div className="flex items-center justify-between border-b-2 border-slate-300 bg-gradient-to-b from-blue-600 to-blue-700 px-5 py-4 flex-shrink-0">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center bg-white border border-blue-800 shadow">
               <FileText className="h-5 w-5 text-blue-700" />
@@ -88,43 +112,9 @@ export function BuktiPembayaranModal({ open, onOpenChange, buktiUrl, nomorTransa
         </div>
 
         {/* Content */}
-        <div className="bg-white p-5 max-h-[70vh] overflow-auto">
-          {/* File Info */}
-          <div className="mb-4 pb-3 border-b-2 border-slate-300 flex items-center justify-between">
-            <div>
-              <Text size="2" weight="medium" className="text-slate-700 block">
-                Nama File
-              </Text>
-              <Text size="2" className="text-slate-900 font-mono block mt-1">
-                {fileName}
-              </Text>
-            </div>
-            <div className="flex gap-2">
-              <Button
-                size="2"
-                variant="soft"
-                onClick={handleDownload}
-                style={{ borderRadius: 0 }}
-                className="cursor-pointer"
-              >
-                <Download className="h-3.5 w-3.5" />
-                Download
-              </Button>
-              <Button
-                size="2"
-                variant="soft"
-                onClick={() => window.open(buktiUrl, '_blank')}
-                style={{ borderRadius: 0 }}
-                className="cursor-pointer"
-              >
-                <ExternalLink className="h-3.5 w-3.5" />
-                Buka Tab Baru
-              </Button>
-            </div>
-          </div>
-
+        <div className="bg-white p-5 flex-1 overflow-auto min-h-0">
           {/* Preview Area */}
-          <div className="bg-slate-50 border-2 border-slate-300 p-4 min-h-[400px] flex items-center justify-center">
+          <div className="bg-slate-50 border-2 border-slate-300 p-4 flex items-center justify-center h-full">
             {loading && (
               <div className="text-center">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-3"></div>
@@ -154,26 +144,29 @@ export function BuktiPembayaranModal({ open, onOpenChange, buktiUrl, nomorTransa
             )}
 
             {!loading && !error && fileType === 'image' && (
-              <div className="w-full">
+              <div className="w-full select-none">
                 <img
                   src={buktiUrl}
                   alt="Bukti Pembayaran"
-                  className="max-w-full h-auto mx-auto border border-slate-300 shadow-lg"
+                  className="max-w-full h-auto mx-auto border border-slate-300 shadow-lg select-none pointer-events-none"
                   onError={handleImageError}
                   onLoad={handleImageLoad}
-                  style={{ maxHeight: '60vh' }}
+                  onContextMenu={(e) => e.preventDefault()}
+                  onDragStart={(e) => e.preventDefault()}
+                  style={{ maxHeight: '60vh', userSelect: 'none' }}
                 />
               </div>
             )}
 
             {!loading && !error && fileType === 'pdf' && (
-              <div className="w-full h-full">
+              <div className="w-full h-full select-none">
                 <iframe
                   src={buktiUrl}
                   title="Bukti Pembayaran PDF"
                   className="w-full border border-slate-300"
                   style={{ minHeight: '500px' }}
                   onError={handleImageError}
+                  onContextMenu={(e) => e.preventDefault()}
                 />
               </div>
             )}
@@ -200,13 +193,23 @@ export function BuktiPembayaranModal({ open, onOpenChange, buktiUrl, nomorTransa
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-3 border-t-2 border-slate-300 bg-gradient-to-b from-slate-50 to-slate-100 px-5 py-3">
+        <div className="flex items-center justify-end gap-2 border-t-2 border-slate-300 bg-gradient-to-b from-slate-50 to-slate-100 px-5 py-3 flex-shrink-0">
           <Button
+            size="2"
             variant="soft"
-            color="gray"
-            onClick={() => onOpenChange(false)}
+            onClick={handleDownload}
+            className="cursor-pointer hover:bg-green-100 text-green-700 border border-green-200"
             style={{ borderRadius: 0 }}
-            className="cursor-pointer"
+          >
+            <Download className="h-3.5 w-3.5" />
+            Download
+          </Button>
+          <Button
+            size="2"
+            variant="soft"
+            onClick={() => onOpenChange(false)}
+            className="cursor-pointer hover:bg-red-100 text-red-700 border border-red-200"
+            style={{ borderRadius: 0 }}
           >
             <X className="h-3.5 w-3.5" />
             Tutup
