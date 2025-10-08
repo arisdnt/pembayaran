@@ -15,7 +15,7 @@ export function SelectField({
 }) {
   return (
     <label>
-      <div className="flex items-center gap-1.5 mb-1">
+      <div className="flex items-center gap-2 mb-3">
         {Icon && <Icon className="h-3.5 w-3.5 text-purple-500" />}
         <Text as="div" size="2" weight="medium">
           {label} {required && <span className="text-red-600">*</span>}
@@ -46,7 +46,7 @@ export function SelectField({
         </Select.Content>
       </Select.Root>
       {helpText && (
-        <Text size="1" className="text-slate-500 mt-1">
+        <Text size="1" className="text-slate-500 mt-2.5 block">
           {helpText}
         </Text>
       )}

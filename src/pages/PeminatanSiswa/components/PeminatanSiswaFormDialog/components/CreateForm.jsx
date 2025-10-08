@@ -27,9 +27,9 @@ export function CreateForm({
   onSelectAll,
 }) {
   return (
-    <div className="grid grid-cols-3 gap-4" style={{ height: 'calc(90vh - 280px)' }}>
-      <div className="border-r-2 border-slate-300 pr-4 space-y-4">
-        <div className="bg-slate-50 border border-slate-300 px-3 py-2 mb-3">
+    <div className="grid grid-cols-3 gap-6" style={{ height: 'calc(90vh - 280px)' }}>
+      <div className="border-r-2 border-slate-300 pr-6 space-y-5">
+        <div className="bg-slate-50 border border-slate-300 px-4 py-3 mb-5">
           <Text size="2" weight="bold" className="text-slate-700">
             Filter Siswa
           </Text>
@@ -83,8 +83,8 @@ export function CreateForm({
         onSelectAll={onSelectAll}
       />
 
-      <div className="space-y-4">
-        <div className="bg-slate-50 border border-slate-300 px-3 py-2 mb-3">
+      <div className="space-y-5">
+        <div className="bg-slate-50 border border-slate-300 px-4 py-3 mb-5">
           <Text size="2" weight="bold" className="text-slate-700">
             Data Peminatan
           </Text>
@@ -103,7 +103,7 @@ export function CreateForm({
         />
 
         <label>
-          <div className="flex items-center gap-1.5 mb-1">
+          <div className="flex items-center gap-2 mb-3">
             <FileText className="h-3.5 w-3.5 text-purple-500" />
             <Text as="div" size="2" weight="medium">
               Catatan
@@ -113,16 +113,16 @@ export function CreateForm({
             placeholder="Catatan tambahan (opsional)"
             value={formData.catatan}
             onChange={(e) => onFormDataChange({ catatan: e.target.value })}
-            style={{ borderRadius: 0, minHeight: '100px' }}
+            style={{ borderRadius: 0, minHeight: '120px' }}
           />
-          <Text size="1" className="text-slate-500 mt-1">
+          <Text size="1" className="text-slate-500 mt-2.5 block">
             Catatan akan diterapkan ke semua siswa yang dipilih
           </Text>
         </label>
 
         {selectedTahunAjaran && formData.tanggal_mulai && (
-          <div className="border border-blue-200 bg-blue-50 px-3 py-2">
-            <Text size="1" weight="medium" className="text-blue-800 mb-1 block">
+          <div className="border border-blue-200 bg-blue-50 px-4 py-3">
+            <Text size="1" weight="medium" className="text-blue-800 mb-1.5 block">
               Tanggal Peminatan (Otomatis)
             </Text>
             <Text size="1" className="text-blue-700 block">

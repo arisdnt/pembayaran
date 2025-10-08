@@ -61,21 +61,26 @@ export function FilterControls({
         <div style={{ gridColumn: 'span 1' }} className="min-w-0 overflow-hidden">
           <Select.Root value={statusFilter} onValueChange={setStatusFilter}>
             <Select.Trigger style={{ borderRadius: 0, border: '1px solid #cbd5e1', backgroundColor: '#ffffff', width: '100%', height: '36px' }} className="cursor-pointer font-sans truncate text-sm px-2" />
-            <Select.Content style={{ borderRadius: 0, minWidth: 'var(--radix-select-trigger-width)', width: 'max-content', maxHeight: '300px' }}>
+            <Select.Content 
+              style={{ borderRadius: 0, minWidth: 'var(--radix-select-trigger-width)', width: 'max-content', maxHeight: '300px' }}
+              className="bg-white border-2 border-slate-300 shadow-lg"
+              position="popper"
+              sideOffset={4}
+            >
               <Select.Item value="all" className="cursor-pointer hover:bg-slate-100">
-                <span className="flex items-center gap-2"><ListFilter className="h-3.5 w-3.5 text-slate-600" /><span>Semua</span></span>
+                <span className="flex items-center gap-2"><ListFilter className="h-3.5 w-3.5 text-slate-600" aria-hidden="true" /><span>Semua</span></span>
               </Select.Item>
               <Select.Item value="pending" className="cursor-pointer hover:bg-slate-100">
-                <span className="flex items-center gap-2"><Clock className="h-3.5 w-3.5 text-amber-600" /><span>Pending</span></span>
+                <span className="flex items-center gap-2"><Clock className="h-3.5 w-3.5 text-amber-600" aria-hidden="true" /><span>Pending</span></span>
               </Select.Item>
               <Select.Item value="syncing" className="cursor-pointer hover:bg-slate-100">
-                <span className="flex items-center gap-2"><RefreshCw className="h-3.5 w-3.5 text-blue-600" /><span>Syncing</span></span>
+                <span className="flex items-center gap-2"><RefreshCw className="h-3.5 w-3.5 text-blue-600" aria-hidden="true" /><span>Syncing</span></span>
               </Select.Item>
               <Select.Item value="applied" className="cursor-pointer hover:bg-slate-100">
-                <span className="flex items-center gap-2"><CheckCircle className="h-3.5 w-3.5 text-emerald-600" /><span>Applied</span></span>
+                <span className="flex items-center gap-2"><CheckCircle className="h-3.5 w-3.5 text-emerald-600" aria-hidden="true" /><span>Applied</span></span>
               </Select.Item>
               <Select.Item value="error" className="cursor-pointer hover:bg-slate-100">
-                <span className="flex items-center gap-2"><XCircle className="h-3.5 w-3.5 text-rose-600" /><span>Error</span></span>
+                <span className="flex items-center gap-2"><XCircle className="h-3.5 w-3.5 text-rose-600" aria-hidden="true" /><span>Error</span></span>
               </Select.Item>
             </Select.Content>
           </Select.Root>
@@ -85,11 +90,16 @@ export function FilterControls({
         <div style={{ gridColumn: 'span 1' }} className="min-w-0 overflow-hidden">
           <Select.Root value={tableFilter} onValueChange={setTableFilter}>
             <Select.Trigger style={{ borderRadius: 0, border: '1px solid #cbd5e1', backgroundColor: '#ffffff', width: '100%', height: '36px' }} className="cursor-pointer font-sans truncate text-sm px-2" />
-            <Select.Content style={{ borderRadius: 0, minWidth: 'var(--radix-select-trigger-width)', width: 'max-content', maxHeight: '300px' }}>
+            <Select.Content 
+              style={{ borderRadius: 0, minWidth: 'var(--radix-select-trigger-width)', width: 'max-content', maxHeight: '300px' }}
+              className="bg-white border-2 border-slate-300 shadow-lg"
+              position="popper"
+              sideOffset={4}
+            >
               {tableOptions.map((table) => (
                 <Select.Item key={table} value={table} className="cursor-pointer hover:bg-slate-100">
                   <span className="flex items-center gap-2">
-                    <Layers className="h-3.5 w-3.5 text-slate-700" />
+                    <Layers className="h-3.5 w-3.5 text-purple-600" aria-hidden="true" />
                     <span>{table === 'all' ? 'Semua Tabel' : table}</span>
                   </span>
                 </Select.Item>
@@ -109,15 +119,7 @@ export function FilterControls({
         {/* Kolom 5-7: Reserved */}
         <div style={{ gridColumn: 'span 3' }} className="min-w-0 overflow-hidden" aria-hidden="true" />
 
-        {/* Kolom 8: Retry All */}
-        <div style={{ gridColumn: 'span 1' }} className="min-w-0 overflow-hidden">
-          <button onClick={onRetryAll} disabled={retrying || globalStats.error === 0} className="flex items-center justify-center gap-2 px-3 text-white font-medium shadow-sm hover:shadow transition-all disabled:opacity-50 disabled:cursor-not-allowed w-full truncate" style={{ borderRadius: 0, backgroundColor: '#dc2626', border: '1px solid #b91c1c', height: '36px' }} title={globalStats.error === 0 ? 'Tidak ada error untuk di-retry' : 'Retry semua item yang error'}>
-            <RotateCcw className={`h-4 w-4 flex-shrink-0 ${retrying ? 'animate-spin' : ''}`} />
-            <span className="text-sm truncate">Retry ({globalStats.error})</span>
-          </button>
-        </div>
-
-        {/* Kolom 9: Statcard T/A */}
+        {/* Kolom 8: Statcard T/A */}
         <div style={{ gridColumn: 'span 1' }} className="min-w-0 overflow-hidden">
           <div className="grid grid-cols-2 items-center border border-slate-300 shadow-sm overflow-hidden" style={{ borderRadius: 0, height: '36px' }}>
             <div className="flex items-center justify-center px-2 min-w-0">
@@ -127,6 +129,14 @@ export function FilterControls({
               <span className="text-emerald-700 text-xs font-semibold tracking-wide truncate">A : {filteredStats.total}</span>
             </div>
           </div>
+        </div>
+
+        {/* Kolom 9: Retry All */}
+        <div style={{ gridColumn: 'span 1' }} className="min-w-0 overflow-hidden">
+          <button onClick={onRetryAll} disabled={retrying || globalStats.error === 0} className="flex items-center justify-center gap-2 px-3 text-white font-medium shadow-sm hover:shadow transition-all disabled:opacity-50 disabled:cursor-not-allowed w-full truncate" style={{ borderRadius: 0, backgroundColor: '#dc2626', border: '1px solid #b91c1c', height: '36px' }} title={globalStats.error === 0 ? 'Tidak ada error untuk di-retry' : 'Retry semua item yang error'}>
+            <RotateCcw className={`h-4 w-4 flex-shrink-0 ${retrying ? 'animate-spin' : ''}`} />
+            <span className="text-sm truncate">Retry ({globalStats.error})</span>
+          </button>
         </div>
 
         {/* Kolom 10: Refresh */}

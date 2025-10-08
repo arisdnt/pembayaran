@@ -13,8 +13,8 @@ export function SiswaCheckboxList({
   onSelectAll,
 }) {
   return (
-    <div className="border-r-2 border-slate-300 pr-4 flex flex-col">
-      <div className="bg-slate-50 border border-slate-300 px-3 py-2 mb-3">
+    <div className="border-r-2 border-slate-300 pr-6 flex flex-col">
+      <div className="bg-slate-50 border border-slate-300 px-4 py-3 mb-4">
         <div className="flex items-center justify-between">
           <Text size="2" weight="bold" className="text-slate-700">
             Pilih Siswa
@@ -25,7 +25,7 @@ export function SiswaCheckboxList({
         </div>
       </div>
 
-      <div className="mb-3">
+      <div className="mb-4">
         <TextField.Root
           placeholder="Cari siswa..."
           value={searchSiswa}
@@ -47,12 +47,12 @@ export function SiswaCheckboxList({
       </div>
 
       {searchedSiswaList.length > 0 && (
-        <div className="mb-2">
+        <div className="mb-3">
           <Button
             type="button"
             onClick={onSelectAll}
             variant="soft"
-            size="1"
+            size="2"
             style={{ borderRadius: 0, width: '100%' }}
             className="cursor-pointer"
           >
@@ -77,13 +77,13 @@ export function SiswaCheckboxList({
             </Text>
           </div>
         ) : (
-          <div className="p-2">
+          <div className="p-3">
             {searchedSiswaList.map((siswa, index) => {
               const hasPeminatan = siswaWithPeminatan.has(siswa.id)
               return (
                 <label
                   key={`${siswa.id}-${index}`}
-                  className={`flex items-start gap-2 p-2 mb-1 border transition-colors ${
+                  className={`flex items-start gap-3 p-3 mb-2 border transition-colors ${
                     hasPeminatan
                       ? 'bg-orange-50 border-orange-300 cursor-not-allowed opacity-60'
                       : selectedSiswaIds.includes(siswa.id)

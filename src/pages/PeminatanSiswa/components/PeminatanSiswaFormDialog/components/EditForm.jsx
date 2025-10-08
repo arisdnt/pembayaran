@@ -19,7 +19,7 @@ export function EditForm({
 }) {
   return (
     <div className="grid grid-cols-2 gap-6">
-      <div className="space-y-4">
+      <div className="space-y-5">
         <SelectField
           icon={Calendar}
           label="1. Tahun Ajaran"
@@ -59,7 +59,7 @@ export function EditForm({
         />
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-5">
         <SelectField
           icon={Users}
           label="4. Siswa"
@@ -87,9 +87,9 @@ export function EditForm({
         />
 
         <label>
-          <div className="flex items-center gap-1.5 mb-1">
+          <div className="flex items-center gap-2 mb-3">
             <FileText className="h-3.5 w-3.5 text-orange-500" />
-            <span className="text-sm font-medium">6. Catatan</span>
+            <Text as="div" size="2" weight="medium">6. Catatan</Text>
           </div>
           <TextField.Root
             placeholder="Catatan tambahan (opsional)"
