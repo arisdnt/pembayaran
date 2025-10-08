@@ -54,10 +54,14 @@ export function NavbarMenu({ onAboutClick }) {
                       : 'hover:bg-white/10'
                 }`}
                 style={isAboutMenu ? {
+                  borderRadius: 0,
                   backdropFilter: 'blur(8px)',
                   WebkitBackdropFilter: 'blur(8px)',
                   WebkitAppRegion: 'no-drag'
-                } : { WebkitAppRegion: 'no-drag' }}
+                } : { 
+                  borderRadius: 0,
+                  WebkitAppRegion: 'no-drag' 
+                }}
               >
                 <Icon className={`h-4 w-4 ${isAboutMenu ? 'text-purple-200' : iconColor}`} />
                 {item.label}

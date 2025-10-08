@@ -1,21 +1,21 @@
-export function StatsDisplay({ stats, hasActiveFilters }) {
+export function StatsDisplay({ stats /*, hasActiveFilters*/ }) {
   return (
-    <div className="ml-auto flex items-center gap-1.5 text-xs font-medium">
-      <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-300 shadow-sm">
-        <span className="text-slate-600">Total:</span>
-        <span className="font-bold text-slate-900">{stats.total}</span>
-      </div>
-      <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 border border-emerald-300 shadow-sm">
-        <span className="inline-flex h-2 w-2 rounded-full bg-emerald-600" />
-        <span className="text-emerald-700">Aktif:</span>
-        <span className="font-bold text-emerald-900">{stats.active}</span>
-      </div>
-      {hasActiveFilters && (
-        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 border border-blue-300 shadow-sm">
-          <span className="text-blue-700">Tampil:</span>
-          <span className="font-bold text-blue-900">{stats.filtered}</span>
+    <div className="w-full min-w-0">
+      <div
+        className="grid grid-cols-2 items-center border border-slate-300 shadow-sm overflow-hidden"
+        style={{ borderRadius: 0, height: '36px' }}
+      >
+        <div className="flex items-center justify-center px-2 min-w-0">
+          <span className="text-slate-800 text-xs font-semibold tracking-wide truncate">
+            T : {stats.total}
+          </span>
         </div>
-      )}
+        <div className="flex items-center justify-center px-2 min-w-0 border-l border-slate-300">
+          <span className="text-emerald-700 text-xs font-semibold tracking-wide truncate">
+            A : {stats.active}
+          </span>
+        </div>
+      </div>
     </div>
   )
 }

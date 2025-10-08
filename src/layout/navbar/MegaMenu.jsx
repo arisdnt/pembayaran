@@ -88,7 +88,10 @@ export function MegaMenu({ section, sectionIcon: SectionIcon, sectionIconColor, 
         className={`text-white/90 hover:text-white hover:bg-white/10 transition-colors cursor-pointer font-medium ${
           isOpen ? 'bg-white/15 text-white' : ''
         }`}
-        style={{ WebkitAppRegion: 'no-drag' }}
+        style={{ 
+          borderRadius: 0,
+          WebkitAppRegion: 'no-drag' 
+        }}
       >
         {SectionIcon && <SectionIcon className={`h-4 w-4 ${sectionIconColor}`} />}
         {section.title}
@@ -123,7 +126,10 @@ export function MegaMenu({ section, sectionIcon: SectionIcon, sectionIconColor, 
                       ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white' 
                       : 'hover:bg-gradient-to-r hover:from-blue-500 hover:to-blue-600 hover:text-white'
                   }`}
-                  style={{ WebkitAppRegion: 'no-drag' }}
+                  style={{ 
+                    borderRadius: 0,
+                    WebkitAppRegion: 'no-drag' 
+                  }}
                 >
                   <div 
                     className={`flex-shrink-0 h-9 w-9 flex items-center justify-center border transition-colors ${
@@ -131,6 +137,7 @@ export function MegaMenu({ section, sectionIcon: SectionIcon, sectionIconColor, 
                         ? 'bg-white/20 border-white/30 text-white' 
                         : `${iconBgClass} group-hover:bg-white/20 group-hover:border-white/30 group-hover:text-white`
                     }`}
+                    style={{ borderRadius: 0 }}
                   >
                     <Icon className="h-4 w-4" />
                   </div>

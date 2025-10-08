@@ -28,7 +28,7 @@ export function FormSelectField({
           side="bottom"
           align="start"
           sideOffset={4}
-          style={{ borderRadius: 0, minWidth: 'var(--radix-select-trigger-width)' }}
+          style={{ borderRadius: 0, minWidth: 'var(--radix-select-trigger-width)', width: 'max-content', maxHeight: '300px' }}
           className="border-2 border-slate-300 shadow-lg bg-white z-50"
         >
           {options.map((option) => (
@@ -38,7 +38,10 @@ export function FormSelectField({
               className="hover:bg-blue-50 cursor-pointer px-3 py-2 focus:bg-blue-100"
               style={{ borderRadius: 0 }}
             >
-              {option.label}
+              <span className="flex items-center gap-2">
+                <span className="inline-flex h-1.5 w-1.5 rounded-full bg-slate-400" aria-hidden="true" />
+                <span>{option.label}</span>
+              </span>
             </Select.Item>
           ))}
         </Select.Content>
