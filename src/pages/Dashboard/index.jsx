@@ -1,15 +1,21 @@
 import { useState, useEffect } from 'react'
 import { Text } from '@radix-ui/themes'
-import { Users, Receipt, Wallet, AlertCircle, RefreshCw, LayoutDashboard } from 'lucide-react'
+import { LayoutDashboard } from 'lucide-react'
 import { db } from '../../offline/db'
-import { useDashboardData } from '../../hooks/useDashboardData'
 import { DashboardFilters } from './components/DashboardFilters'
-import { StatCard } from './components/StatCard'
-import { PembayaranChart } from './components/PembayaranChart'
-import { StatusPieChart } from './components/StatusPieChart'
-import { TagihanTable } from './components/TagihanTable'
-import { PembayaranPendingTable } from './components/PembayaranPendingTable'
 import { PageLayout } from '../../layout/PageLayout'
+import { useDashboardCharts } from './hooks/useDashboardCharts'
+import { useDashboardComparisons } from './hooks/useDashboardComparisons'
+import { useDashboardFinancials } from './hooks/useDashboardFinancials'
+import { GenderPieChart } from './charts/GenderPieChart'
+import { ClassBarChart } from './charts/ClassBarChart'
+import { PeminatanBarChart } from './charts/PeminatanBarChart'
+import { WaliKelasBarChart } from './charts/WaliKelasBarChart'
+import { SiswaTrendLineChart } from './charts/SiswaTrendLineChart'
+import { PembayaranTrendAreaChart } from './charts/PembayaranTrendAreaChart'
+import { TagihanVsPembayaranAreaChart } from './charts/TagihanVsPembayaranAreaChart'
+import { TopKelasTunggakanBar } from './charts/TopKelasTunggakanBar'
+import { TunggakanByGenderBar } from './charts/TunggakanByGenderBar'
 
 function DashboardContent() {
   const [masterDataReady, setMasterDataReady] = useState(false)
@@ -27,7 +33,9 @@ function DashboardContent() {
   })
 
   // Wait for master data to be ready before fetching dashboard data
-  const { data, loading, error, refresh } = useDashboardData(masterDataReady ? filters : null)
+  const { data, loading } = useDashboardCharts(masterDataReady ? filters : null)
+  const cmp = useDashboardComparisons(masterDataReady ? filters : null)
+  const fin = useDashboardFinancials(masterDataReady ? filters : null)
 
   useEffect(() => {
     fetchMasterData()
@@ -99,65 +107,25 @@ function DashboardContent() {
                   selectedTimeRange={filters.timeRange}
                   onTimeRangeChange={(val) => setFilters({ ...filters, timeRange: val })}
               />
-
-              <button
-                  onClick={refresh}
-                  disabled={loading}
-                  className="flex items-center gap-2 px-3 border border-slate-300 bg-white hover:bg-slate-50 transition-colors disabled:opacity-50 shrink-0"
-                  style={{ borderRadius: 0, height: '35px' }}
-                  type="button"
-                >
-                  <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-                  <Text size="2" weight="medium" className="text-slate-700">
-                    Refresh
-                  </Text>
-              </button>
             </div>
           </div>
         </div>
-
-        {/* Error */}
-        {error && (
-          <div className="shrink-0 mx-6 mt-4 flex items-start gap-3 bg-red-50 border-2 border-red-200 px-4 py-3">
-            <AlertCircle className="h-5 w-5 text-red-500 mt-0.5 shrink-0" />
-            <div>
-              <Text size="2" weight="medium" className="text-red-700">Error</Text>
-              <Text size="2" className="text-red-600">{error}</Text>
-            </div>
-          </div>
-        )}
-
-        {/* Content */}
-        <div className="flex-1 overflow-hidden px-6 py-4">
-          <div className="grid grid-cols-4 gap-4 h-full" style={{ gridTemplateRows: 'auto auto 1fr' }}>
-            {/* Stats - Row 1 (auto height) */}
-            <StatCard title="Total Siswa" value={data.stats.totalSiswa} icon={Users} color="text-blue-600" loading={loading} />
-            <StatCard title="Total Tagihan" value={data.stats.totalTagihan} icon={Receipt} color="text-purple-600" loading={loading} />
-            <StatCard title="Total Pembayaran" value={data.stats.totalPembayaran} icon={Wallet} color="text-green-600" loading={loading} />
-            <StatCard title="Tunggakan" value={data.stats.totalTunggakan} icon={AlertCircle} color="text-red-600" isCurrency loading={loading} />
-
-            {/* Charts - Row 2 (auto height) */}
-            <div className="col-span-2 h-64">
-              <PembayaranChart 
-                data={data.chartData.pembayaranPerBulan} 
-                loading={loading}
-                filters={filters}
-                masterData={masterData}
-              />
-            </div>
-            <div className="h-64">
-              <StatusPieChart data={data.chartData.statusPembayaran} loading={loading} />
-            </div>
-            
-            {/* Pembayaran Pending - Span 2 rows (row 2 & 3) */}
-            <div className="col-span-1 row-span-2">
-              <PembayaranPendingTable data={data.recentData.pembayaranPending} loading={loading} />
-            </div>
-
-            {/* Tagihan Table - Row 3, 3 columns */}
-            <div className="col-span-3">
-              <TagihanTable data={data.recentData.tagihanTerbaru} loading={loading} />
-            </div>
+        {/* Content: charts only, never exceed viewport */}
+        <div className="flex-1 overflow-auto px-6 py-4">
+          <div className="grid grid-cols-12 gap-4">
+            {/* Row A */}
+            <div className="col-span-4 h-[320px]"><GenderPieChart data={data?.gender} /></div>
+            <div className="col-span-8 h-[320px]"><ClassBarChart data={data?.classDist} /></div>
+            {/* Row B (asymmetric widths for better aesthetics) */}
+            <div className="col-span-5 h-[360px]"><PeminatanBarChart data={data?.pemDist} /></div>
+            <div className="col-span-4 h-[360px]"><WaliKelasBarChart data={data?.waliDist} /></div>
+            <div className="col-span-3 h-[360px]"><TunggakanByGenderBar data={fin.data?.tunggakanByGender} /></div>
+            {/* Row C – Trends */}
+            <div className="col-span-6 h-[380px]"><SiswaTrendLineChart data={cmp.data?.siswaTrend || data?.siswaTrend} compare={cmp.data?.siswaTrendCompare} /></div>
+            <div className="col-span-6 h-[380px]"><PembayaranTrendAreaChart data={cmp.data?.bayarTrend || data?.bayarTrend} /></div>
+            {/* Row D – Financial insights */}
+            <div className="col-span-7 h-[380px]"><TagihanVsPembayaranAreaChart tagihan={fin.data?.tagihanTrend} bayar={cmp.data?.bayarTrend || data?.bayarTrend} /></div>
+            <div className="col-span-5 h-[380px]"><TopKelasTunggakanBar data={fin.data?.topKelasTunggakan} /></div>
           </div>
         </div>
       </div>

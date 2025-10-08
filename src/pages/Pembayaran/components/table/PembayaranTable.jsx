@@ -6,7 +6,7 @@ import { PembayaranTableRow } from './PembayaranTableRow'
 import { PembayaranEmptyState } from './PembayaranEmptyState'
 import { BuktiPembayaranModal } from '../modals/BuktiPembayaranModal'
 
-export function PembayaranTable({ data, isLoading, isRefreshing, onEdit, onDelete, onAdd, onViewDetail }) {
+export function PembayaranTable({ data, isLoading, isRefreshing, onEdit, onDelete, onAdd, onViewDetail, onRingkasan }) {
   const [buktiModalOpen, setBuktiModalOpen] = useState(false)
   const [selectedBukti, setSelectedBukti] = useState(null)
   const [selectedNomor, setSelectedNomor] = useState(null)
@@ -49,6 +49,7 @@ export function PembayaranTable({ data, isLoading, isRefreshing, onEdit, onDelet
           hasActiveFilters={hasActiveFilters}
           onClearFilters={handleClearFilters}
           onAdd={onAdd}
+          onRingkasan={onRingkasan}
         />
 
         <div className="flex-1 overflow-auto min-h-0">

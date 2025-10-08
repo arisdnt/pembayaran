@@ -6,6 +6,7 @@ import { AlertCircle } from 'lucide-react'
 import { usePembayaran } from './hooks/usePembayaran'
 import { PembayaranTable } from './components/table/PembayaranTable'
 import { DeleteConfirmDialog } from '../../components/common/DeleteConfirmDialog'
+import { RingkasanModal } from './components/modals/RingkasanModal'
 
 function PembayaranContent() {
   const navigate = useNavigate()
@@ -21,10 +22,14 @@ function PembayaranContent() {
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [currentItem, setCurrentItem] = useState(null)
+  const [ringkasanModalOpen, setRingkasanModalOpen] = useState(false)
 
   const handleOpenCreate = () => {
-    // Navigate to create page
     navigate('/pembayaran/create')
+  }
+
+  const handleOpenRingkasan = () => {
+    setRingkasanModalOpen(true)
   }
 
   const handleOpenEdit = (item) => {
@@ -76,6 +81,7 @@ function PembayaranContent() {
             onDelete={handleOpenDelete}
             onAdd={handleOpenCreate}
             onViewDetail={handleOpenDetail}
+            onRingkasan={handleOpenRingkasan}
           />
         </div>
       </div>
@@ -87,6 +93,11 @@ function PembayaranContent() {
         itemName={currentItem?.nomor_pembayaran || ''}
         title="Hapus Pembayaran"
         description="Apakah Anda yakin ingin menghapus pembayaran"
+      />
+
+      <RingkasanModal
+        open={ringkasanModalOpen}
+        onOpenChange={setRingkasanModalOpen}
       />
       </PageLayout>
   )

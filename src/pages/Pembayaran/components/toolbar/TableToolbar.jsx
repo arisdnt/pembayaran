@@ -1,5 +1,5 @@
 import { Button } from '@radix-ui/themes'
-import { Plus, X } from 'lucide-react'
+import { Plus, X, TrendingUp } from 'lucide-react'
 import { SearchBar } from './SearchBar'
 import { FilterControls } from './FilterControls'
 import { StatsDisplay } from './StatsDisplay'
@@ -17,6 +17,7 @@ export function TableToolbar({
   hasActiveFilters,
   onClearFilters,
   onAdd,
+  onRingkasan,
 }) {
   return (
     <div className="border-b border-slate-300 bg-gradient-to-b from-slate-50 to-slate-100">
@@ -80,12 +81,30 @@ export function TableToolbar({
           </Button>
         </div>
 
-        {/* Kolom 5-8 (40%): Reserved */}
-        <div style={{ gridColumn: 'span 4' }} className="min-w-0 overflow-hidden" aria-hidden="true" />
+        {/* Kolom 5-7 (30%): Reserved */}
+        <div style={{ gridColumn: 'span 3' }} className="min-w-0 overflow-hidden" aria-hidden="true" />
 
-        {/* Kolom 9 (10%): Stats Display */}
+        {/* Kolom 8 (10%): Stats Display */}
         <div style={{ gridColumn: 'span 1' }} className="min-w-0 overflow-hidden">
           <StatsDisplay stats={stats} hasActiveFilters={hasActiveFilters} />
+        </div>
+
+        {/* Kolom 9 (10%): Ringkasan Button */}
+        <div style={{ gridColumn: 'span 1' }} className="min-w-0 overflow-hidden">
+          <Button
+            onClick={onRingkasan}
+            size="2"
+            style={{ 
+              borderRadius: 0, 
+              height: '36px', 
+              backgroundColor: '#16a34a',
+              border: '1px solid #15803d'
+            }}
+            className="cursor-pointer text-white hover:brightness-95 transition-colors w-full truncate"
+          >
+            <TrendingUp className="h-4 w-4 flex-shrink-0 text-white" />
+            <span className="truncate">Ringkasan</span>
+          </Button>
         </div>
 
         {/* Kolom 10 (10%): Tambah Baru Button */}
