@@ -18,9 +18,50 @@ function getMonthName(monthKey) {
   return `${months[parseInt(month) - 1]} ${year}`
 }
 
-export const PembayaranChart = memo(function PembayaranChart({ data, loading }) {
+function generateChartTitle(filters, masterData) {
+  const parts = []
+  
+  // Period label
+  const periodLabels = {
+    'today': 'Hari Ini',
+    'week': '7 Hari Terakhir',
+    'month': '30 Hari Terakhir',
+    'quarter': '3 Bulan Terakhir',
+    'semester': '6 Bulan Terakhir',
+    'year': 'Tahun Ini',
+    'all': 'Semua Waktu'
+  }
+  const period = periodLabels[filters?.timeRange || 'all'] || 'Semua Waktu'
+  parts.push(`Pembayaran ${period}`)
+  
+  // Tahun Ajaran
+  if (filters?.tahunAjaran && masterData?.tahunAjaranList) {
+    const ta = masterData.tahunAjaranList.find(t => t.id === filters.tahunAjaran)
+    if (ta) {
+      parts.push(`- ${ta.nama}`)
+    }
+  }
+  
+  // Tingkat
+  if (filters?.tingkat) {
+    parts.push(`- Tingkat ${filters.tingkat}`)
+  }
+  
+  // Kelas
+  if (filters?.kelas && masterData?.kelasList) {
+    const kelas = masterData.kelasList.find(k => k.id === filters.kelas)
+    if (kelas) {
+      parts.push(`- ${kelas.tingkat} ${kelas.nama_sub_kelas}`)
+    }
+  }
+  
+  return parts.join(' ')
+}
+
+export const PembayaranChart = memo(function PembayaranChart({ data, loading, filters, masterData }) {
   // Tetap tampilkan chart meski sedang refresh, hanya data yang berubah
   const maxValue = Math.max(...(data?.map(d => d.total) || [1]), 1)
+  const chartTitle = generateChartTitle(filters, masterData)
 
   return (
     <div className="border-2 border-slate-300 bg-white shadow-lg flex flex-col h-full overflow-hidden">
@@ -28,7 +69,7 @@ export const PembayaranChart = memo(function PembayaranChart({ data, loading }) 
         <div className="flex items-center gap-2">
           <TrendingUp className="h-4 w-4 text-slate-600" />
           <Text size="2" weight="bold" className="text-slate-700 uppercase tracking-wider">
-            Pembayaran 6 Bulan Terakhir
+            {chartTitle}
           </Text>
         </div>
       </div>

@@ -13,7 +13,7 @@ export const StatCard = memo(function StatCard({ title, value, icon: Icon, color
   // Tampilkan data yang ada, tidak menampilkan loading state saat refresh
   const displayValue = isCurrency
     ? formatCurrency(value)
-    : `Rp ${value.toLocaleString('id-ID')}`
+    : value.toLocaleString('id-ID')
 
   return (
     <div className="border-2 border-slate-300 bg-white shadow-lg flex flex-col">

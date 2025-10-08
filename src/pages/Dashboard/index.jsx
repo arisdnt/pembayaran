@@ -138,7 +138,12 @@ function DashboardContent() {
 
             {/* Charts - Row 2 (auto height) */}
             <div className="col-span-2 h-64">
-              <PembayaranChart data={data.chartData.pembayaranPerBulan} loading={loading} />
+              <PembayaranChart 
+                data={data.chartData.pembayaranPerBulan} 
+                loading={loading}
+                filters={filters}
+                masterData={masterData}
+              />
             </div>
             <div className="h-64">
               <StatusPieChart data={data.chartData.statusPembayaran} loading={loading} />

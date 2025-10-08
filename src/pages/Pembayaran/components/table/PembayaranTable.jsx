@@ -55,7 +55,7 @@ export function PembayaranTable({ data, isLoading, isRefreshing, onEdit, onDelet
           <table className="w-full border-collapse">
             <thead className="bg-gradient-to-b from-slate-100 to-slate-50 sticky top-0 z-10">
               <tr className="border-b-2 border-slate-300">
-                <th className="px-4 py-3 text-left border-r border-slate-200">
+                <th className="px-4 py-3 text-left border-r border-slate-200 w-28">
                   <Text size="1" weight="bold" className="text-slate-700 uppercase tracking-wider">
                     No. Pembayaran
                   </Text>
@@ -70,12 +70,12 @@ export function PembayaranTable({ data, isLoading, isRefreshing, onEdit, onDelet
                     Siswa
                   </Text>
                 </th>
-                <th className="px-4 py-3 text-left border-r border-slate-200">
+                <th className="px-4 py-3 text-left border-r border-slate-200 w-32">
                   <Text size="1" weight="bold" className="text-slate-700 uppercase tracking-wider">
                     Tahun Ajaran
                   </Text>
                 </th>
-                <th className="px-4 py-3 text-left border-r border-slate-200">
+                <th className="px-4 py-3 text-left border-r border-slate-200 w-32">
                   <Text size="1" weight="bold" className="text-slate-700 uppercase tracking-wider">
                     Kelas
                   </Text>
@@ -87,20 +87,10 @@ export function PembayaranTable({ data, isLoading, isRefreshing, onEdit, onDelet
                 </th>
                 <th className="px-4 py-3 text-left border-r border-slate-200">
                   <Text size="1" weight="bold" className="text-slate-700 uppercase tracking-wider">
-                    Dibuat
-                  </Text>
-                </th>
-                <th className="px-4 py-3 text-left border-r border-slate-200">
-                  <Text size="1" weight="bold" className="text-slate-700 uppercase tracking-wider">
-                    Nominal
-                  </Text>
-                </th>
-                <th className="px-4 py-3 text-left border-r border-slate-200">
-                  <Text size="1" weight="bold" className="text-slate-700 uppercase tracking-wider">
                     Total Tagihan
                   </Text>
                 </th>
-                <th className="px-4 py-3 text-left border-r border-slate-200">
+                <th className="px-4 py-3 text-left border-r border-slate-200 w-56">
                   <Text size="1" weight="bold" className="text-slate-700 uppercase tracking-wider">
                     Sudah Dibayar
                   </Text>
@@ -110,9 +100,14 @@ export function PembayaranTable({ data, isLoading, isRefreshing, onEdit, onDelet
                     Sisa Tagihan
                   </Text>
                 </th>
-                <th className="px-4 py-3 text-left border-r border-slate-200">
+                <th className="px-4 py-3 text-left border-r border-slate-200 w-32">
                   <Text size="1" weight="bold" className="text-slate-700 uppercase tracking-wider">
                     Bukti
+                  </Text>
+                </th>
+                <th className="px-4 py-3 text-left border-r border-slate-200">
+                  <Text size="1" weight="bold" className="text-slate-700 uppercase tracking-wider">
+                    Dibuat
                   </Text>
                 </th>
                 <th className="px-4 py-3 text-center">

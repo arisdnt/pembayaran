@@ -151,7 +151,7 @@ export function useDashboardData(filters = {}) {
       const totalTunggakan = Math.max(totalTagihanAmount - totalPembayaran, 0)
 
       // Chart - pembayaran per bulan
-      const pembayaranPerBulan = rincianPembayaran
+      const pembayaranPerBulanRaw = rincianPembayaran
         .filter(r => (startDate ? (new Date(r.tanggal_bayar) >= new Date(startDate)) : true))
         .filter(r => {
           const p = pembayaran.find(p => p.id === r.id_pembayaran)
@@ -164,6 +164,44 @@ export function useDashboardData(filters = {}) {
           acc[key] = (acc[key] || 0) + Number(r.jumlah_dibayar || 0)
           return acc
         }, {})
+
+      // Generate consistent month keys based on timeRange
+      const now = new Date()
+      let monthsToShow = 6 // default
+      
+      switch (filters.timeRange) {
+        case 'today':
+        case 'week':
+          monthsToShow = 1
+          break
+        case 'month':
+          monthsToShow = 2
+          break
+        case 'quarter':
+          monthsToShow = 3
+          break
+        case 'semester':
+          monthsToShow = 6
+          break
+        case 'year':
+          monthsToShow = 12
+          break
+        case 'all':
+          monthsToShow = 12 // show last 12 months for "all"
+          break
+      }
+
+      const monthKeys = []
+      for (let i = monthsToShow - 1; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
+        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+        monthKeys.push(key)
+      }
+
+      const pembayaranPerBulan = monthKeys.reduce((acc, key) => {
+        acc[key] = pembayaranPerBulanRaw[key] || 0
+        return acc
+      }, {})
 
       // Status pembayaran (lunas vs belum) berdasarkan total vs paid
       const statusPembayaran = tagihanFiltered.map(t => {
