@@ -351,11 +351,11 @@ export function PaymentInputModal({ open, onOpenChange, onSubmit, tagihan, summa
                       <FileText className="h-4 w-4 text-slate-500" />
                       <Text size="2" weight="medium">Catatan</Text>
                     </div>
-                    <TextArea
+                    <TextField.Root
                       placeholder="Catatan tambahan (opsional)"
                       value={formData.catatan}
                       onChange={(e) => setFormData({ ...formData, catatan: e.target.value })}
-                      style={{ borderRadius: 0, minHeight: '60px' }}
+                      style={{ borderRadius: 0 }}
                     />
                   </label>
                 </div>
@@ -375,13 +375,15 @@ export function PaymentInputModal({ open, onOpenChange, onSubmit, tagihan, summa
                         onChange={handleFileChange}
                         className="hidden"
                       />
-                      <div className="flex flex-col items-center gap-2 text-center">
-                        <Upload className="h-6 w-6 text-slate-400" />
+                      <div className="grid grid-cols-[auto_1fr] gap-3 items-center">
+                        <div className="flex items-center justify-center">
+                          <Upload className="h-8 w-8 text-slate-400" />
+                        </div>
                         <div>
-                          <Text size="2" weight="medium" className="text-slate-700 block">
+                          <Text size="2" weight="medium" className="text-slate-700 block leading-tight">
                             Klik untuk upload bukti
                           </Text>
-                          <Text size="1" className="text-slate-500">
+                          <Text size="1" className="text-slate-500 block mt-1">
                             JPG, PNG, WEBP, atau PDF (Max 5MB)
                           </Text>
                         </div>

@@ -4,7 +4,7 @@ import { PembayaranTableHeader } from './PembayaranTableHeader'
 import { PembayaranTableRow } from './PembayaranTableRow'
 import { PembayaranEmptyState } from './PembayaranEmptyState'
 
-export function PembayaranTable({ data, isLoading, isRefreshing, onEdit, onDelete, onAdd, onViewDetail, selectedItem, onSelectItem }) {
+export function PembayaranTable({ data, isLoading, isRefreshing, onEdit, onDelete, onAdd, onViewDetail }) {
   const {
     searchQuery,
     setSearchQuery,
@@ -97,8 +97,6 @@ export function PembayaranTable({ data, isLoading, isRefreshing, onEdit, onDelet
                   key={item.id}
                   item={item}
                   index={index}
-                  isSelected={selectedItem?.id === item.id}
-                  onSelect={onSelectItem}
                   onEdit={onEdit}
                   onDelete={onDelete}
                   onViewDetail={onViewDetail}

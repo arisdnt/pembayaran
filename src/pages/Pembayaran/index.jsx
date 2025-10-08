@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { PageLayout } from '../../layout/PageLayout'
 import { Text } from '@radix-ui/themes'
@@ -6,7 +6,6 @@ import { AlertCircle } from 'lucide-react'
 import { usePembayaran } from './hooks/usePembayaran'
 import { PembayaranTable } from './components/table/PembayaranTable'
 import { DeleteConfirmDialog } from '../../components/common/DeleteConfirmDialog'
-import { DetailPanel } from './components/panels/DetailPanel'
 
 function PembayaranContent() {
   const navigate = useNavigate()
@@ -22,14 +21,6 @@ function PembayaranContent() {
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [currentItem, setCurrentItem] = useState(null)
-  const [selectedItem, setSelectedItem] = useState(null)
-
-  // Auto-select first item when data loads
-  useEffect(() => {
-    if (data && data.length > 0 && !selectedItem) {
-      setSelectedItem(data[0])
-    }
-  }, [data, selectedItem])
 
   const handleOpenCreate = () => {
     // Navigate to create page
@@ -55,9 +46,6 @@ function PembayaranContent() {
     if (currentItem) {
       await deleteItem(currentItem.id)
       setCurrentItem(null)
-      if (selectedItem?.id === currentItem.id) {
-        setSelectedItem(null)
-      }
     }
   }
 
@@ -78,31 +66,17 @@ function PembayaranContent() {
           </div>
         ) : null}
 
-        {/* Layout 2 Kolom: 75% Tabel | 25% Detail */}
-        <div className="flex gap-3 flex-1 min-h-0">
-          {/* Kolom Kiri: Tabel (75%) */}
-          <div className="w-3/4 h-full">
-            <PembayaranTable
-              data={data}
-              isLoading={loading}
-              isRefreshing={isRefreshing}
-              onEdit={handleOpenEdit}
-              onDelete={handleOpenDelete}
-              onAdd={handleOpenCreate}
-              onViewDetail={handleOpenDetail}
-              selectedItem={selectedItem}
-              onSelectItem={setSelectedItem}
-            />
-          </div>
-
-          {/* Kolom Kanan: Detail Panel (25%) */}
-          <div className="w-1/4 h-full">
-            <DetailPanel
-              selectedItem={selectedItem}
-              isLoading={loading}
-              isRefreshing={isRefreshing}
-            />
-          </div>
+        {/* Tabel Full Width */}
+        <div className="flex-1 min-h-0">
+          <PembayaranTable
+            data={data}
+            isLoading={loading}
+            isRefreshing={isRefreshing}
+            onEdit={handleOpenEdit}
+            onDelete={handleOpenDelete}
+            onAdd={handleOpenCreate}
+            onViewDetail={handleOpenDetail}
+          />
         </div>
       </div>
 

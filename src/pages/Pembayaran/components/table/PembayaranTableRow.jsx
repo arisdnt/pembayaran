@@ -11,18 +11,15 @@ function formatCurrency(amount) {
   }).format(amount || 0)
 }
 
-export function PembayaranTableRow({ item, index, isSelected, onSelect, onEdit, onDelete, onViewDetail }) {
+export function PembayaranTableRow({ item, index, onEdit, onDelete, onViewDetail }) {
   const isEven = index % 2 === 0
 
   return (
     <tr
-      onClick={() => onSelect(item)}
-      className={`border-b border-slate-200 cursor-pointer ${
-        isSelected
-          ? 'bg-blue-100 border-l-4 border-l-blue-600'
-          : isEven
-          ? 'bg-white hover:bg-blue-50'
-          : 'bg-slate-50 hover:bg-blue-50'
+      className={`border-b border-slate-200 ${
+        isEven
+          ? 'bg-white hover:bg-slate-50'
+          : 'bg-slate-50 hover:bg-slate-100'
       }`}
     >
       <td className="px-4 py-3 border-r border-slate-200">
@@ -82,10 +79,7 @@ export function PembayaranTableRow({ item, index, isSelected, onSelect, onEdit, 
           <IconButton
             size="1"
             variant="soft"
-            onClick={(e) => {
-              e.stopPropagation()
-              onViewDetail(item)
-            }}
+            onClick={() => onViewDetail(item)}
             className="cursor-pointer hover:bg-slate-100 text-slate-700 border border-slate-200"
             style={{ borderRadius: 0 }}
             aria-label={`Detail ${item.nomor_pembayaran}`}
@@ -95,10 +89,7 @@ export function PembayaranTableRow({ item, index, isSelected, onSelect, onEdit, 
           <IconButton
             size="1"
             variant="soft"
-            onClick={(e) => {
-              e.stopPropagation()
-              onEdit(item)
-            }}
+            onClick={() => onEdit(item)}
             className="cursor-pointer hover:bg-blue-100 text-blue-700 border border-blue-200"
             style={{ borderRadius: 0 }}
             aria-label={`Edit ${item.nomor_pembayaran}`}
@@ -108,10 +99,7 @@ export function PembayaranTableRow({ item, index, isSelected, onSelect, onEdit, 
           <IconButton
             size="1"
             variant="soft"
-            onClick={(e) => {
-              e.stopPropagation()
-              onDelete(item)
-            }}
+            onClick={() => onDelete(item)}
             className="cursor-pointer hover:bg-red-100 text-red-700 border border-red-200"
             style={{ borderRadius: 0 }}
             aria-label={`Hapus ${item.nomor_pembayaran}`}

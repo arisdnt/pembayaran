@@ -109,20 +109,24 @@ export function PaymentConfirmationModal({
                     {/* Detail Item */}
                     <div className="p-3 space-y-2 text-sm">
                       <div className="grid grid-cols-2 gap-x-4 gap-y-1">
-                        {nomorPreview?.nomor_transaksi && (
-                          <div className="flex justify-between col-span-2">
-                            <Text size="1" className="text-slate-500">Nomor Transaksi:</Text>
+                        {nomorPreview?.nomor_pembayaran && (
+                          <div className="col-span-2 flex items-center justify-between">
+                            <Text size="1" className="text-slate-500">Nomor:</Text>
                             <Text size="1" className="font-mono text-slate-700">
-                              {nomorPreview.nomor_transaksi}
+                              {nomorPreview.nomor_pembayaran}
+                              <span className="text-slate-400 mx-2">|</span>
+                              {item.tagihan.nomor_tagihan}
                             </Text>
                           </div>
                         )}
-                        <div className="flex justify-between">
-                          <Text size="1" className="text-slate-500">Nomor Tagihan:</Text>
-                          <Text size="1" className="font-mono text-slate-700">
-                            {item.tagihan.nomor_tagihan}
-                          </Text>
-                        </div>
+                        {!nomorPreview?.nomor_pembayaran && (
+                          <div className="flex justify-between">
+                            <Text size="1" className="text-slate-500">Nomor Tagihan:</Text>
+                            <Text size="1" className="font-mono text-slate-700">
+                              {item.tagihan.nomor_tagihan}
+                            </Text>
+                          </div>
+                        )}
                         <div className="flex justify-between">
                           <Text size="1" className="text-slate-500">Tahun Ajaran:</Text>
                           <Text size="1" className="text-slate-700">
@@ -195,31 +199,22 @@ export function PaymentConfirmationModal({
                       Informasi Siswa
                     </Text>
                   </div>
-                  <div className="space-y-3">
-                    <div>
-                      <Text size="1" className="text-slate-500 mb-1 block">Nama Siswa</Text>
-                      <Text size="2" weight="bold" className="text-slate-800 block">
-                        {siswaInfo.nama_lengkap}
-                      </Text>
-                    </div>
-                    <div>
-                      <Text size="1" className="text-slate-500 mb-1 block">NISN</Text>
-                      <Text size="2" className="font-mono text-slate-700 block">
-                        {siswaInfo.nisn || '-'}
-                      </Text>
-                    </div>
-                    <div>
-                      <Text size="1" className="text-slate-500 mb-1 block">Tahun Ajaran</Text>
-                      <Text size="2" className="text-slate-700 block">
-                        {siswaInfo.tahun_ajaran || '-'}
-                      </Text>
-                    </div>
-                    <div>
-                      <Text size="1" className="text-slate-500 mb-1 block">Kelas</Text>
-                      <Text size="2" className="text-slate-700 block">
-                        {siswaInfo.kelas || '-'}
-                      </Text>
-                    </div>
+                  <div className="text-sm grid grid-cols-[auto_auto_1fr] gap-x-2 gap-y-2">
+                    <span className="text-slate-600">Nama</span>
+                    <span className="text-slate-600">:</span>
+                    <span className="text-slate-900 font-semibold">{siswaInfo.nama_lengkap}</span>
+                    
+                    <span className="text-slate-600">NISN</span>
+                    <span className="text-slate-600">:</span>
+                    <span className="text-slate-900 font-mono">{siswaInfo.nisn || '-'}</span>
+                    
+                    <span className="text-slate-600">Tahun</span>
+                    <span className="text-slate-600">:</span>
+                    <span className="text-slate-900">{siswaInfo.tahun_ajaran || '-'}</span>
+                    
+                    <span className="text-slate-600">Kelas</span>
+                    <span className="text-slate-600">:</span>
+                    <span className="text-slate-900">{siswaInfo.kelas || '-'}</span>
                   </div>
                 </div>
               )}
@@ -244,20 +239,19 @@ export function PaymentConfirmationModal({
                       <Text size="1" className="text-slate-500 uppercase tracking-wider">
                         Nomor Pembayaran
                       </Text>
-                      <div className="space-y-1">
+                      <div className="space-y-1.5">
                         {generatedNumbers.map((nomor, idx) => (
-                          <div key={nomor.nomor_pembayaran || idx} className="flex justify-between gap-4">
-                            <Text size="1" className="text-slate-500">#{idx + 1}</Text>
-                            <div className="text-right">
-                              <Text size="1" className="font-mono text-slate-700">
-                                {nomor.nomor_pembayaran || '—'}
-                              </Text>
+                          <div key={nomor.nomor_pembayaran || idx} className="flex items-start gap-2">
+                            <Text size="1" className="text-slate-500 shrink-0">#{idx + 1}</Text>
+                            <Text size="1" className="font-mono text-slate-700 leading-tight break-all">
+                              {nomor.nomor_pembayaran || '—'}
                               {nomor.nomor_transaksi && (
-                                <Text size="1" className="font-mono text-slate-400 block">
-                                  {nomor.nomor_transaksi}
-                                </Text>
+                                <>
+                                  <span className="text-slate-400 mx-1">|</span>
+                                  <span className="text-slate-600">{nomor.nomor_transaksi}</span>
+                                </>
                               )}
-                            </div>
+                            </Text>
                           </div>
                         ))}
                       </div>
