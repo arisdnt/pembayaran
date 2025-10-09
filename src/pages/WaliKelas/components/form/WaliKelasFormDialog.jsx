@@ -60,6 +60,8 @@ function WaliKelasFormDialog({
           overflow: 'hidden'
         }}
         className="border-2 border-slate-300 shadow-2xl"
+        onPointerDownOutside={(e) => e.preventDefault()}
+        onInteractOutside={(e) => e.preventDefault()}
       >
         <FormHeader isEdit={isEdit} onClose={handleCancel} />
 

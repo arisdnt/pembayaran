@@ -1,5 +1,4 @@
-import { Dialog } from '@radix-ui/themes'
-import { Text, Badge } from '@radix-ui/themes'
+import { Dialog, Text, Badge, Button } from '@radix-ui/themes'
 import { X, GraduationCap, Clock, Hash, Users } from 'lucide-react'
 import { formatDateTime } from '../../helpers/formatters'
 
@@ -52,26 +51,21 @@ export function KelasDetailModal({ open, onOpenChange, kelas, selectedYearLabel 
           overflow: 'hidden'
         }}
         className="border-2 border-slate-300 shadow-2xl"
+        onPointerDownOutside={(e) => e.preventDefault()}
+        onInteractOutside={(e) => e.preventDefault()}
       >
-        {/* Header - Excel style */}
-        <div className="flex items-center justify-between border-b-2 border-slate-300 bg-gradient-to-b from-slate-50 to-slate-100 px-5 py-4">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-10 w-10 items-center justify-center bg-blue-600 border border-blue-700 shadow-sm">
-              <GraduationCap className="h-5 w-5 text-white" />
+        {/* Header */}
+        <div className="flex items-center border-b-2 border-slate-300 bg-gradient-to-b from-slate-50 to-slate-100 px-4 py-2">
+          <div className="flex items-center gap-2">
+            <div className="flex h-7 w-7 items-center justify-center bg-blue-600 border border-blue-700 shadow-sm">
+              <GraduationCap className="h-4 w-4 text-white" />
             </div>
             <div>
-              <Text size="3" weight="bold" className="text-slate-800 uppercase tracking-wider">
+              <Text size="2" weight="bold" className="text-slate-800 uppercase tracking-wider">
                 Detail Kelas
               </Text>
             </div>
           </div>
-          <button
-            onClick={() => onOpenChange(false)}
-            className="flex h-8 w-8 items-center justify-center hover:bg-red-50 hover:border-red-400 transition-all border border-slate-300 group"
-            aria-label="Close"
-          >
-            <X className="h-4 w-4 text-slate-600 group-hover:text-red-600 transition-colors" />
-          </button>
         </div>
 
         {/* Content */}
@@ -202,25 +196,21 @@ export function KelasDetailModal({ open, onOpenChange, kelas, selectedYearLabel 
           </div>
         </div>
 
-        {/* Footer - Excel style */}
-        <div className="border-t-2 border-slate-300 bg-gradient-to-b from-slate-50 to-slate-100 px-5 py-3">
-          <div className="flex items-center justify-between">
-            <Text size="1" className="text-slate-600 font-medium">
-              Data kelas • Sistem Kas Sekolah
-            </Text>
-            <div className="flex gap-2">
-              <button
-                onClick={() => onOpenChange(false)}
-                className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold transition-colors shadow-sm hover:shadow border border-blue-700"
-                style={{ borderRadius: 0 }}
-              >
-                <span className="flex items-center gap-2">
-                  <X className="h-4 w-4" />
-                  Tutup
-                </span>
-              </button>
-            </div>
-          </div>
+        {/* Footer */}
+        <div className="flex items-center justify-end gap-3 border-t-2 border-slate-300 bg-gradient-to-b from-slate-50 to-slate-100 px-4 py-2">
+          <Button
+            size="2"
+            onClick={() => onOpenChange(false)}
+            style={{
+              borderRadius: 0,
+              backgroundColor: '#64748b',
+              border: '1px solid #475569'
+            }}
+            className="cursor-pointer text-white shadow-sm hover:shadow flex items-center gap-2"
+          >
+            <X className="h-4 w-4" />
+            Tutup
+          </Button>
         </div>
       </Dialog.Content>
     </Dialog.Root>

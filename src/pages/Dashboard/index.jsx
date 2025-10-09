@@ -22,8 +22,7 @@ function DashboardContent() {
   const [filters, setFilters] = useState({
     tahunAjaran: '',
     tingkat: '',
-    kelas: '',
-    timeRange: 'all'
+    kelas: ''
   })
 
   const [masterData, setMasterData] = useState({
@@ -104,8 +103,6 @@ function DashboardContent() {
                   onTingkatChange={(val) => setFilters({ ...filters, tingkat: val, kelas: '' })}
                   selectedKelas={filters.kelas}
                   onKelasChange={(val) => setFilters({ ...filters, kelas: val })}
-                  selectedTimeRange={filters.timeRange}
-                  onTimeRangeChange={(val) => setFilters({ ...filters, timeRange: val })}
               />
             </div>
           </div>

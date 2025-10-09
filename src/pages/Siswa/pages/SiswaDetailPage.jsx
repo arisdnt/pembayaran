@@ -5,6 +5,7 @@ import { useSingleMessageSender } from '../hooks/useSingleMessageSender'
 import { generateSingleMessage } from '../utils/generateSingleMessage'
 import { SendMessageModal } from '../components/SendMessageModal'
 import { StudentPaymentHistoryDocument } from '../components/documents/StudentPaymentHistoryDocument'
+import { ErrorModal } from '../../../components/modals/ErrorModal'
 import {
   DetailSiswaLayout,
   DetailLoadingState,
@@ -13,12 +14,27 @@ import {
 } from '../components/detail'
 
 function buildHistoryData(siswa, tagihanData) {
-  if (!siswa || !tagihanData || tagihanData.length === 0) return null
+  // Jangan return null, buat data kosong jika tidak ada
+  if (!siswa) return null
 
   const siswaInfo = {
     nama_lengkap: siswa.nama_lengkap || '-',
     nisn: siswa.nisn || '-',
     kelas: '-',
+  }
+
+  // Jika tidak ada tagihanData, return data kosong dengan struktur lengkap
+  if (!tagihanData || tagihanData.length === 0) {
+    return {
+      siswaInfo,
+      ledgerEntries: [],
+      grandTotal: {
+        totalTagihan: 0,
+        totalDibayar: 0,
+        sisaTagihan: 0
+      },
+      timestamp: new Date().toISOString(),
+    }
   }
 
   // Build ledger entries seperti di TagihanPembayaranSection
@@ -164,12 +180,41 @@ export function DetailSiswa() {
   const [messageData, setMessageData] = useState(null)
   const [generateError, setGenerateError] = useState(null)
   const [showPrintView, setShowPrintView] = useState(false)
+  const [errorModalOpen, setErrorModalOpen] = useState(false)
+  const [errorModalData, setErrorModalData] = useState({ title: '', message: '', details: '' })
 
   const historyData = useMemo(() => buildHistoryData(siswa, tagihanData), [siswa, tagihanData])
 
   const handleBack = () => navigate('/siswa')
 
   const handlePrint = () => {
+    // Validasi: cek apakah siswa punya riwayat kelas
+    if (!riwayatKelas || riwayatKelas.length === 0) {
+      setErrorModalData({
+        title: 'Tidak Dapat Mencetak',
+        message: 'Siswa ini belum memiliki data riwayat kelas',
+        details: 'Silakan tambahkan data riwayat kelas terlebih dahulu sebelum mencetak riwayat pembayaran.'
+      })
+      setErrorModalOpen(true)
+      return
+    }
+
+    // Cek apakah ada riwayat kelas dengan tahun ajaran dan kelas
+    const hasValidRiwayat = riwayatKelas.some(rk => 
+      rk.tahun_ajaran && rk.kelas
+    )
+
+    if (!hasValidRiwayat) {
+      setErrorModalData({
+        title: 'Data Tidak Lengkap',
+        message: 'Data riwayat kelas belum lengkap',
+        details: 'Pastikan siswa memiliki data tahun ajaran dan kelas yang valid sebelum mencetak riwayat pembayaran.'
+      })
+      setErrorModalOpen(true)
+      return
+    }
+
+    // Jika validasi OK, lanjutkan cetak
     setShowPrintView(true)
     setTimeout(() => {
       window.print()
@@ -183,7 +228,38 @@ export function DetailSiswa() {
     
     // Validasi nomor WhatsApp
     if (!siswa?.nomor_whatsapp_wali) {
-      setGenerateError('Nomor WhatsApp wali tidak tersedia')
+      setErrorModalData({
+        title: 'Tidak Dapat Mengirim Pesan',
+        message: 'Nomor WhatsApp wali tidak tersedia',
+        details: 'Silakan tambahkan nomor WhatsApp wali siswa terlebih dahulu di halaman edit siswa.'
+      })
+      setErrorModalOpen(true)
+      return
+    }
+
+    // Validasi: cek apakah siswa punya riwayat kelas
+    if (!riwayatKelas || riwayatKelas.length === 0) {
+      setErrorModalData({
+        title: 'Tidak Dapat Mengirim Pesan',
+        message: 'Siswa ini belum memiliki data riwayat kelas',
+        details: 'Silakan tambahkan data riwayat kelas terlebih dahulu sebelum mengirim pesan kepada wali siswa.'
+      })
+      setErrorModalOpen(true)
+      return
+    }
+
+    // Cek apakah ada riwayat kelas dengan tahun ajaran dan kelas yang valid
+    const hasValidRiwayat = riwayatKelas.some(rk => 
+      rk.tahun_ajaran && rk.kelas
+    )
+
+    if (!hasValidRiwayat) {
+      setErrorModalData({
+        title: 'Data Tidak Lengkap',
+        message: 'Data riwayat kelas belum lengkap',
+        details: 'Pastikan siswa memiliki data tahun ajaran dan kelas yang valid sebelum mengirim pesan kepada wali siswa.'
+      })
+      setErrorModalOpen(true)
       return
     }
 
@@ -195,7 +271,12 @@ export function DetailSiswa() {
     }
 
     if (!activeRiwayatKelas) {
-      setGenerateError('Data riwayat kelas tidak ditemukan untuk siswa ini')
+      setErrorModalData({
+        title: 'Tidak Dapat Mengirim Pesan',
+        message: 'Data riwayat kelas tidak ditemukan',
+        details: 'Sistem tidak dapat menemukan riwayat kelas yang aktif untuk siswa ini. Silakan hubungi administrator.'
+      })
+      setErrorModalOpen(true)
       return
     }
 
@@ -208,8 +289,12 @@ export function DetailSiswa() {
       setModalOpen(true)
     } catch (err) {
       console.error('Error generating message:', err)
-      setGenerateError(err.message || 'Gagal membuat pesan')
-      alert(`Gagal membuat pesan: ${err.message}`)
+      setErrorModalData({
+        title: 'Gagal Membuat Pesan',
+        message: err.message || 'Terjadi kesalahan saat membuat pesan',
+        details: 'Sistem tidak dapat membuat pesan WhatsApp. Silakan coba lagi atau hubungi administrator jika masalah berlanjut.'
+      })
+      setErrorModalOpen(true)
     }
   }
 
@@ -336,6 +421,15 @@ export function DetailSiswa() {
         onSend={handleModalSend}
         onCancel={cancelSending}
         messageData={messageData}
+      />
+
+      <ErrorModal
+        open={errorModalOpen}
+        onOpenChange={setErrorModalOpen}
+        title={errorModalData.title}
+        message={errorModalData.message}
+        details={errorModalData.details}
+        variant="error"
       />
     </>
   )

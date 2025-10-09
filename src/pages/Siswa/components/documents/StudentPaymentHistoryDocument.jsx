@@ -156,9 +156,15 @@ export const StudentPaymentHistoryDocument = forwardRef(function StudentPaymentH
         </div>
 
         {ledgerEntries.length === 0 ? (
-          <div className="mb-6 border-2 border-slate-300 p-6 text-center">
-            <Text size="3" className="text-slate-500">
-              Belum ada riwayat pembayaran
+          <div className="mb-6 border-2 border-slate-300 p-8 text-center bg-slate-50" style={{ breakInside: 'avoid', pageBreakInside: 'avoid' }}>
+            <Text size="4" weight="bold" className="text-slate-600 block mb-2">
+              Belum Ada Riwayat Tagihan dan Pembayaran
+            </Text>
+            <Text size="2" className="text-slate-500 block">
+              Siswa ini belum memiliki catatan tagihan atau pembayaran yang dapat ditampilkan.
+            </Text>
+            <Text size="2" className="text-slate-500 block mt-2">
+              Silakan tambahkan tagihan atau lakukan pembayaran terlebih dahulu.
             </Text>
           </div>
         ) : (

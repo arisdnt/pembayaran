@@ -93,6 +93,8 @@ export default function SettingsModal({ open, onOpenChange }) {
           overflow: 'hidden'
         }}
         className="border-2 border-slate-300 shadow-2xl"
+        onPointerDownOutside={(e) => e.preventDefault()}
+        onInteractOutside={(e) => e.preventDefault()}
       >
         {/* Header */}
         <div className="flex items-center justify-between border-b-2 border-slate-300 bg-gradient-to-b from-blue-50 to-blue-100 px-5 py-4">
@@ -224,8 +226,8 @@ export default function SettingsModal({ open, onOpenChange }) {
             disabled={loading || fetching}
             style={{
               borderRadius: 0,
-              backgroundColor: '#2563eb',
-              border: '1px solid #1d4ed8'
+              backgroundColor: '#16a34a',
+              border: '1px solid #15803d'
             }}
             className="cursor-pointer text-white shadow-sm hover:shadow"
           >

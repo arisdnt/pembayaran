@@ -174,6 +174,13 @@ function DetailPembayaranContent() {
 
       <style>{`
         @media print {
+          /* Force color printing only for invoice content */
+          #invoice-page-content * {
+            -webkit-print-color-adjust: exact !important;
+            color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+
           body * {
             visibility: hidden;
           }
@@ -194,9 +201,84 @@ function DetailPembayaranContent() {
             display: none !important;
           }
 
+          /* Ensure backgrounds and colors are preserved */
+          .bg-slate-800 {
+            background-color: #1e293b !important;
+            color: white !important;
+          }
+
+          .text-white {
+            color: white !important;
+          }
+
+          .bg-slate-100 {
+            background-color: #f1f5f9 !important;
+          }
+
+          .bg-slate-200 {
+            background-color: #e2e8f0 !important;
+          }
+
+          .border-slate-800 {
+            border-color: #1e293b !important;
+          }
+
+          .border-slate-300 {
+            border-color: #cbd5e1 !important;
+          }
+
+          .border-slate-600 {
+            border-color: #475569 !important;
+          }
+
+          .text-slate-900 {
+            color: #0f172a !important;
+          }
+
+          .text-slate-700 {
+            color: #334155 !important;
+          }
+
+          .text-slate-600 {
+            color: #475569 !important;
+          }
+
+          .text-slate-500 {
+            color: #64748b !important;
+          }
+
+          /* Preserve all borders */
+          table, th, td {
+            border-collapse: collapse !important;
+          }
+
+          .border-2 {
+            border-width: 2px !important;
+          }
+
+          .border-4 {
+            border-width: 4px !important;
+          }
+
+          .border-b-4 {
+            border-bottom-width: 4px !important;
+          }
+
+          .border-b {
+            border-bottom-width: 1px !important;
+          }
+
+          .border-r {
+            border-right-width: 1px !important;
+          }
+
+          .border-t-2 {
+            border-top-width: 2px !important;
+          }
+
           @page {
             size: A4;
-            margin: 0;
+            margin: 10mm;
           }
         }
       `}</style>

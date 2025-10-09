@@ -39,6 +39,8 @@ export function JenisPembayaranFormDialog({
           overflow: 'hidden'
         }}
         className="border-2 border-slate-300 shadow-2xl"
+        onPointerDownOutside={(e) => e.preventDefault()}
+        onInteractOutside={(e) => e.preventDefault()}
       >
         <DialogHeader isEdit={isEdit} onClose={onOpenChange} />
 

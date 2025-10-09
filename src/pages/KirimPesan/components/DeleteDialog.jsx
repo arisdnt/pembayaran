@@ -13,6 +13,8 @@ export default function DeleteDialog({ open, onOpenChange, onConfirm }) {
           overflow: 'hidden'
         }}
         className="border-2 border-slate-300 shadow-2xl"
+        onPointerDownOutside={(e) => e.preventDefault()}
+        onInteractOutside={(e) => e.preventDefault()}
       >
         <div className="flex items-center justify-between border-b-2 border-slate-300 bg-gradient-to-b from-red-50 to-red-100 px-5 py-4">
           <div className="flex items-center gap-2.5">

@@ -149,6 +149,8 @@ export function PaymentInputModal({ open, onOpenChange, onSubmit, tagihan, summa
       <Dialog.Content
         style={{ maxWidth: '1000px', width: '90vw', padding: 0, borderRadius: 0 }}
         className="border-2 border-slate-300 shadow-2xl"
+        onPointerDownOutside={(e) => e.preventDefault()}
+        onInteractOutside={(e) => e.preventDefault()}
       >
         {/* Header */}
         <div className="flex items-center justify-between border-b-2 border-slate-300 bg-gradient-to-b from-green-600 to-green-700 px-5 py-4">

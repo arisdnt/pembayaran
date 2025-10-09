@@ -1,4 +1,4 @@
-import { TextField } from '@radix-ui/themes'
+import { TextField, Text } from '@radix-ui/themes'
 import { Calendar, Hash, School, Users, BookOpen, FileText } from 'lucide-react'
 import { SelectField } from './SelectField'
 

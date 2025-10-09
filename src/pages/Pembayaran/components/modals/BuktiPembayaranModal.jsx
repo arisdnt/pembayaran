@@ -82,6 +82,8 @@ export function BuktiPembayaranModal({ open, onOpenChange, buktiUrl, nomorTransa
       <Dialog.Content
         style={{ maxWidth: '900px', width: '90vw', padding: 0, borderRadius: 0, maxHeight: '90vh' }}
         className="border-2 border-slate-300 shadow-2xl flex flex-col"
+        onPointerDownOutside={(e) => e.preventDefault()}
+        onInteractOutside={(e) => e.preventDefault()}
       >
         {/* Header */}
         <div className="flex items-center justify-between border-b-2 border-slate-300 bg-gradient-to-b from-blue-600 to-blue-700 px-5 py-4 flex-shrink-0">

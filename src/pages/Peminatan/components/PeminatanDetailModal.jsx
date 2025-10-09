@@ -1,4 +1,4 @@
-import { Dialog, Text, Badge } from '@radix-ui/themes'
+import { Dialog, Text, Badge, Button } from '@radix-ui/themes'
 import { BookOpen, X, Hash, TrendingDown, TrendingUp, FileText, Power, Users } from 'lucide-react'
 
 export function PeminatanDetailModal({ open, onOpenChange, peminatan, selectedYearLabel = 'Semua Tahun Ajaran' }) {
@@ -30,27 +30,21 @@ export function PeminatanDetailModal({ open, onOpenChange, peminatan, selectedYe
           overflow: 'hidden'
         }}
         className="border-2 border-slate-300 shadow-2xl"
+        onPointerDownOutside={(e) => e.preventDefault()}
+        onInteractOutside={(e) => e.preventDefault()}
       >
-        {/* Header - Excel style */}
-        <div className="flex items-center justify-between border-b-2 border-slate-300 bg-gradient-to-b from-slate-50 to-slate-100 px-5 py-4">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-10 w-10 items-center justify-center border border-indigo-700 bg-indigo-600 shadow-sm">
-              <BookOpen className="h-5 w-5 text-white" />
+        {/* Header */}
+        <div className="flex items-center border-b-2 border-slate-300 bg-gradient-to-b from-slate-50 to-slate-100 px-4 py-2">
+          <div className="flex items-center gap-2">
+            <div className="flex h-7 w-7 items-center justify-center border border-indigo-700 bg-indigo-600 shadow-sm">
+              <BookOpen className="h-4 w-4 text-white" />
             </div>
             <div>
-              <Text size="3" weight="bold" className="text-slate-800 uppercase tracking-wider">
+              <Text size="2" weight="bold" className="text-slate-800 uppercase tracking-wider">
                 Detail Peminatan
               </Text>
             </div>
           </div>
-          <button
-            onClick={() => onOpenChange(false)}
-            className="flex h-8 w-8 items-center justify-center hover:bg-red-50 hover:border-red-400 transition-all border border-slate-300 group"
-            aria-label="Close"
-            type="button"
-          >
-            <X className="h-4 w-4 text-slate-600 group-hover:text-red-600 transition-colors" />
-          </button>
         </div>
 
         {/* Content */}
@@ -139,18 +133,19 @@ export function PeminatanDetailModal({ open, onOpenChange, peminatan, selectedYe
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end border-t-2 border-slate-300 bg-gradient-to-b from-slate-50 to-slate-100 px-5 py-3">
-          <button
+        <div className="flex items-center justify-end gap-3 border-t-2 border-slate-300 bg-gradient-to-b from-slate-50 to-slate-100 px-4 py-2">
+          <Button
+            size="2"
             type="button"
+            variant="soft"
+            color="gray"
             onClick={() => onOpenChange(false)}
-            className="px-5 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm font-semibold transition-colors shadow-sm hover:shadow border border-slate-400"
             style={{ borderRadius: 0 }}
+            className="cursor-pointer border border-slate-300 shadow-sm hover:shadow flex items-center gap-2"
           >
-            <span className="flex items-center gap-2">
-              <X className="h-4 w-4" />
-              Tutup
-            </span>
-          </button>
+            <X className="h-4 w-4" />
+            Tutup
+          </Button>
         </div>
       </Dialog.Content>
     </Dialog.Root>

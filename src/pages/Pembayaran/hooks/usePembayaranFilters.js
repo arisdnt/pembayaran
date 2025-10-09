@@ -4,6 +4,7 @@ export function usePembayaranFilters(data) {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedTahunAjaran, setSelectedTahunAjaran] = useState('all')
   const [selectedTingkat, setSelectedTingkat] = useState('all')
+  const [selectedDateRange, setSelectedDateRange] = useState('all')
 
   const tahunAjaranOptions = useMemo(() => {
     const map = new Map()
@@ -56,8 +57,36 @@ export function usePembayaranFilters(data) {
       })
     }
 
+    // Filter berdasarkan tanggal dibuat
+    if (selectedDateRange !== 'all') {
+      const now = new Date()
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+      
+      filtered = filtered.filter((item) => {
+        const itemDate = new Date(item.dibuat_pada || item.diperbarui_pada)
+        const itemDateOnly = new Date(itemDate.getFullYear(), itemDate.getMonth(), itemDate.getDate())
+        const diffTime = today - itemDateOnly
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
+        
+        switch (selectedDateRange) {
+          case 'today':
+            return diffDays === 0
+          case '3days':
+            return diffDays >= 0 && diffDays <= 2
+          case '7days':
+            return diffDays >= 0 && diffDays <= 6
+          case '30days':
+            return diffDays >= 0 && diffDays <= 29
+          case '90days':
+            return diffDays >= 0 && diffDays <= 89
+          default:
+            return true
+        }
+      })
+    }
+
     return filtered
-  }, [data, searchQuery, selectedTahunAjaran, selectedTingkat])
+  }, [data, searchQuery, selectedTahunAjaran, selectedTingkat, selectedDateRange])
 
   const stats = useMemo(() => {
     const total = data.length
@@ -67,13 +96,14 @@ export function usePembayaranFilters(data) {
   }, [data, filteredData])
 
   const hasActiveFilters = Boolean(
-    searchQuery.trim() || selectedTahunAjaran !== 'all' || selectedTingkat !== 'all'
+    searchQuery.trim() || selectedTahunAjaran !== 'all' || selectedTingkat !== 'all' || selectedDateRange !== 'all'
   )
 
   const handleClearFilters = () => {
     setSearchQuery('')
     setSelectedTahunAjaran('all')
     setSelectedTingkat('all')
+    setSelectedDateRange('all')
   }
 
   return {
@@ -83,6 +113,8 @@ export function usePembayaranFilters(data) {
     setSelectedTahunAjaran,
     selectedTingkat,
     setSelectedTingkat,
+    selectedDateRange,
+    setSelectedDateRange,
     tahunAjaranOptions,
     tingkatOptions,
     filteredData,

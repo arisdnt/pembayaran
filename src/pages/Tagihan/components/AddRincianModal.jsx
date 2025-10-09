@@ -47,6 +47,8 @@ export function AddRincianModal({
       <Dialog.Content
         style={{ maxWidth: '1100px', width: '95vw', padding: 0, borderRadius: 0 }}
         className="border-2 border-slate-300 shadow-2xl"
+        onPointerDownOutside={(e) => e.preventDefault()}
+        onInteractOutside={(e) => e.preventDefault()}
       >
         {/* Header */}
         <div className="flex items-center justify-between border-b-2 border-slate-300 bg-gradient-to-b from-blue-600 to-blue-700 px-5 py-4">

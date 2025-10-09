@@ -29,6 +29,8 @@ export function RingkasanModal({ open, onOpenChange }) {
       <Dialog.Content
         style={{ maxWidth: '650px', width: '95vw', padding: 0, borderRadius: 0, overflow: 'hidden' }}
         className="border-2 border-slate-300 shadow-2xl"
+        onPointerDownOutside={(e) => e.preventDefault()}
+        onInteractOutside={(e) => e.preventDefault()}
       >
         <div className="flex items-center border-b-2 border-slate-300 bg-gradient-to-b from-blue-50 to-blue-100 px-4 py-2">
           <div className="flex items-center gap-2">
@@ -126,7 +128,7 @@ export function RingkasanModal({ open, onOpenChange }) {
           <Button
             size="2"
             onClick={() => onOpenChange(false)}
-            style={{ borderRadius: 0, backgroundColor: '#2563eb', border: '1px solid #1e40af' }}
+            style={{ borderRadius: 0, backgroundColor: '#64748b', border: '1px solid #475569' }}
             className="cursor-pointer text-white shadow-sm hover:shadow flex items-center gap-2"
           >
             <X className="h-4 w-4" />

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Dialog, Text } from '@radix-ui/themes'
-import { User, Mail, Phone, Calendar, Code, Shield, MapPin } from 'lucide-react'
+import { User, Mail, Phone, Calendar, Code, Shield, MapPin, X } from 'lucide-react'
 
 export function AboutModal({ open, onOpenChange }) {
   const [copiedField, setCopiedField] = useState(null)
@@ -79,6 +79,8 @@ export function AboutModal({ open, onOpenChange }) {
       <Dialog.Content
         style={{ maxWidth: '92vw', width: '720px', padding: 0, borderRadius: 0 }}
         className="border border-slate-300 shadow-2xl bg-white"
+        onPointerDownOutside={(e) => e.preventDefault()}
+        onInteractOutside={(e) => e.preventDefault()}
       >
         {/* Header */}
         <div className="flex items-start justify-between px-5 py-3 border-b border-slate-300 bg-gradient-to-b from-slate-50 to-white">
@@ -122,6 +124,18 @@ export function AboutModal({ open, onOpenChange }) {
           <Row icon={Phone} label="WhatsApp" value="+62 812-3127-4828" href="https://wa.me/62081231274828" copyId="whatsapp" />
           <Row icon={Calendar} label="Release Year" value="2025" />
           <Row icon={MapPin} label="Address" value="Sidowayah, Panekan, Magetan Jawa Timur" />
+        </div>
+
+        {/* Footer dengan button close */}
+        <div className="flex justify-end px-5 py-3 border-t border-slate-300 bg-gradient-to-b from-white to-slate-50">
+          <button
+            onClick={() => onOpenChange(false)}
+            className="px-3 py-1.5 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white text-xs font-semibold shadow-sm flex items-center gap-1.5 transition-all"
+            type="button"
+          >
+            <X className="h-3 w-3" />
+            Tutup
+          </button>
         </div>
       </Dialog.Content>
     </Dialog.Root>

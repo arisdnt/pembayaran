@@ -3,8 +3,9 @@ import { X, UserPlus, Edit3 } from 'lucide-react'
 
 export function FormFooter({ isEdit, submitting, onCancel, onSubmit }) {
   return (
-    <div className="flex items-center justify-end gap-3 border-t-2 border-slate-300 bg-gradient-to-b from-slate-50 to-slate-100 px-5 py-3">
+    <div className="flex items-center justify-end gap-3 border-t-2 border-slate-300 bg-gradient-to-b from-slate-50 to-slate-100 px-4 py-2">
       <Button
+        size="2"
         type="button"
         variant="soft"
         color="gray"
@@ -13,10 +14,11 @@ export function FormFooter({ isEdit, submitting, onCancel, onSubmit }) {
         style={{ borderRadius: 0 }}
         className="cursor-pointer border border-slate-300 shadow-sm hover:shadow"
       >
-        <X className="h-3.5 w-3.5" />
+        <X className="h-4 w-4" />
         Batal
       </Button>
       <Button
+        size="2"
         onClick={onSubmit}
         disabled={submitting}
         style={{
@@ -26,7 +28,7 @@ export function FormFooter({ isEdit, submitting, onCancel, onSubmit }) {
         }}
         className="cursor-pointer text-white shadow-sm hover:shadow"
       >
-        {isEdit ? <Edit3 className="h-3.5 w-3.5" /> : <UserPlus className="h-3.5 w-3.5" />}
+        {isEdit ? <Edit3 className="h-4 w-4" /> : <UserPlus className="h-4 w-4" />}
         {submitting ? 'Menyimpan...' : isEdit ? 'Perbarui' : 'Simpan'}
       </Button>
     </div>

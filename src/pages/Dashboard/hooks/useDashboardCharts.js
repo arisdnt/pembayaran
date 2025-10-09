@@ -29,20 +29,10 @@ export function useDashboardCharts(filters) {
       const tahunId = filters?.tahunAjaran || null
       const tingkat = filters?.tingkat || null
       const kelasId = filters?.kelas || null
-      const timeRange = filters?.timeRange || 'all'
-
-      // Time window
-      let startDate = null
-      const now = new Date()
-      if (timeRange === 'today') startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-      else if (timeRange === 'week') startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7)
-      else if (timeRange === 'month') startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 30)
-      else if (timeRange === 'quarter') startDate = new Date(now.getFullYear(), now.getMonth() - 3, now.getDate())
-      else if (timeRange === 'semester') startDate = new Date(now.getFullYear(), now.getMonth() - 6, now.getDate())
-      else if (timeRange === 'year') startDate = new Date(now.getFullYear(), 0, 1)
+      // No time window filtering; include all historical data
 
       let rks = tahunId ? rksAll.filter(r => r.id_tahun_ajaran === tahunId) : rksAll.filter(r => (r.status||'').toLowerCase()==='aktif')
-      if (startDate) rks = rks.filter(r => !r.tanggal_masuk || new Date(r.tanggal_masuk) >= startDate)
+      // Keep all rks regardless of tanggal_masuk
       if (tingkat) {
         const kSet = new Set(kelas.filter(k => k.tingkat === tingkat).map(k => k.id))
         rks = rks.filter(r => kSet.has(r.id_kelas))
@@ -101,7 +91,6 @@ export function useDashboardCharts(filters) {
         if (!rksIds.has(t.id_riwayat_kelas_siswa)) return
         const total = (rpByPembayaran.get(p.id)||[]).reduce((s,it)=>s+Number(it.jumlah_dibayar||0),0)
         const d = new Date(p.dibuat_pada || p.diperbarui_pada || new Date())
-        if (startDate && d < startDate) return
         const key = monthKey(d)
         bayarRaw.set(key,(bayarRaw.get(key)||0)+total)
       })

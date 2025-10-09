@@ -3,6 +3,7 @@ import { Plus, X, TrendingUp } from 'lucide-react'
 import { SearchBar } from './SearchBar'
 import { FilterControls } from './FilterControls'
 import { StatsDisplay } from './StatsDisplay'
+import { DateRangeFilter } from './DateRangeFilter'
 
 export function TableToolbar({
   searchQuery,
@@ -13,6 +14,8 @@ export function TableToolbar({
   selectedTingkat,
   onTingkatChange,
   tingkatOptions,
+  selectedDateRange,
+  onDateRangeChange,
   stats,
   hasActiveFilters,
   onClearFilters,
@@ -62,7 +65,15 @@ export function TableToolbar({
           />
         </div>
 
-        {/* Kolom 4 (10%): Reset Button */}
+        {/* Kolom 4 (10%): Filter Waktu */}
+        <div style={{ gridColumn: 'span 1' }} className="min-w-0 overflow-hidden">
+          <DateRangeFilter
+            selectedDateRange={selectedDateRange}
+            onDateRangeChange={onDateRangeChange}
+          />
+        </div>
+
+        {/* Kolom 5 (10%): Reset Button */}
         <div style={{ gridColumn: 'span 1' }} className="min-w-0 overflow-hidden">
           <Button
             onClick={onClearFilters}
@@ -81,8 +92,8 @@ export function TableToolbar({
           </Button>
         </div>
 
-        {/* Kolom 5-7 (30%): Reserved */}
-        <div style={{ gridColumn: 'span 3' }} className="min-w-0 overflow-hidden" aria-hidden="true" />
+        {/* Kolom 6-7 (20%): Reserved */}
+        <div style={{ gridColumn: 'span 2' }} className="min-w-0 overflow-hidden" aria-hidden="true" />
 
         {/* Kolom 8 (10%): Stats Display */}
         <div style={{ gridColumn: 'span 1' }} className="min-w-0 overflow-hidden">

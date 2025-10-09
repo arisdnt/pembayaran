@@ -64,7 +64,11 @@ function RincianTagihanFormDialog({
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
-      <Dialog.Content style={{ maxWidth: 600, borderRadius: 0 }}>
+      <Dialog.Content 
+        style={{ maxWidth: 600, borderRadius: 0 }}
+        onPointerDownOutside={(e) => e.preventDefault()}
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <Dialog.Title>{isEdit ? 'Edit Rincian Tagihan' : 'Tambah Rincian Tagihan'}</Dialog.Title>
 
         <form onSubmit={handleSubmit}>

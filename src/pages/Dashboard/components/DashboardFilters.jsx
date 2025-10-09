@@ -1,15 +1,5 @@
 import { Text, Select } from '@radix-ui/themes'
-import { Calendar, GraduationCap, BookOpen, Filter } from 'lucide-react'
-
-const TIME_RANGES = [
-  { value: 'today', label: 'Hari Ini' },
-  { value: 'week', label: '7 Hari Terakhir' },
-  { value: 'month', label: '30 Hari Terakhir' },
-  { value: 'quarter', label: '3 Bulan Terakhir' },
-  { value: 'semester', label: '6 Bulan Terakhir' },
-  { value: 'year', label: 'Tahun Ini' },
-  { value: 'all', label: 'Semua Waktu' }
-]
+import { GraduationCap, BookOpen, Filter } from 'lucide-react'
 
 export function DashboardFilters({
   tahunAjaranList,
@@ -20,9 +10,7 @@ export function DashboardFilters({
   selectedTingkat,
   onTingkatChange,
   selectedKelas,
-  onKelasChange,
-  selectedTimeRange,
-  onTimeRangeChange
+  onKelasChange
 }) {
   console.log('DashboardFilters render:', {
     tahunAjaranList: tahunAjaranList?.length,
@@ -30,8 +18,7 @@ export function DashboardFilters({
     tingkatList: tingkatList?.length,
     selectedTahunAjaran,
     selectedTingkat,
-    selectedKelas,
-    selectedTimeRange
+    selectedKelas
   })
 
   return (
@@ -108,20 +95,7 @@ export function DashboardFilters({
         </Select.Root>
       </div>
 
-      {/* Time Range */}
-      <div className="flex items-center gap-2 border-l border-slate-300 pl-3 ml-3">
-        <Calendar className="h-3.5 w-3.5 text-green-500" />
-        <Select.Root value={selectedTimeRange} onValueChange={onTimeRangeChange}>
-          <Select.Trigger style={{ borderRadius: 0, width: '180px' }} placeholder="Periode Waktu" />
-          <Select.Content style={{ borderRadius: 0 }}>
-            {TIME_RANGES.map(range => (
-              <Select.Item key={range.value} value={range.value}>
-                {range.label}
-              </Select.Item>
-            ))}
-          </Select.Content>
-        </Select.Root>
-      </div>
+      {/* Time range filter removed as per requirement */}
     </div>
   )
 }

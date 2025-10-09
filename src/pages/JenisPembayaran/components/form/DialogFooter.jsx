@@ -3,20 +3,22 @@ import { Edit3, DollarSign, X } from 'lucide-react'
 
 export function DialogFooter({ isEdit, submitting, onClose, onSubmit }) {
   return (
-    <div className="flex items-center justify-end gap-3 border-t-2 border-slate-300 bg-gradient-to-b from-slate-50 to-slate-100 px-5 py-3">
+    <div className="flex items-center justify-end gap-3 border-t-2 border-slate-300 bg-gradient-to-b from-slate-50 to-slate-100 px-4 py-2">
       <Button
+        size="2"
         type="button"
         variant="soft"
         color="gray"
         disabled={submitting}
         onClick={() => onClose(false)}
         style={{ borderRadius: 0 }}
-        className="cursor-pointer border border-slate-300"
+        className="cursor-pointer border border-slate-300 shadow-sm hover:shadow"
       >
-        <X className="h-3.5 w-3.5" />
+        <X className="h-4 w-4" />
         Batal
       </Button>
       <Button
+        size="2"
         onClick={onSubmit}
         disabled={submitting}
         style={{
@@ -24,9 +26,9 @@ export function DialogFooter({ isEdit, submitting, onClose, onSubmit }) {
           backgroundColor: isEdit ? '#d97706' : '#16a34a',
           border: isEdit ? '1px solid #b45309' : '1px solid #15803d'
         }}
-        className="cursor-pointer text-white"
+        className="cursor-pointer text-white shadow-sm hover:shadow"
       >
-        {isEdit ? <Edit3 className="h-3.5 w-3.5" /> : <DollarSign className="h-3.5 w-3.5" />}
+        {isEdit ? <Edit3 className="h-4 w-4" /> : <DollarSign className="h-4 w-4" />}
         {submitting ? 'Menyimpan...' : isEdit ? 'Perbarui' : 'Simpan'}
       </Button>
     </div>

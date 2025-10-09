@@ -65,8 +65,8 @@ export const PaymentInvoiceDocument = forwardRef(function PaymentInvoiceDocument
   const profile = SCHOOL_IDENTITY.profile
 
   return (
-    <div id={contentId} ref={ref} className="bg-white print:p-0" style={{ minHeight: '297mm' }}>
-      <div className="p-8 print:p-12 max-w-[210mm] mx-auto">
+    <div id={contentId} ref={ref} className="bg-white print:p-0">
+      <div className="p-8 print:p-2 max-w-[210mm] mx-auto print:max-w-none">
         <div className="grid grid-cols-2 gap-6 border-b-4 border-slate-800 pb-4 mb-6">
           <div className="flex items-start gap-3">
             <div className="flex-shrink-0">

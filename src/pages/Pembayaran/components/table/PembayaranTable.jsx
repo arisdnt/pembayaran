@@ -23,6 +23,8 @@ export function PembayaranTable({ data, isLoading, isRefreshing, onEdit, onDelet
     setSelectedTahunAjaran,
     selectedTingkat,
     setSelectedTingkat,
+    selectedDateRange,
+    setSelectedDateRange,
     tahunAjaranOptions,
     tingkatOptions,
     filteredData,
@@ -45,6 +47,8 @@ export function PembayaranTable({ data, isLoading, isRefreshing, onEdit, onDelet
           selectedTingkat={selectedTingkat}
           onTingkatChange={setSelectedTingkat}
           tingkatOptions={tingkatOptions}
+          selectedDateRange={selectedDateRange}
+          onDateRangeChange={setSelectedDateRange}
           stats={stats}
           hasActiveFilters={hasActiveFilters}
           onClearFilters={handleClearFilters}

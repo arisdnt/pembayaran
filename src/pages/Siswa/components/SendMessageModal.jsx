@@ -73,6 +73,8 @@ export function SendMessageModal({ open, onOpenChange, logLines, sending, onSend
           borderRadius: 0,
           padding: 0,
         }}
+        onPointerDownOutside={(e) => e.preventDefault()}
+        onInteractOutside={(e) => e.preventDefault()}
       >
         <div className="flex flex-col h-[600px] p-4">
           {/* Log Content */}

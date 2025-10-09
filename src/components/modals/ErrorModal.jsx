@@ -18,8 +18,10 @@ export function ErrorModal({
   const iconColorClass = isSuccess ? 'text-green-600' : 'text-red-600'
   const titleColorClass = isSuccess ? 'text-green-900' : 'text-red-900'
   const detailsColorClass = isSuccess ? 'text-green-700' : 'text-red-700'
-  const buttonBg = isSuccess ? '#16a34a' : '#dc2626'
-  const buttonBorder = isSuccess ? '#15803d' : '#b91c1c'
+  
+  // Button "Tutup" always gray (neutral action)
+  const buttonBg = '#64748b'
+  const buttonBorder = '#475569'
   
   const Icon = isSuccess ? CheckCircle : AlertCircle
 
@@ -34,6 +36,8 @@ export function ErrorModal({
           overflow: 'hidden'
         }}
         className="border-2 border-slate-300 shadow-2xl"
+        onPointerDownOutside={(e) => e.preventDefault()}
+        onInteractOutside={(e) => e.preventDefault()}
       >
         {/* Header */}
         <div className={`flex items-center border-b-2 border-slate-300 bg-gradient-to-b ${headerBgClass} px-4 py-2`}>

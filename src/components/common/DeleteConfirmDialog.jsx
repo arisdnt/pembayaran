@@ -35,6 +35,8 @@ export function DeleteConfirmDialog({
           overflow: 'hidden'
         }}
         className="border-2 border-slate-300 shadow-2xl"
+        onPointerDownOutside={(e) => e.preventDefault()}
+        onInteractOutside={(e) => e.preventDefault()}
       >
         {/* Header */}
         <div className="flex items-center border-b-2 border-slate-300 bg-gradient-to-b from-orange-50 to-orange-100 px-4 py-2">

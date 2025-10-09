@@ -90,7 +90,11 @@ export function RincianTransaksiModal({
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
-      <Dialog.Content style={{ maxWidth: 600, borderRadius: 0 }}>
+      <Dialog.Content 
+        style={{ maxWidth: 600, borderRadius: 0 }}
+        onPointerDownOutside={(e) => e.preventDefault()}
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <div className="flex items-center justify-between mb-4">
           <Dialog.Title>
             <Text size="4" weight="bold">
